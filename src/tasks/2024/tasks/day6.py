@@ -231,4 +231,4 @@ if __name__ == "__main__":
     # test(part1, 41)
     # run(part1)
     test(part2, 6)
-    run(part2)
+    assert run(part2) < 1517
