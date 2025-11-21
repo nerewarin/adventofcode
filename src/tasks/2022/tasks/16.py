@@ -177,7 +177,7 @@ class State:
 
     def move_to_valve(self, name):
         if name == self.pos:
-            a = 0
+            pass
         dist = self.valve.connections[name]
 
         cost = dist * TIME_TO_MOVE
@@ -383,7 +383,7 @@ def to_inspect(state):
         # "+JJ",
     ]
     if state.path[: len(toInspect)] == toInspect:
-        a = 9
+        pass
 
 
 def _get_diff_to_final(start_state):
@@ -408,7 +408,7 @@ def get_max_fuel_for_pair_agents(start_states: tuple[State]) -> tuple[State]:
     successors_by_state = tuple((sorted(state.get_successors())) for state in start_states)
     successors = tuple(set.union(*(set(s.get_successors()) for s in start_states)))
     if set(successors_by_state[0]) != set(successors_by_state[1]):
-        a = 0
+        pass
     if not successors:
         states = tuple(map(State.copy, start_states))
 
@@ -552,7 +552,7 @@ def part2():
     else:
         print("test ok")
 
-    res = run(task2)
+    run(task2)
 
     end = datetime.datetime.now()
     print(end - start)

@@ -29,7 +29,7 @@ def calc():
             mode2 = _ins % 10
 
             _ins = _ins // 10
-            mode3 = _ins % 10
+            _ins % 10
 
             if op == 99:
                 return inp[0]

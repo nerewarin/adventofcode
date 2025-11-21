@@ -148,7 +148,7 @@ class SandSlabs:
         return [Brick.from_line(line, line_num) for line_num, line in enumerate(inp)]
 
     def get_number_of_bricks_for_be_disintegrated_safely(self):
-        brick_name2brick = {brick.name: brick for brick in self.bricks}
+        {brick.name: brick for brick in self.bricks}
 
         brick_name2supports = defaultdict(list)
         brick_name2supported_by = defaultdict(list)

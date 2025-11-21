@@ -67,8 +67,11 @@ def haunted_wasteland2(inp, **kw):
     instructions, nodes = _parse_inp(inp)
     print(f"{instructions[:20]}...")
 
-    is_end = lambda x: x[-1] == "Z"
-    is_start = lambda x: x[-1] == "A"
+    def is_end(x):
+        return x[-1] == "Z"
+
+    def is_start(x):
+        return x[-1] == "A"
 
     currents = [node for node in nodes if is_start(node)]
     initial_currents = list(currents)

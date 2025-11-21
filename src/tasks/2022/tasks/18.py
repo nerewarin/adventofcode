@@ -160,7 +160,7 @@ def part1(expected):
     else:
         print("test ok")
 
-    res = run(task1)  # 3346
+    run(task1)  # 3346
     end = datetime.datetime.now()
     print(end - start)
 
@@ -180,7 +180,7 @@ def part2(expected):
     else:
         print("test ok")
 
-    res = run(task2)  # 3178 is too high
+    run(task2)  # 3178 is too high
     # 3118 is too high
     # 1975 is too low
     end = datetime.datetime.now()

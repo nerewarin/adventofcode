@@ -50,7 +50,7 @@ class Amplifier:
             mode2 = _ins % 10
 
             _ins = _ins // 10
-            mode3 = _ins % 10
+            _ins % 10
 
             if op == 99:
                 return self.inputs[0]
@@ -75,7 +75,6 @@ class Amplifier:
                 elif op == 4:
                     out = self.inputs[param1]
                     yield out
-                    a = 9
             elif op < 7:
                 # jump-if-true
                 if op == 5 and self.get_value(param1, mode1):

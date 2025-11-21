@@ -102,7 +102,7 @@ class MonitoringStation:
 
     def vaporize(self, desirable_vaporized_idx):
         station_pos, *max_vision, angle2asteroid_map = self.find_best_place_and_angle2asteroid_map()
-        x, y = None, None
+        _x, _y = None, None
         # for idx in range(desirable_vaporized_idx):
         #     x, y, angle2asteroid_map = self._vaporize(station_pos, angle2asteroid_map)
 
@@ -148,18 +148,6 @@ def test1():
 
 
 def test2():
-    inp = """
-        #.........
-        ...A......
-        ...B..a...
-        .EDCG....a
-        ..F.c.b...
-        .....c....
-        ..efd.c.gb
-        .......c..
-        ....f...c.
-        ...e..d..c
-    """
     return "test2 is not implemented"
 
 

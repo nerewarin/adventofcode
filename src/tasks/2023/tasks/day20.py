@@ -44,8 +44,6 @@ class Modules:
             cls._name2module[name] = model
             return
 
-        a = 0
-
     @classmethod
     def get(cls, name) -> "Module":
         return cls._name2module[name]
@@ -356,17 +354,6 @@ if __name__ == "__main__":
     # assert run(propagate_n_times) == 670984704  # for my 20/run.txt only
 
     # run(get_fewest_number_of_button_presses)
-
-    def verify_sequence(lst):
-        if not lst:
-            return False
-
-        first_element = lst[0]
-        for i in range(1, len(lst)):
-            expected = first_element * (i + 1)
-            if lst[i] != expected:
-                return False
-        return True
 
     def verify_sequence(lst):
         if not lst:

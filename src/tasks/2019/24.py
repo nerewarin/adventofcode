@@ -88,7 +88,6 @@ class PlanetOfDiscord:
             """
 
         if y in (0, max_idx):
-            breakpoint = 0
             adjacent_x = centre
             adjacent_y = centre + (1 if y else -1)
             adj_sum += self._get_value(layout_level_away, adjacent_x, adjacent_y)
@@ -156,7 +155,6 @@ class PlanetOfDiscord:
                 """
 
         if y == centre and x in (centre - 1, centre + 1):
-            breakpoint = 0
             for adjacent_y in range(self._size):
                 max_x = self._size - 1
                 adjacent_x = max_x if x == centre + 1 else 0

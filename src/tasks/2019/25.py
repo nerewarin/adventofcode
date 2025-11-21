@@ -32,7 +32,7 @@ class Cryostasis(ASCIICapableComputer):
         self._map = []
 
     def _get_msg(self, *args, **kwargs):
-        self.last_msg = super(Cryostasis, self)._get_msg(*args, **kwargs)
+        self.last_msg = super()._get_msg(*args, **kwargs)
         return self.last_msg
 
     def _extract_info(self, s, msg=None):
@@ -66,7 +66,7 @@ class Cryostasis(ASCIICapableComputer):
         def get_state(msg, to_print, autoloot=True):
             place = msg.split("==")[1].strip()
             if place == "Engineering":
-                a = 9
+                pass
             _d = msg[msg.rfind(place) + len(place) + 4 :]
             description = _d[: _d.find("\n")]
             if "Command?" not in msg:

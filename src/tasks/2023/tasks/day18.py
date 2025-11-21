@@ -65,8 +65,6 @@ class Workflow:
     def _cut_intervals(self, constraints, attr, comparator_str, arg):
         intervals = constraints[attr]
 
-        intervals_to_exclude = []
-        intervals_to_add = []
         for interval in intervals:
             s, e = interval
             # todo consider >
@@ -83,7 +81,7 @@ class Workflow:
                 else:
                     interval[0] = arg + 1
             else:
-                a = 0
+                pass
 
         return intervals
 
@@ -147,7 +145,7 @@ class Workflow:
 
                             if not found:
                                 #     # intervals1.append(interval2)
-                                a = 0
+                                pass
 
         return constraints
 
@@ -158,7 +156,6 @@ class Workflow:
         if self.constraints:
             return self.constraints
 
-        name = self.name
         # attr name to intervals of possible values (inclusive)
         constraints = self.get_null_constraints()
 
@@ -201,10 +198,8 @@ class Workflow:
 
         # add fallback
         if self.fallback == "R":
-            a = 0
             pass
         elif self.fallback == "A":
-            a = 0
             pass
         else:
             w_fallback = self.workflow_by_name[self.fallback]
@@ -280,8 +275,7 @@ class Aplenty:
 
     def get_distinct_combinations_of_accepted_ratings(self):
         for w in self.workflows:
-            clauses = w.get_acceptance_clause()
-            a = 0
+            w.get_acceptance_clause()
 
 
 def aplenty(inp, part=1, **kw):

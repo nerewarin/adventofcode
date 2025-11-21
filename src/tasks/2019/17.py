@@ -28,7 +28,7 @@ class SetAndForget(ASCIICapableComputer):
     def _draw(self):
         for symbol in self._map:
             if symbol in "^v<>X":
-                vacuum_robot_xy = symbol
+                pass
             print(symbol, end="")
         # print(f'\nvacuum_robot_xy: {vacuum_robot_xy}')
 
@@ -50,7 +50,7 @@ class SetAndForget(ASCIICapableComputer):
         return ord(msg[-1])
 
     def _get_commands(self):
-        robot_pos = self._map.index("^")
+        self._map.index("^")
         L = "L"
         R = "R"
         a = 12

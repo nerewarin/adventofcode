@@ -28,7 +28,20 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
-ignore = ["E203"]  # Black compatibility
+ignore = [
+    "E203",  # Black compatibility
+    "N999",  # Invalid module name (files like 1.py, 2.py are valid)
+    "N802",  # Function name should be lowercase (camelCase compatibility)
+    "N806",  # Variable should be lowercase (camelCase compatibility)
+    "N803",  # Argument name should be lowercase (camelCase compatibility)
+    "N816",  # Variable in global scope should not be mixedCase
+    "N818",  # Exception name should be named with Error suffix
+    "N801",  # Class name should use CapWords convention
+    "E501",  # Line too long (mostly in comments/docstrings)
+    "E731",  # Do not assign lambda (sometimes useful)
+    "E722",  # Do not use bare except (legacy code)
+    "E741",  # Ambiguous variable name (l, O, I - sometimes acceptable)
+]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]

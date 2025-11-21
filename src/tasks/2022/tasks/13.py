@@ -69,7 +69,7 @@ def _parse_puzzle(inp):
             pairs.append(pair)
 
             if pairs_data[0] == pairs_data[1]:
-                a = 0
+                pass
 
             pairs_data = []
 

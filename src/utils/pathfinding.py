@@ -237,7 +237,6 @@ def astar(
 
         # Loop through children
         filtered_children = [child for child in children if child.position not in closed_list]
-        a = 0
 
         for child in filtered_children:
             # Create the f, g, and h values
@@ -259,7 +258,7 @@ def astar(
             # if child.signal - current_node.signal == 1:
             #     child.f -= 10000
             if child.position in ((16 - 1 - 1, 88 - 1), (16 - 1 + 1, 88 - 1)):
-                a = 90  # for debug
+                pass  # for debug
 
             # Child is already in the open list
             skip = False
@@ -280,7 +279,7 @@ def print_maze(closed_list, current_node, cycle, maze, open_list):
     maze_str = [[chr(x + 96) for x in list(line)] for line in maze]
     for node_ in open_list:
         # maze_str[node_.position[0]][node_.position[1]] = " "
-        v = maze_str[node_.position[0]][node_.position[1]]
+        maze_str[node_.position[0]][node_.position[1]]
         # if ord('a') <= ord(v) <= ord('z'):
         #     v = chr(ord(v) - 32)
         #     maze_str[node_.position[0]][node_.position[1]] = v
@@ -373,7 +372,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     while not fringe.isEmpty():
         moving = fringe.pop()
         state, path, cost = moving
-        state_pos = state.pos
 
         if problem.isGoalState(state):
             # TODO del this shit start
@@ -397,14 +395,13 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
         closed.append(state)
         if state.pos in for_debug:
-            a = 0
+            pass
 
         if state not in successors.keys():
             successors[state] = problem.getSuccessors(state)
 
         for child in successors[state]:
             child_state, child_action, child_cost = child
-            child_path = child_state.path
 
             full_cost = cost + child_cost
             h = heuristic(child_state, problem)

@@ -9,6 +9,7 @@ import itertools
 import os
 import re
 from dataclasses import dataclass
+from math import gcd
 
 
 @dataclass()
@@ -176,11 +177,8 @@ def part1(*args, **kwargs):
 
 
 def part2(*args, **kwargs):
-    pr = NbodyProblem(*args)
+    NbodyProblem(*args)
     return NbodyProblem().find_period()
-
-
-from math import gcd
 
 
 def nok2(a, b):

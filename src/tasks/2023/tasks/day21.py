@@ -118,7 +118,6 @@ class StepCounter:
 
         gardens = set([])
         visited = set([])
-        min_step_for_visit = {}
         step2gardens = collections.defaultdict(set)
         while fringe:
             state = fringe.popleft()

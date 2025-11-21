@@ -297,7 +297,7 @@ class DonutMaze:
                 return False
 
         if len(path) > len(tst_steps):
-            breakpoint = None
+            pass
         return True
 
     def get_shortest_path(self):
@@ -307,8 +307,6 @@ class DonutMaze:
         queue = collections.deque([(self._start, start_level, start_floor, path)])
         seen = {(start_floor, self._start): start_level}
         visit_order = [(start_level, start_floor, self._start)]
-
-        top_paths = []
 
         while queue:
             vertex, level, floor, path = queue.popleft()

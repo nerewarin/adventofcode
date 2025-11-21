@@ -19,7 +19,7 @@ def _get_resources_dir():
             parts = fname.parts
             try:
                 tasks_idx = parts.index("tasks")
-                year_folder = parts[tasks_idx + 1]
+                parts[tasks_idx + 1]
                 # Go up from src/tasks/{year}/tasks/dayX.py to src/tasks/{year}/inputs/
                 year_path = fname.parent.parent
                 return year_path / "inputs" / task_num

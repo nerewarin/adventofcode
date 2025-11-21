@@ -135,7 +135,6 @@ class NeverTellMeTheOdds:
         return len(res)
 
     def _normalize_positions(self):
-        int_positions = []
         minimums = [float("inf")] * 3
         maximums = [float("-inf")] * 3
         for h in self.hailstones:
@@ -152,7 +151,7 @@ class NeverTellMeTheOdds:
             #     z += z.vx
 
         init_world_shape = [maximums[i] - minimums[i] for i in range(h.shape)]
-        normalization_coefs = [minimums[i] + init_world_shape[i] // 2 for i in range(h.shape)]
+        [minimums[i] + init_world_shape[i] // 2 for i in range(h.shape)]
 
         # normalize
         # for h in self.hailstones:
@@ -181,8 +180,6 @@ class NeverTellMeTheOdds:
 
         for velocity_candidate in self._spherical_search_generator():
             print(velocity_candidate)
-
-        a = 0
 
 
 def never_tell_me_the_odds(inp, part=1, area=None):

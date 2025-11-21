@@ -264,9 +264,9 @@ class PipeMaze:
 
                         start_vector = sum_2d(start_vectors)
 
-                        visited = set([])
+                        set([])
                         if self.is_dot(start_vector):
-                            a = 0
+                            pass
                             # TODO search for dots in all directions until you reach border
 
                         return res
@@ -274,7 +274,7 @@ class PipeMaze:
                     if self._part == 2:
                         res = 0
                         for i, (x, y) in enumerate(path_coordinates):
-                            action = succ.path[i]
+                            succ.path[i]
                             if self._inp[y][x] == ".":
                                 res += 1
                         assert x, y == self._get_start_pos()  # make sure we end just where we start

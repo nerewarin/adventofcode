@@ -229,8 +229,6 @@ def task1(inp, limit=2022):
             state.place_figure(figure)
             figure_idx += 1
             height = len(state.tiles) - 7
-            a = 0
-            a = 0
 
         return height  # 1586627906917 < res < 1586627906922
         # not 1586627906920
@@ -250,7 +248,7 @@ def part1(expected):
     else:
         print("test ok")
 
-    res = run(task1)  # 3171
+    run(task1)  # 3171
     end = datetime.datetime.now()
     print(end - start)
 
