@@ -3,6 +3,8 @@ import copy
 
 from src.utils.test_and_run import run, test
 
+DEBUG = False
+
 OBSTACLE = "O"
 WALL = "#"
 TURN = "+"
@@ -194,6 +196,7 @@ def part2(data):
     _, initial_path = part1(grid, True)
 
     possible_positions = 0
+    obstacles_cache = set()
 
     for step, (row, col, direction) in enumerate(initial_path):
         # Check all adjacent positions for potential obstructions
@@ -201,6 +204,11 @@ def part2(data):
             for dc in [-1, 0, 1]:
                 if abs(dr) + abs(dc) == 1:  # Only check orthogonal positions
                     new_row, new_col = row + dr, col + dc
+
+                    if (new_row, new_col) in obstacles_cache:
+                        continue
+                    obstacles_cache.add((new_row, new_col))
+
                     if is_valid_position((new_row, new_col), grid) and (new_row, new_col) != (row, col):
                         # Temporarily place an obstruction
                         original_cell = grid[new_row][new_col]
@@ -209,7 +217,8 @@ def part2(data):
                         is_stuck, path = can_get_stuck(grid, row, col, direction, possible_positions)
                         if is_stuck:
                             full_path = initial_path[:step] + path
-                            display(grid, full_path, possible_positions)
+                            if DEBUG:
+                                display(grid, full_path, possible_positions)
 
                             possible_positions += 1
                         grid[new_row][new_col] = original_cell  # Restore original cell
