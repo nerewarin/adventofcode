@@ -1,3 +1,4 @@
+import collections
 import copy
 
 from src.utils.test_and_run import run, test
@@ -86,9 +87,9 @@ def can_get_stuck(grid, start_row, start_col, direction, possible_positions):
 
     while True:
         if (row, col, direction) in visited:
-            display(grid, path, possible_positions)
             return True, path  # Guard is stuck in a loop
 
+        # path.append((row, col, direction))
         visited.add((row, col, direction))
 
         dr, dc = DIRECTIONS[direction]
@@ -96,9 +97,10 @@ def can_get_stuck(grid, start_row, start_col, direction, possible_positions):
 
         # If position is invalid or has an obstacle, turn right
         if not is_valid_position((next_row, next_col), grid) or grid[next_row][next_col] in (WALL, OBSTACLE):
-            path.append((row, col, direction))
+            # path.append((row, col, direction))
 
             direction = TURN_RIGHT[direction]
+            path.append((row, col, direction))
 
             dr, dc = DIRECTIONS[direction]
             next_row, next_col = row + dr, col + dc
@@ -122,15 +124,20 @@ def display(grid, path: list[str], ind):
     print(f"Path #{ind} found:")
     grid_to_show = copy.deepcopy(grid)
 
-    visited = set()
+    visited_to_direction = collections.defaultdict(set)
 
     for i, (row, col, direction) in enumerate(path):
-        if i + 1 < len(path) and direction != path[i + 1][-1] or (row, col) in visited:
+        if i > 0 and direction != path[i - 1][-1]:
+            symbol = TURN
+        elif (row, col) in visited_to_direction and (
+            PATH_TO_SYMBOL[direction] not in visited_to_direction[(row, col)]
+            or TURN in visited_to_direction[(row, col)]
+        ):
             symbol = TURN
         else:
             symbol = PATH_TO_SYMBOL[direction]
 
-        visited.add((row, col))
+        visited_to_direction[(row, col)].add(symbol)
 
         grid_to_show[row][col] = symbol
 
@@ -188,10 +195,14 @@ def part2(data):
     grid = [list(line) for line in data]
 
     _, initial_path = part1(grid, True)
+    # # turn workaround
+    # for i, (row, col, direction) in enumerate(initial_path):
+    #     if i and direction != initial_path[i - 1][-1]:
+    #         initial_path[i] = (initial_path[i][0], initial_path[i][1], initial_path[i - 1][-1])
 
     possible_positions = 0
 
-    for row, col, direction in initial_path:
+    for step, (row, col, direction) in enumerate(initial_path):
         # Check all adjacent positions for potential obstructions
         for dr in [-1, 0, 1]:
             for dc in [-1, 0, 1]:
@@ -201,7 +212,12 @@ def part2(data):
                         # Temporarily place an obstruction
                         original_cell = grid[new_row][new_col]
                         grid[new_row][new_col] = OBSTACLE  # Place obstruction
-                        if can_get_stuck(grid, row, col, direction, possible_positions):
+
+                        is_stuck, path = can_get_stuck(grid, row, col, direction, possible_positions)
+                        if is_stuck:
+                            full_path = initial_path[:step] + path
+                            display(grid, full_path, possible_positions)
+
                             possible_positions += 1
                         grid[new_row][new_col] = original_cell  # Restore original cell
 
