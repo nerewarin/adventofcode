@@ -89,7 +89,6 @@ def can_get_stuck(grid, start_row, start_col, direction, possible_positions):
         if (row, col, direction) in visited:
             return True, path  # Guard is stuck in a loop
 
-        # path.append((row, col, direction))
         visited.add((row, col, direction))
 
         dr, dc = DIRECTIONS[direction]
@@ -97,8 +96,6 @@ def can_get_stuck(grid, start_row, start_col, direction, possible_positions):
 
         # If position is invalid or has an obstacle, turn right
         if not is_valid_position((next_row, next_col), grid) or grid[next_row][next_col] in (WALL, OBSTACLE):
-            # path.append((row, col, direction))
-
             direction = TURN_RIGHT[direction]
             path.append((row, col, direction))
 
@@ -195,10 +192,6 @@ def part2(data):
     grid = [list(line) for line in data]
 
     _, initial_path = part1(grid, True)
-    # # turn workaround
-    # for i, (row, col, direction) in enumerate(initial_path):
-    #     if i and direction != initial_path[i - 1][-1]:
-    #         initial_path[i] = (initial_path[i][0], initial_path[i][1], initial_path[i - 1][-1])
 
     possible_positions = 0
 
