@@ -162,7 +162,8 @@ def part2(data):
         to the right of it there is an obstacle;
             to the right of that obstacle there is another obstacle
                ...
-                    and this is in while until we either reach one of our (row, col, direction) visited (we update this list every time virtually on our way) -> True
+                    and this is in a while until we either reach one of our (row, col, direction) visited
+                    (we update this list every time virtually on our way) -> True,
                     or we get out of the bounds -> False
 
 
@@ -180,8 +181,9 @@ def part2(data):
     ......##..
 
 
-    seems like we also need to cache these "good" onstacles.
-    if our algo will take too much time we can us them to first check if our obstacke is on the same line with cached and we have no other walls between them. that means this is automatically an answer too.
+    seems like we also need to cache these "good" obstacles.
+    if our algo will take too much time we can us them to first check if our obstacle is on the same line with cached,
+    and we have no other walls between them. that means this is automatically an answer too.
     """
     grid = [list(line) for line in data]
 
