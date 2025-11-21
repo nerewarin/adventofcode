@@ -1,10 +1,12 @@
 """--- Day 5: Supply Stacks ---
 https://adventofcode.com/2022/day/5
 """
+
 import re
 from collections import defaultdict
 
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
+
 _COMMAND = re.compile(r"move (\d+) from (\d+) to (\d+)")
 
 
@@ -14,7 +16,7 @@ def supply_stacks(inp, settlement="reversed"):
     for level, line in enumerate(inp):
         if line.startswith(" 1"):
             stack_levels = max([int(level) for level in re.sub(r"\s+", " ", line).split(" ") if level])
-            inp = inp[level + 2:]
+            inp = inp[level + 2 :]
             break
         stack_lines.append(line)
     else:
@@ -39,7 +41,7 @@ def supply_stacks(inp, settlement="reversed"):
             items.reverse()
         stacks[dst] = items + stacks[dst]
 
-    return ''.join(stacks[idx][0] if stacks[idx] else '' for idx in range(stack_levels))
+    return "".join(stacks[idx][0] if stacks[idx] else "" for idx in range(stack_levels))
 
 
 if __name__ == "__main__":

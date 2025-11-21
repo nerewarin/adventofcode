@@ -2,18 +2,15 @@
 --- Day 1: Trebuchet?! ---
 https://adventofcode.com/2023/day/1
 """
+
 import re
 
 from src.utils.helpers import HUMAN_DIGITS
 from src.utils.test_and_run import run, test
 
 _pattern = "|".join(f"({word})" for word in HUMAN_DIGITS)
-_DIGITS_REXP = re.compile(
-    rf"({_pattern})"
-)
-WORD2DIGIT = {
-    HUMAN_DIGITS[n]: n + 1 for n in range(len(HUMAN_DIGITS))
-}
+_DIGITS_REXP = re.compile(rf"({_pattern})")
+WORD2DIGIT = {HUMAN_DIGITS[n]: n + 1 for n in range(len(HUMAN_DIGITS))}
 
 
 def trebuchet2(inp, **_):
@@ -21,7 +18,7 @@ def trebuchet2(inp, **_):
     for line in inp:
         v = None
         for is_reversed, it in enumerate(
-                [line, reversed(line)],
+            [line, reversed(line)],
         ):
             candidate = ""
             for s in it:
@@ -64,8 +61,8 @@ def trebuchet(inp):
     for line in inp:
         v = None
         for it in (
-                line,
-                reversed(line),
+            line,
+            reversed(line),
         ):
             for s in it:
                 if s.isdigit():

@@ -9,8 +9,8 @@ import collections
 
 class DigitalSendingNetwork:
     def __init__(self):
-        with open('inputs/8.txt') as f:
-            inputs = [[int(symbol) for symbol in row] for row in f.read().split('\n')][0]
+        with open("inputs/8.txt") as f:
+            inputs = [[int(symbol) for symbol in row] for row in f.read().split("\n")][0]
 
         self._inputs = inputs
         self.wide = 25
@@ -21,11 +21,11 @@ class DigitalSendingNetwork:
 
         layers_amount = len(inputs) // layers_size
 
-        self.layers = [inputs[layer * layers_size: (layer + 1) * layers_size] for layer in range(layers_amount)]
+        self.layers = [inputs[layer * layers_size : (layer + 1) * layers_size] for layer in range(layers_amount)]
 
     def calc_part1(self):
         counters = [collections.Counter(layer) for layer in self.layers]
-        counter_idx, fewest_nulls = None, float('inf')
+        counter_idx, fewest_nulls = None, float("inf")
         for idx, counter in enumerate(counters):
             nulls = counter[0]
             if nulls < fewest_nulls:
@@ -45,22 +45,22 @@ class DigitalSendingNetwork:
         #
         code2color = {
             # black: '#',
-            black: ' ',
+            black: " ",
             # black: u"\u2588",
             # white: u"\u2B1C",
             # white: ' ',
-            white: '#',
+            white: "#",
             # white: u"\u25AF",
-            transparent: ''
+            transparent: "",
         }
-        res_str = ''
+        res_str = ""
         for row in range(self.tall):
             for col in range(self.wide):
                 idx = row * self.wide + col
                 cell_code = result[idx]
                 color = code2color[cell_code]
                 res_str += color
-            res_str += '\n'
+            res_str += "\n"
 
         return res_str
 
@@ -73,7 +73,7 @@ def part2():
     return DigitalSendingNetwork().draw()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         # part1(),
         part2(),

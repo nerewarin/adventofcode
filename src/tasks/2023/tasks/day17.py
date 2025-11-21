@@ -3,14 +3,15 @@
 https://adventofcode.com/2023/day/17
 """
 
-from tasks.day10 import State as BaseState
 from src.utils.input_formatters import cast_2d_list_elements
-from src.utils.pathfinding import manhattan_distance, aStarSearch
+from src.utils.pathfinding import aStarSearch, manhattan_distance
 from src.utils.position_search_problem import PositionSearchProblem
 from src.utils.test_and_run import run, test
+from tasks.day10 import State as BaseState
 
 # def print(*_):
 #     pass
+
 
 class State(BaseState):
     directions = {
@@ -88,7 +89,7 @@ class State(BaseState):
                 State(self.inp, pos, self.step + 1, self.path + [(dx, dy)], visited=visited),
                 (dx, dy),
                 # TODO check x y in right order
-                self.inp[y][x]
+                self.inp[y][x],
             )
 
 
@@ -157,7 +158,7 @@ class ClumsyCrucible:
 
             loss_ = self._inp[y][x]
             loss += loss_
-            print(f"{i+1}. ({x}, {y}) = {loss_}, {loss=}")
+            print(f"{i + 1}. ({x}, {y}) = {loss_}, {loss=}")
 
     def minimize_loss(self):
         def heuristic(state, problem):
@@ -188,7 +189,7 @@ class ClumsyCrucible:
 
             loss_ = self._inp[y][x]
             loss += loss_
-            print(f"{i+1}. ({x}, {y}) = {loss_}, {loss=}")
+            print(f"{i + 1}. ({x}, {y}) = {loss_}, {loss=}")
 
         # self._print_test_path()
 

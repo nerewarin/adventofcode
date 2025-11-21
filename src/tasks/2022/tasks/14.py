@@ -1,7 +1,8 @@
 """--- Day 14: Regolith Reservoir ---
 https://adventofcode.com/2022/day/14
 """
-from src.utils.test_and_run import test, run
+
+from src.utils.test_and_run import run, test
 
 
 def _parse_puzzle(inp):
@@ -9,7 +10,7 @@ def _parse_puzzle(inp):
     all_rocks = []
     for line in inp:
         # 498,4 -> 498,6 -> 496,6
-        path = [tuple((int(x.strip()) for x in elm.split(","))) for elm in line.split("->")]
+        path = [tuple(int(x.strip()) for x in elm.split(",")) for elm in line.split("->")]
         start = path[0]
         rocks = [start]
         for point in path[1:]:
@@ -91,7 +92,7 @@ def task(inp, bottom=None):
 
     sand_count = 0
 
-    bottom_lvl = max((x[1] for x in all_rocks)) + 2
+    bottom_lvl = max(x[1] for x in all_rocks) + 2
 
     dropped_sand_position = True
     while dropped_sand_position:
@@ -116,4 +117,3 @@ if __name__ == "__main__":
     test(task, bottom="floor", expected=93)
     res = run(task, bottom="floor")
     assert res == 24377, f"{res=} but it should be 24377 for my input!"
-

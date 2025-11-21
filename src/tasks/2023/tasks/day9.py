@@ -2,14 +2,13 @@
 --- Day 8: Mirage Maintenance ---
 https://adventofcode.com/2023/day/9
 """
+
 from src.utils.test_and_run import run, test
 
 
 def guess_next_number(line, part=1):
     inp = list(map(int, line.split()))
-    layers = [
-        (inp)
-    ]
+    layers = [(inp)]
     last_layer = inp
     while any([elm != 0 for elm in last_layer]):
         layer = []
@@ -43,5 +42,5 @@ def mirage(inp, **kw):
 if __name__ == "__main__":
     test(mirage, 114)
     run(mirage)
-    test(mirage,  part=2, expected=2)
+    test(mirage, part=2, expected=2)
     run(mirage, part=2)

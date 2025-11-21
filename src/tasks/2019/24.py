@@ -1,4 +1,3 @@
-
 """
 --- Day 24: Planet of Discord ---
 
@@ -6,7 +5,6 @@ https://adventofcode.com/2019/day/24
 
 """
 
-import collections
 import itertools
 
 import _tools
@@ -18,9 +16,7 @@ class PlanetOfDiscord:
     def __init__(self, inp=None):
         _inp = inp or _tools.get_puzzle_input(scalar_type=str, multiline=True)
         self._layouts_history = set()
-        self._lvl2inp = {
-            0: tuple(tuple(1 if val == '#' else 0 for val in row) for row in _inp)
-        }
+        self._lvl2inp = {0: tuple(tuple(1 if val == "#" else 0 for val in row) for row in _inp)}
         self.nulls_layout = tuple([tuple([0] * self._size) for x in range(self._size)])
         self.minute = 0
 
@@ -37,12 +33,14 @@ class PlanetOfDiscord:
         return row[x]
 
     def count_adjacent_bugs(self, layout, x, y, level=0):
-        res = sum((
-            self._get_value(layout, x + 1, y),
-            self._get_value(layout, x - 1, y),
-            self._get_value(layout, x, y + 1),
-            self._get_value(layout, x, y - 1),
-        ))
+        res = sum(
+            (
+                self._get_value(layout, x + 1, y),
+                self._get_value(layout, x - 1, y),
+                self._get_value(layout, x, y + 1),
+                self._get_value(layout, x, y - 1),
+            )
+        )
 
         if len(self._lvl2inp) == 1:
             # part 1 - no levels
@@ -122,7 +120,6 @@ class PlanetOfDiscord:
                  |     |         |     |
             """
 
-
         # adjacent by centre
         layout_level_into = self._lvl2inp.get(level + 1, self.nulls_layout)
         if x == centre and y in (centre - 1, centre + 1):
@@ -161,7 +158,7 @@ class PlanetOfDiscord:
         if y == centre and x in (centre - 1, centre + 1):
             breakpoint = 0
             for adjacent_y in range(self._size):
-                max_x = (self._size - 1)
+                max_x = self._size - 1
                 adjacent_x = max_x if x == centre + 1 else 0
                 value = self._get_value(layout_level_into, adjacent_x, adjacent_y)
                 adj_sum += value
@@ -237,10 +234,10 @@ class PlanetOfDiscord:
         return self.get_biodiversity_rating(layout)
 
     def _draw(self):
-        print(f'\n=== MINUTE {self.minute} ===\n')
+        print(f"\n=== MINUTE {self.minute} ===\n")
         for level, layout in self._lvl2inp.items():
             # DRAW
-            print('level', level)
+            print("level", level)
             for row in layout:
                 print(row)
             # END DRAW
@@ -305,32 +302,32 @@ def part2():
 
 
 def test(test_num):
-    _inp = '''
+    _inp = """
         ....#
         #..#.
         #..##
         ..#..
         #....
-    '''
-    test_inp = [val.strip() for val in _inp.split('\n') if val.strip()]
+    """
+    test_inp = [val.strip() for val in _inp.split("\n") if val.strip()]
     if test_num == 1:
         res = PlanetOfDiscord(test_inp).get_biodiversity_rating_of_repeating_layout()
-        assert res == 2129920, 'test{} failed!: {}'.format(test_num, res)
+        assert res == 2129920, f"test{test_num} failed!: {res}"
     elif test_num == 2:
         res = part1()
-        assert res == 25719471, 'test{} failed!: {}'.format(test_num, res)
+        assert res == 25719471, f"test{test_num} failed!: {res}"
     elif test_num == 3:
         solver = PlanetOfDiscord(test_inp)
         solver.simulate_recursively(10)
         res = solver.count_all_bugs()
-        assert res == 99, 'test{} failed!: {}'.format(test_num, res)
+        assert res == 99, f"test{test_num} failed!: {res}"
     else:
-        raise NotImplementedError(f'unknown test_num = {test_num}')
+        raise NotImplementedError(f"unknown test_num = {test_num}")
 
-    return 'test{} ok'.format(test_num)
+    return f"test{test_num} ok"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         # test(1),
         # test(2),

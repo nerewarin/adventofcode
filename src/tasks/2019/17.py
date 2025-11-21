@@ -15,7 +15,7 @@ class SetAndForget(ASCIICapableComputer):
         super().__init__()
 
         if _map:
-            self._map = '\n'.join(_map)
+            self._map = "\n".join(_map)
         else:
             self._map = self._get_msg()
 
@@ -27,9 +27,9 @@ class SetAndForget(ASCIICapableComputer):
 
     def _draw(self):
         for symbol in self._map:
-            if symbol in '^v<>X':
+            if symbol in "^v<>X":
                 vacuum_robot_xy = symbol
-            print(symbol, end='')
+            print(symbol, end="")
         # print(f'\nvacuum_robot_xy: {vacuum_robot_xy}')
 
     def collect_dust(self):
@@ -40,7 +40,7 @@ class SetAndForget(ASCIICapableComputer):
         self._input_commands(commands)
 
         # video_enabled = 'y'
-        video_disabled = 'n'
+        video_disabled = "n"
         self.feed(ord(video_disabled))
         self.feed(self._new_line)
 
@@ -50,31 +50,47 @@ class SetAndForget(ASCIICapableComputer):
         return ord(msg[-1])
 
     def _get_commands(self):
-        robot_pos = self._map.index('^')
-        L = 'L'
-        R = 'R'
+        robot_pos = self._map.index("^")
+        L = "L"
+        R = "R"
         a = 12
         b = 10
         c = 8
-        A = L, a, L, b, R, c, L, a,
+        A = (
+            L,
+            a,
+            L,
+            b,
+            R,
+            c,
+            L,
+            a,
+        )
         B = R, c, R, b, R, a
-        C = L, b, R, a, R, c,
+        C = (
+            L,
+            b,
+            R,
+            a,
+            R,
+            c,
+        )
         return {
-            'A': A,
-            'B': B,
-            'C': C,
-            'path': 'ABABCCBABC',
+            "A": A,
+            "B": B,
+            "C": C,
+            "path": "ABABCCBABC",
         }
 
     def get_sum_of_the_alignment_parameters(self):
         self._draw()
 
-        layout = self._map.split('\n')
+        layout = self._map.split("\n")
         alignments = []
         res = 0
         for y, row in enumerate(layout):
             for x, symbol in enumerate(row):
-                if symbol == '#' and self.all_adjacent_are_scaffold(layout, x, y):
+                if symbol == "#" and self.all_adjacent_are_scaffold(layout, x, y):
                     alignments.append((x, y))
                     res += x * y
         return res
@@ -89,7 +105,7 @@ def part2(*args, **kwargs):
 
 
 def test(test_num):
-    _inp = '''
+    _inp = """
         ..#..........
         ..#..........
         #######...###
@@ -97,18 +113,18 @@ def test(test_num):
         #############
         ..#...#...#..
         ..#####...^..
-    '''
-    test_inp = [val.strip() for val in _inp.split('\n') if val.strip()]
+    """
+    test_inp = [val.strip() for val in _inp.split("\n") if val.strip()]
     if test_num == 1:
         res = SetAndForget(test_inp).get_sum_of_the_alignment_parameters()
-        assert res == 76, 'test{} failed!: {}'.format(test_num, res)
+        assert res == 76, f"test{test_num} failed!: {res}"
     else:
-        raise NotImplementedError(f'unknown test_num = {test_num}')
+        raise NotImplementedError(f"unknown test_num = {test_num}")
 
-    return 'test{} ok'.format(test_num)
+    return f"test{test_num} ok"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         test(1),
         part1(),

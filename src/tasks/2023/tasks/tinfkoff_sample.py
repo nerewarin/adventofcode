@@ -1,6 +1,7 @@
 """
 https://github.com/Tinkoff/career/blob/main/interview/sections/programming.md
 """
+
 Input = [1, 2, 4, 5], [3, 3, 4], [2, 3, 4, 5, 6]
 
 l1, l2, l3 = map(len, Input)

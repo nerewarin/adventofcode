@@ -1,7 +1,8 @@
 """--- Day 1: Calorie Counting ---
 https://adventofcode.com/2022/day/1
 """
-from src.utils.input_formatters import group_by_blank, cast_2d_list_elements
+
+from src.utils.input_formatters import cast_2d_list_elements, group_by_blank
 from src.utils.test_and_run import run, test
 
 

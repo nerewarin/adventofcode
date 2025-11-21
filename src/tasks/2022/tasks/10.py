@@ -1,15 +1,16 @@
 """--- Day 9: Rope Bridge ---
 https://adventofcode.com/2022/day/9
 """
+
 from functools import partial
 
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 
 class Register:
     def __init__(self, mode):
         self.x = 1
-        self.part2 = mode == 'draw'
+        self.part2 = mode == "draw"
         if self.part2:
             self.cycle = 0
         else:
@@ -77,12 +78,9 @@ def task(inp, mode=None):
     s = []
     for cmd_num, cmd in enumerate(inp):
         # print(cmd)
-        fn, value, *_ = (cmd + ' dummy').split(" ")
+        fn, value, *_ = (cmd + " dummy").split(" ")
 
-        f = {
-            "noop": r.noop,
-            "addx": partial(r.addx, value)
-        }[fn]
+        f = {"noop": r.noop, "addx": partial(r.addx, value)}[fn]
         res = f()
         if isinstance(res, str):
             print(res)
@@ -103,10 +101,17 @@ if __name__ == "__main__":
     run(task)
 
     # part 2
-    test(task, mode="draw", expected=[line for line in """##..##..##..##..##..##..##..##..##..##..
+    test(
+        task,
+        mode="draw",
+        expected=[
+            line
+            for line in """##..##..##..##..##..##..##..##..##..##..
 ###...###...###...###...###...###...###.
 ####....####....####....####....####....
 #####.....#####.....#####.....#####.....
 ######......######......######......####
-#######.......#######.......#######.....""".split("\n")])
+#######.......#######.......#######.....""".split("\n")
+        ],
+    )
     run(task, mode="draw")

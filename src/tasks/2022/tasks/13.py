@@ -1,9 +1,10 @@
 """--- Day 13: Distress Signal ---
 https://adventofcode.com/2022/day/13
 """
+
 import math
 
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 
 class BlocksComparator:

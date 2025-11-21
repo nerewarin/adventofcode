@@ -1,0 +1,25 @@
+# Modern pre-commit hooks for Advent of Code
+# Install: poetry run pre-commit install
+# Run: poetry run pre-commit run --all-files
+
+repos:
+  # Ruff - fast Python linter and formatter (replaces flake8, isort, black)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-docstring-first
+      - id: debug-statements

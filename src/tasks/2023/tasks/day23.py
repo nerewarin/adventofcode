@@ -2,13 +2,11 @@
 --- Day 23: Sand Slabs ---
 https://adventofcode.com/2023/day/23
 """
-import collections
+
 import dataclasses
 from collections import defaultdict
 
-from src.utils.input_formatters import cast_2d_list_elements
-from src.utils.position_search_problem import PositionSearchProblem
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import run
 
 
 @dataclasses.dataclass
@@ -47,9 +45,7 @@ class Brick:
 
     @property
     def shape(self):
-        return [
-            abs(self.end[i] - self.start[i] + 1) for i in range(3)
-        ]
+        return [abs(self.end[i] - self.start[i] + 1) for i in range(3)]
 
     @property
     def length(self):
@@ -140,24 +136,19 @@ class SandSlabs:
                 lines.append(line)
 
             for line in lines:
-                line = line.replace("...", '._.')
+                line = line.replace("...", "._.")
                 print(line)
-            print("="*100)
+            print("=" * 100)
 
     def _update_world_shape(self):
-        self._world_shape = [
-            max(brick.end[i] for brick in self.bricks)
-            for i in range(3)
-        ]
+        self._world_shape = [max(brick.end[i] for brick in self.bricks) for i in range(3)]
 
     @staticmethod
     def _parse_input(inp):
         return [Brick.from_line(line, line_num) for line_num, line in enumerate(inp)]
 
     def get_number_of_bricks_for_be_disintegrated_safely(self):
-        brick_name2brick = {
-            brick.name: brick for brick in self.bricks
-        }
+        brick_name2brick = {brick.name: brick for brick in self.bricks}
 
         brick_name2supports = defaultdict(list)
         brick_name2supported_by = defaultdict(list)
@@ -171,7 +162,7 @@ class SandSlabs:
             top_floor = z1 + 1
 
             # find all bricks above
-            bricks_above = list(sorted_by_z0[i + 1:])
+            bricks_above = list(sorted_by_z0[i + 1 :])
             for brick_above in bricks_above:
                 brick_above_z0 = brick_above.z0
                 if brick_above_z0 > top_floor:
@@ -222,4 +213,3 @@ def sand_slabs(inp):
 if __name__ == "__main__":
     # test(sand_slabs, expected=5)
     assert 980 < run(sand_slabs) < 1040
-

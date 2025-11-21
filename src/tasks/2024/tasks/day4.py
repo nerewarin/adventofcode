@@ -1,25 +1,26 @@
 import os
-from typing import List
 
 from src.utils.test_and_run import test
+
 DEBUG = False
 
-def find_xmas_occurrences(grid: List[str]) -> int:
+
+def find_xmas_occurrences(grid: list[str]) -> int:
     height = len(grid)
     width = len(grid[0])
     count = 0
-    
+
     # Helper function to check if coordinates are within grid bounds
     def in_bounds(x: int, y: int) -> bool:
         return 0 <= x < width and 0 <= y < height
-    
+
     # Check all possible directions for "XMAS"
-    directions = [(0,1), (1,0), (1,1), (-1,1), (0,-1), (-1,0), (-1,-1), (1,-1)]
+    directions = [(0, 1), (1, 0), (1, 1), (-1, 1), (0, -1), (-1, 0), (-1, -1), (1, -1)]
     target = "XMAS"
     all_coordinates = []
     for y in range(height):
         for x in range(width):
-            if grid[y][x] != 'X':
+            if grid[y][x] != "X":
                 continue
 
             # Try each direction
@@ -27,8 +28,8 @@ def find_xmas_occurrences(grid: List[str]) -> int:
                 coordinates = []
                 valid = True
                 for i in range(len(target)):
-                    new_x = x + i*dx
-                    new_y = y + i*dy
+                    new_x = x + i * dx
+                    new_y = y + i * dy
                     if not in_bounds(new_x, new_y) or grid[new_y][new_x] != target[i]:
                         valid = False
                         break
@@ -43,7 +44,7 @@ def find_xmas_occurrences(grid: List[str]) -> int:
     if DEBUG:
         for i, coordinates in enumerate(all_coordinates):
             print(f"==== {i} ====")
-            grid = [[" "] * width for _ in range(height) ]
+            grid = [[" "] * width for _ in range(height)]
             for i, (x, y) in enumerate(coordinates):
                 grid[y][x] = target[i]
             for row in grid:
@@ -51,15 +52,16 @@ def find_xmas_occurrences(grid: List[str]) -> int:
 
     return count
 
-def find_xmas_x_pattern(grid: List[str]) -> int:
+
+def find_xmas_x_pattern(grid: list[str]) -> int:
     height = len(grid)
     width = len(grid[0])
     count = 0
 
     def get(x, y):
         for dim, bound in (
-                (x, width),
-                (y, height),
+            (x, width),
+            (y, height),
         ):
             if dim < 0:
                 return None
@@ -71,9 +73,9 @@ def find_xmas_x_pattern(grid: List[str]) -> int:
     # For each center position that could be the middle of an X
     for y in range(height):
         for x in range(width):
-            if grid[y][x] != 'A':  # Center must be 'A'
+            if grid[y][x] != "A":  # Center must be 'A'
                 continue
-                
+
             # Only check one basic X configuration and its variations
             dx1, dy1 = -1, -1  # up-left
             dx2, dy2 = 1, -1  # up-right
@@ -113,22 +115,24 @@ def find_xmas_x_pattern(grid: List[str]) -> int:
             #     count += 1
             #     continue
 
-
     return count
 
-def solve_part1(input_data: str|list[str]) -> int:
+
+def solve_part1(input_data: str | list[str]) -> int:
     if isinstance(input_data, list):
         grid = input_data
     else:
         grid = [line.strip() for line in input_data.splitlines() if line.strip()]
     return find_xmas_occurrences(grid)
 
-def solve_part2(input_data: str|list[str]) -> int:
+
+def solve_part2(input_data: str | list[str]) -> int:
     if isinstance(input_data, list):
         grid = input_data
     else:
         grid = [line.strip() for line in input_data.splitlines() if line.strip()]
     return find_xmas_x_pattern(grid)
+
 
 if __name__ == "__main__":
     # test(solve_part1, expected=18)
@@ -137,10 +141,10 @@ if __name__ == "__main__":
     test(solve_part2, test_part=2, expected=9)
 
     current_dir = os.path.dirname(os.path.dirname(__file__))
-    input_file = os.path.join(current_dir, 'inputs', '4', 'run')
+    input_file = os.path.join(current_dir, "inputs", "4", "run")
 
     # # Read the input file
-    with open(input_file, 'r') as f:
+    with open(input_file) as f:
         input_data = f.read()
 
     res1 = solve_part1(input_data)

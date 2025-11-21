@@ -1,12 +1,13 @@
 """----Day 11: Monkey in the Middle ---
 https://adventofcode.com/2022/day/11
 """
-import dataclasses
-import re
-import math
-from collections import deque, Counter
 
-from src.utils.test_and_run import test, run
+import dataclasses
+import math
+import re
+from collections import Counter, deque
+
+from src.utils.test_and_run import run, test
 
 
 class Operation:
@@ -84,8 +85,7 @@ def lcm(a, b):
 
 
 def task(inp, mode=None):
-    """monkey business
-    """
+    """monkey business"""
     monkeys = _parse_puzzle(inp)
     lcm_res = monkeys[0].test_divider
     for monkey in monkeys[1:]:

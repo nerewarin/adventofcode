@@ -5,21 +5,21 @@ https://adventofcode.com/2019/day/22
 
 """
 
-import re
 import collections
+import re
 
 import _tools
 
 
 class SlamShuffle:
-    _increment_rexp = re.compile(r'deal with increment ([-]*\d+)')
-    _cut_rexp = re.compile(r'cut ([-]*\d+)')
+    _increment_rexp = re.compile(r"deal with increment ([-]*\d+)")
+    _cut_rexp = re.compile(r"cut ([-]*\d+)")
 
     def __init__(self, inp=None, deck_size=10007, deck=None):
         if inp is None:
-            inp = _tools.get_puzzle_input(scalar_type=str, delimeter='\n', multiline=True)
+            inp = _tools.get_puzzle_input(scalar_type=str, delimeter="\n", multiline=True)
         else:
-            inp = [val.strip() for val in inp.split('\n') if val.strip()]
+            inp = [val.strip() for val in inp.split("\n") if val.strip()]
         self.inp = inp
         self._deck_size = deck_size
         self.deck = deck or list(range(self._deck_size))
@@ -38,8 +38,8 @@ class SlamShuffle:
         _last_instruction = None
         for instr_idx, raw_instruction in enumerate(self.inp):
             if len(set(self.deck)) != self._deck_size:
-                raise ValueError(f'error dealing {_last_instruction}')
-            if raw_instruction == 'deal into new stack':
+                raise ValueError(f"error dealing {_last_instruction}")
+            if raw_instruction == "deal into new stack":
                 self.deck = self.deck[::-1]
                 _last_instruction = raw_instruction
                 continue
@@ -58,18 +58,18 @@ class SlamShuffle:
                 _last_instruction = raw_instruction
                 continue
 
-            raise ValueError(f'unknown {raw_instruction}')
+            raise ValueError(f"unknown {raw_instruction}")
         return
 
     def get_position(self, value):
         f"""
-        
+
         Args:
-            value (int): value in deck (from 0 to 10006) 
+            value (int): value in deck (from 0 to 10006)
 
         Returns:
             int: position of {value} in deck
-            
+
         """
         self._shuffle()
         return self.deck.index(value)
@@ -84,9 +84,9 @@ class SlamShuffle:
         n = deck_size
         a, b = 1, 0
         for instr_idx, raw_instruction in enumerate(self.inp):
-            print(f'a={a} b={b}')
-            print(f'{position}: {raw_instruction}')
-            if raw_instruction == 'deal into new stack':
+            print(f"a={a} b={b}")
+            print(f"{position}: {raw_instruction}")
+            if raw_instruction == "deal into new stack":
                 a = -a % n
                 b = (-b + n - 1) % n
                 continue
@@ -104,45 +104,55 @@ class SlamShuffle:
                 idx = int(_cut_instruction.group(1))
                 b = (b - idx) % n
                 continue
-            raise ValueError(f'unknown {raw_instruction}')
+            raise ValueError(f"unknown {raw_instruction}")
 
         pow_ = pow(a, cycles, deck_size)
         a, b = pow_, b * (pow_ - 1) * pow(a - 1, n - 2, n) % n
 
-        result = pow(a, n-2, n) * (position - b) % n
+        result = pow(a, n - 2, n) * (position - b) % n
         return result
 
 
 def _str_to_deck(s):
-    return [int(x) for x in s.split(' ')]
+    return [int(x) for x in s.split(" ")]
 
 
 def test1():
-    ss1 = SlamShuffle('''
+    ss1 = SlamShuffle(
+        """
         deal with increment 7
         deal into new stack
         deal into new stack
-    ''', deck_size=10)
+    """,
+        deck_size=10,
+    )
     ss1._shuffle()
-    assert ss1.deck == _str_to_deck('0 3 6 9 2 5 8 1 4 7')
+    assert ss1.deck == _str_to_deck("0 3 6 9 2 5 8 1 4 7")
 
-    ss2 = SlamShuffle('''
+    ss2 = SlamShuffle(
+        """
         cut 6
         deal with increment 7
         deal into new stack
-    ''', deck_size=10)
+    """,
+        deck_size=10,
+    )
     ss2._shuffle()
-    assert ss2.deck == _str_to_deck('3 0 7 4 1 8 5 2 9 6')
+    assert ss2.deck == _str_to_deck("3 0 7 4 1 8 5 2 9 6")
 
-    ss3 = SlamShuffle('''
+    ss3 = SlamShuffle(
+        """
 deal with increment 7
 deal with increment 9
 cut -2
-    ''', deck_size=10)
+    """,
+        deck_size=10,
+    )
     ss3._shuffle()
-    assert ss3.deck == _str_to_deck('6 3 0 7 4 1 8 5 2 9')
+    assert ss3.deck == _str_to_deck("6 3 0 7 4 1 8 5 2 9")
 
-    ss4 = SlamShuffle('''
+    ss4 = SlamShuffle(
+        """
 deal into new stack
 cut -2
 deal with increment 7
@@ -153,9 +163,11 @@ cut 3
 deal with increment 9
 deal with increment 3
 cut -1
-    ''', deck_size=10)
+    """,
+        deck_size=10,
+    )
     ss4._shuffle()
-    assert ss4.deck == _str_to_deck('9 2 5 8 1 4 7 0 3 6')
+    assert ss4.deck == _str_to_deck("9 2 5 8 1 4 7 0 3 6")
 
 
 def part1(*args, **kwargs):
@@ -164,7 +176,7 @@ def part1(*args, **kwargs):
     # result = SlamShuffle(*args, **kwargs).get_a_b(pos, 1007, 1)
 
     if result != 5472:
-        raise ValueError(f'{result} is wrong or do u use another input? then skip this message')
+        raise ValueError(f"{result} is wrong or do u use another input? then skip this message")
     return result
 
 
@@ -175,11 +187,11 @@ def part2(*args, **kwargs):
     pos2020 = 2020
     pos2020 = ss.get_a_b(pos2020, deck_size, cycles)
     if pos2020 <= 54854748320449:
-        raise ValueError(f'{pos2020} is too low!')
+        raise ValueError(f"{pos2020} is too low!")
     return pos2020
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         test1(),
         part1(),

@@ -9,16 +9,13 @@ def calc_fuel(mass):
 
 
 def part1():
-    with open('inputs/1.txt') as f:
-        res = sum(
-            calc_fuel(int(line))
-            for line in f.readlines()
-        )
+    with open("inputs/1.txt") as f:
+        res = sum(calc_fuel(int(line)) for line in f.readlines())
         print(res)
 
 
 def part2():
-    with open('inputs/1.txt') as f:
+    with open("inputs/1.txt") as f:
         res = 0
         for line in f.readlines():
             mass = int(line)

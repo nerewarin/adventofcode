@@ -2,12 +2,13 @@
 --- Day 21: Step Counter ---
 https://adventofcode.com/2023/day/21
 """
+
 import collections
 import dataclasses
 
 from src.utils.input_formatters import cast_2d_list_elements
 from src.utils.position_search_problem import PositionSearchProblem
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import test
 
 STARTING_POSITION = "S"
 GARDEN_PLOTS = "."
@@ -83,9 +84,7 @@ class StepCounter:
         self.steps = steps
         self.infinite = infinite
 
-        self.start_state = State(
-            self.maze, self.start, path=[], step=0, infinite=self.infinite
-        )
+        self.start_state = State(self.maze, self.start, path=[], step=0, infinite=self.infinite)
 
     @staticmethod
     def _parse_input(inp):

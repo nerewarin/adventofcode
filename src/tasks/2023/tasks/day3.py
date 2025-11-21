@@ -1,13 +1,14 @@
 """
 --- Day 3: Gear Ratios  ---
-  """
+"""
+
 import re
 from collections import defaultdict
 
 from src.utils.test_and_run import run, test
 
-_NUMBERS = re.compile(r'(\d+)')
-_SYMBOLS = re.compile(r'[^0-9.]')
+_NUMBERS = re.compile(r"(\d+)")
+_SYMBOLS = re.compile(r"[^0-9.]")
 
 
 def is_part(start, end, i, inp):
@@ -60,12 +61,12 @@ def gear_ratios(inp, **_):
         numbers = [(match.start(), match.end()) for match in _NUMBERS.finditer(line)]
 
         for start, end in numbers:
-            value = int(line[start: end])
+            value = int(line[start:end])
             if is_part(start, end, i, inp):
                 valid.append(value)
                 # print(value)
             # else:
-                # print(-value)
+            # print(-value)
 
     return sum(valid)
 
@@ -77,7 +78,7 @@ def gear_ratios2(inp, **_):
         numbers = [(match.start(), match.end()) for match in _NUMBERS.finditer(line)]
 
         for start, end in numbers:
-            value = int(line[start: end])
+            value = int(line[start:end])
             is_a_part = is_part(start, end, i, inp)
             if isinstance(is_a_part, tuple):
                 gear_pos = is_a_part

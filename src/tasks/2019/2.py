@@ -1,6 +1,6 @@
 def calc(noun, verb):
-    with open('inputs/2.txt') as f:
-        inp = [int(x) for x in f.read().split(',')]
+    with open("inputs/2.txt") as f:
+        inp = [int(x) for x in f.read().split(",")]
         inp[1] = noun
         inp[2] = verb
 

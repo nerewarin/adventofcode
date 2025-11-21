@@ -1,33 +1,28 @@
-import collections
-
-from src.utils.test_and_run import test, run
 import copy
 
-OBSTACLE = 'O'
-WALL = '#'
-TURN = '+'
+from src.utils.test_and_run import run, test
+
+OBSTACLE = "O"
+WALL = "#"
+TURN = "+"
 
 DIRECTIONS = {
-    '^': (-1, 0),  # up
-    '>': (0, 1),   # right
-    'v': (1, 0),   # down
-    '<': (0, -1),  # left
+    "^": (-1, 0),  # up
+    ">": (0, 1),  # right
+    "v": (1, 0),  # down
+    "<": (0, -1),  # left
 }
 
-TURN_RIGHT = {
-    '^': '>',
-    '>': 'v',
-    'v': '<',
-    '<': '^'
-}
+TURN_RIGHT = {"^": ">", ">": "v", "v": "<", "<": "^"}
 
 PATH_TO_SYMBOL = {
     "^": "|",
-    '>':  "-",
-    'v':  "|",
-    '<':  "-",
+    ">": "-",
+    "v": "|",
+    "<": "-",
     TURN: TURN,
 }
+
 
 def find_start(grid):
     """Find starting position and direction of the guard"""
@@ -37,28 +32,28 @@ def find_start(grid):
                 return i, j, cell
     raise ValueError("No starting position found")
 
+
 def is_valid_position(pos, grid):
     """Check if position is within grid bounds"""
-    return (0 <= pos[0] < len(grid) and 
-            0 <= pos[1] < len(grid[0]))
+    return 0 <= pos[0] < len(grid) and 0 <= pos[1] < len(grid[0])
+
 
 def simulate_guard_path(data):
     # Convert input to grid
     grid = [list(line) for line in data]
-    
+
     # Find start position
     row, col, direction = find_start(grid)
     visited = {(row, col)}
     path = []
-    
+
     while True:
         # Check position in front
         dr, dc = DIRECTIONS[direction]
         next_row, next_col = row + dr, col + dc
-        
+
         # If position is invalid or has obstacle, turn right
-        if (not is_valid_position((next_row, next_col), grid) or 
-            grid[next_row][next_col] in (WALL, OBSTACLE)):
+        if not is_valid_position((next_row, next_col), grid) or grid[next_row][next_col] in (WALL, OBSTACLE):
             direction = TURN_RIGHT[direction]
             continue
 
@@ -67,12 +62,13 @@ def simulate_guard_path(data):
         # Move forward
         row, col = next_row, next_col
         visited.add((row, col))
-        
+
         # Check if guard has left the map
         if not is_valid_position((row + dr, col + dc), grid):
             break
-    
+
     return len(visited), path
+
 
 def part1(data, return_path=False):
     res = simulate_guard_path(data)
@@ -80,6 +76,7 @@ def part1(data, return_path=False):
         # return path up to the very final move
         return res
     return res[0]
+
 
 def can_get_stuck(grid, start_row, start_col, direction, possible_positions):
     """Check if the guard can get stuck in a loop with an obstruction placed."""
@@ -117,7 +114,7 @@ def can_get_stuck(grid, start_row, start_col, direction, possible_positions):
         # Check if guard has left the map
         if not is_valid_position((row + dr, col + dc), grid):
             break
-    
+
     return False, path  # Guard did not get stuck
 
 
@@ -157,18 +154,18 @@ def part2(data):
     ..|...|.#.
     ##+---+...
     ......##..
-    
-    
+
+
     so we need to consider every position of initial (open) path.
-    
+
     for every position consider place obstacle if:
         to the right of it there is an obstacle;
             to the right of that obstacle there is another obstacle
                ...
                     and this is in while until we either reach one of our (row, col, direction) visited (we update this list every time virtually on our way) -> True
                     or we get out of the bounds -> False
-    
-    
+
+
     ....#.....
     ....+---+#
     ....|...|.
@@ -181,8 +178,8 @@ def part2(data):
     .....|||#.
     ##..#+++..
     ......##..
-    
-    
+
+
     seems like we also need to cache these "good" onstacles.
     if our algo will take too much time we can us them to first check if our obstacke is on the same line with cached and we have no other walls between them. that means this is automatically an answer too.
     """
@@ -205,8 +202,9 @@ def part2(data):
                         if can_get_stuck(grid, row, col, direction, possible_positions):
                             possible_positions += 1
                         grid[new_row][new_col] = original_cell  # Restore original cell
-    
+
     return possible_positions
+
 
 # Update the main block to include part2
 if __name__ == "__main__":

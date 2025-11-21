@@ -31,12 +31,15 @@ class Part(NamedTuple):
         return rule.is_fitting(self)
 
     def __eq__(self, other):
-        return all([
-            self.x == other.x,
-            self.m == other.m,
-            self.a == other.a,
-            self.s == other.s,
-        ])
+        return all(
+            [
+                self.x == other.x,
+                self.m == other.m,
+                self.a == other.a,
+                self.s == other.s,
+            ]
+        )
+
 
 class Rule(NamedTuple):
     rulestr: str = ""
@@ -103,10 +106,13 @@ class Rule(NamedTuple):
         return total
 
     def __eq__(self, other):
-        return all([
-            self.lower == other.lower,
-            self.upper == other.upper,
-        ])
+        return all(
+            [
+                self.lower == other.lower,
+                self.upper == other.upper,
+            ]
+        )
+
 
 class Workflow(NamedTuple):
     name: str

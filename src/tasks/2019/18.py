@@ -5,19 +5,18 @@ https://adventofcode.com/2019/day/18
 
 """
 
-import re
 import collections
+import re
 
 import _tools
 
-
-_regexp = re.compile(r'- ([\w ]+)')
+_regexp = re.compile(r"- ([\w ]+)")
 
 
 class Tile:
-    free = '.'
-    wall = '#'
-    agent = '@'
+    free = "."
+    wall = "#"
+    agent = "@"
 
 
 class NoSolution(Exception):
@@ -32,7 +31,7 @@ class MazeWithKeysAndDoors:
         self.idx = idx
 
     def _parse_input_to_maze(self, _inp):
-        inp = _inp or _tools.get_puzzle_input(scalar_type=str, delimeter='', multiline=True)
+        inp = _inp or _tools.get_puzzle_input(scalar_type=str, delimeter="", multiline=True)
         maze = []
         start_pos = None
         doors = {}
@@ -68,7 +67,8 @@ class MazeWithKeysAndDoors:
 
     @staticmethod
     def _is_door(symbol):
-        if not isinstance(symbol, str):  return False
+        if not isinstance(symbol, str):
+            return False
         return symbol.isalpha() and symbol.isupper()
 
     @staticmethod
@@ -98,7 +98,7 @@ class MazeWithKeysAndDoors:
                 elif (col_num, row_num) == vertex:
                     symbol = Tile.agent
 
-                print(symbol, end='')
+                print(symbol, end="")
 
             print()
 
@@ -153,9 +153,7 @@ class MazeWithKeysAndDoors:
 
         start_level = 0
         queue = collections.deque([(self._start_pos, start_level, self._collected_keys)])
-        seen = {
-            (self._start_pos, tuple(self._collected_keys)): start_level
-        }
+        seen = {(self._start_pos, tuple(self._collected_keys)): start_level}
         visit_order = []
         doors_locked = {}
 
@@ -183,9 +181,7 @@ class MazeWithKeysAndDoors:
 
                 seen[(node, new_keys_collected)] = new_level
 
-                queue.append(
-                    (node, new_level, tuple(new_keys_collected))
-                )
+                queue.append((node, new_level, tuple(new_keys_collected)))
 
         # raise NoSolution()
 
@@ -217,27 +213,31 @@ class MazeWithKeysAndDoorsFourAgents(MazeWithKeysAndDoors):
             self._maze[center_y - 1][center_x - 1] = Tile.agent
 
         north_part = self._maze[:center_y]
-        south_part = self._maze[center_y + 1:]
-        assert len(south_part) == len(north_part), f'len(north_part) ({len(north_part)}) != len(south_path) ({south_path})'
+        south_part = self._maze[center_y + 1 :]
+        assert len(south_part) == len(north_part), (
+            f"len(north_part) ({len(north_part)}) != len(south_path) ({south_path})"
+        )
         self._solvers = [
             MazeWithKeysAndDoors(maze, idx)
-            for idx, maze in enumerate([
-                [row[:center_x] for row in north_part],
-                [row[center_x + 1:] for row in north_part],
-                [row[:center_x] for row in south_part],
-                [row[center_x + 1:] for row in south_part],
-            ])
+            for idx, maze in enumerate(
+                [
+                    [row[:center_x] for row in north_part],
+                    [row[center_x + 1 :] for row in north_part],
+                    [row[:center_x] for row in south_part],
+                    [row[center_x + 1 :] for row in south_part],
+                ]
+            )
         ]
         max_y = None
         max_x = None
         for s in self._solvers:
             if max_y and len(s._maze) != max_y:
-                raise ValueError('bad map parsing')
+                raise ValueError("bad map parsing")
             max_y = len(s._maze)
 
             row_wight = len(s._maze[0])
             if max_x and row_wight != max_x:
-                raise ValueError(f'bad row_wight {row_wight}')
+                raise ValueError(f"bad row_wight {row_wight}")
             max_x = row_wight
 
     def get_shortest_path_of_collecting_all_keys(self):
@@ -271,57 +271,61 @@ class MazeWithKeysAndDoorsFourAgents(MazeWithKeysAndDoors):
 
 
 def part1(*args, **kwargs):
-    vertex, level, keys_collected, doors_locked = MazeWithKeysAndDoors(*args, **kwargs).get_shortest_path_of_collecting_all_keys()
+    vertex, level, keys_collected, doors_locked = MazeWithKeysAndDoors(
+        *args, **kwargs
+    ).get_shortest_path_of_collecting_all_keys()
     return level
 
 
 def part2(*args, **kwargs):
     res = MazeWithKeysAndDoorsFourAgents(*args, **kwargs).get_shortest_path_of_collecting_all_keys()
     if res <= 1086:
-        raise ValueError(f'answer {res} is too low!')
+        raise ValueError(f"answer {res} is too low!")
 
     return res
 
 
 def test(test_num):
     if test_num == 1:
-        _inp = '''
+        _inp = """
             #########
             #b.A.@.a#
             #########
-        '''
+        """
         expected = 8
     elif test_num == 2:
-        _inp = '''
+        _inp = """
             ########################
             #f.D.E.e.C.b.A.@.a.B.c.#
             ######################.#
             #d.....................#
             ########################
-        '''
+        """
         expected = 86
     elif test_num == 3:
-        _inp = '''
+        _inp = """
             ########################
             #...............b.C.D.f#
             #.######################
             #.....@.a.B.c.d.A.e.F.g#
             ########################
-        '''
+        """
         expected = 132
     else:
-        raise NotImplementedError(f'unknown test_num = {test_num}')
+        raise NotImplementedError(f"unknown test_num = {test_num}")
 
-    inp = [val.strip() for val in _inp.split('\n') if val.strip()]
+    inp = [val.strip() for val in _inp.split("\n") if val.strip()]
     # inp = None
-    vertex, level, keys_collected, doors_locked = MazeWithKeysAndDoors(inp, to_print=True).get_shortest_path_of_collecting_all_keys()
-    assert level == expected, 'test{} failed!: {}'.format(test_num, res)
-    return 'test{} ok'.format(test_num)
+    vertex, level, keys_collected, doors_locked = MazeWithKeysAndDoors(
+        inp, to_print=True
+    ).get_shortest_path_of_collecting_all_keys()
+    assert level == expected, f"test{test_num} failed!: {res}"
+    return f"test{test_num} ok"
 
 
 def test2(test_num):
     if test_num == 1:
-        _inp = '''
+        _inp = """
             #######
             #a.#Cd#
             ##@#@##
@@ -329,10 +333,10 @@ def test2(test_num):
             ##@#@##
             #cB#Ab#
             #######
-        '''
+        """
         expected = 8
     elif test_num == 2:
-        _inp = '''
+        _inp = """
             ###############
             #d.ABC.#.....a#
             ######@#@######
@@ -340,10 +344,10 @@ def test2(test_num):
             ######@#@######
             #b.....#.....c#
             ###############
-        '''
+        """
         expected = 24
     elif test_num == 3:
-        _inp = '''
+        _inp = """
             #############
             #DcBa.#.GhKl#
             #.###@#@#I###
@@ -353,18 +357,18 @@ def test2(test_num):
             ###C#@#@###J#
             #fEbA.#.FgHi#
             #############
-        '''
+        """
         expected = 32
     else:
-        raise NotImplementedError(f'unknown test_num = {test_num}')
+        raise NotImplementedError(f"unknown test_num = {test_num}")
 
-    inp = [val.strip() for val in _inp.split('\n') if val.strip()]
+    inp = [val.strip() for val in _inp.split("\n") if val.strip()]
     res = MazeWithKeysAndDoorsFourAgents(inp, to_print=True).get_shortest_path_of_collecting_all_keys()
-    assert res == expected, 'test2{} failed!: {}'.format(test_num, res)
-    return 'test2{} ok'.format(test_num)
+    assert res == expected, f"test2{test_num} failed!: {res}"
+    return f"test2{test_num} ok"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         # test(1),
         # test(2),

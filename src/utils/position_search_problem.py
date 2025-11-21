@@ -1,4 +1,3 @@
-
 class PositionSearchProblem:
     """
     A search problem defines the state space, start state, goal test, successor
@@ -10,7 +9,7 @@ class PositionSearchProblem:
     Note: this search problem is fully specified; you should NOT change it.
     """
 
-    def __init__(self, state, goal, costFn = lambda x: 1, inp=None):
+    def __init__(self, state, goal, costFn=lambda x: 1, inp=None):
         """
         Stores the start and goal.
 

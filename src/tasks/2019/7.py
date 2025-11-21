@@ -7,19 +7,19 @@ import itertools
 
 class Amplifier:
     def __init__(self, num, phase, inputs=None):
-        self.num = num # just a number of Amplifier
+        self.num = num  # just a number of Amplifier
         self.phase = phase
         self.signals = []
         self.signals.append(phase)
 
         if inputs is None:
-            with open('inputs/7.txt') as f:
+            with open("inputs/7.txt") as f:
                 inputs = f.read()
-        self.inputs = [int(x) for x in inputs.split(',')]
+        self.inputs = [int(x) for x in inputs.split(",")]
         self.gen = self._generator()
 
     def __repr__(self):
-        return "Amp{}: phase{}, signals={}".format(self.num, self.phase, self.signals)
+        return f"Amp{self.num}: phase{self.phase}, signals={self.signals}"
 
     def __next__(self):
         return next(self.gen)
@@ -97,7 +97,7 @@ class Amplifier:
                 self.inputs[param3] = _val
                 shift = 4
             else:
-                raise NotImplemented("op={} is unknown".format(op))
+                raise NotImplementedError(f"op={op} is unknown")
 
             curr_idx += shift
 
@@ -110,10 +110,7 @@ def part2():
     # phases_combinations, inp = [[[9, 8, 7, 6, 5]]], '3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5'
     # phases_combinations. inp = [[[9,7,8,5,6]]], '''3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10'''
     for phases in phases_combinations:
-        amplifiers = [
-            Amplifier(ind, phases[ind], inp)
-            for ind in range(5)
-        ]
+        amplifiers = [Amplifier(ind, phases[ind], inp) for ind in range(5)]
         amplifiers[0].feed(0)
 
         last_system_output = None
@@ -125,7 +122,7 @@ def part2():
             amp = next_amp
             try:
                 output = next(amp)
-            except StopIteration as e:
+            except StopIteration:
                 last_system_outputs.append(last_system_output)
                 break
 

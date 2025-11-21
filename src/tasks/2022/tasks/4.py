@@ -1,9 +1,12 @@
 """---- Day 4: Camp Cleanup ---
 https://adventofcode.com/2022/day/4
 """
+
 import re
-from src.utils.test_and_run import test, run
-_SECTION_REXP = re.compile("(\d+)-(\d+),(\d+)-(\d+)")
+
+from src.utils.test_and_run import run, test
+
+_SECTION_REXP = re.compile(r"(\d+)-(\d+),(\d+)-(\d+)")
 
 
 def camp_cleanup(inp, overlapping="full"):

@@ -1,6 +1,6 @@
+import math
 import os
 import re
-import math
 import traceback
 
 
@@ -10,14 +10,14 @@ def get_initiator_fname():
         res = re.search(r'File.*"(.*)[\\\/](\d+).py', line)
         if res:
             fname = res.group(2)
-            return os.path.join('inputs', '{}.txt'.format(fname))
+            return os.path.join("inputs", f"{fname}.txt")
     raise ValueError()
 
 
-def get_puzzle_input(scalar_type=int, delimeter=',', multiline=False, strip=True):
+def get_puzzle_input(scalar_type=int, delimeter=",", multiline=False, strip=True):
     fpath = get_initiator_fname()
-    print('reading {}'.format(fpath))
-    with open(fpath, 'r') as f:
+    print(f"reading {fpath}")
+    with open(fpath) as f:
         if multiline:
             lines = [i for i in f.readlines()]
         else:

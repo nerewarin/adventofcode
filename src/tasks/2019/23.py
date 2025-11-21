@@ -5,7 +5,6 @@ https://adventofcode.com/2019/day/23
 
 """
 
-import re
 import collections
 
 from _intcode_computer import IntcodeComputer
@@ -29,10 +28,10 @@ class IntcodeComputer23(IntcodeComputer):
     def _get_op3_input(self):
         if self.signals:
             val = self.signals.pop(0)
-            print(f'used {val}')
+            print(f"used {val}")
             self._idle_cycles = 0
             return val
-        print('used default')
+        print("used default")
         self._idle_cycles += 1
         return -1
 
@@ -54,7 +53,7 @@ class NAT:
         return self.packet.popleft()
 
     def __str__(self):
-        return f'NAT {self.packet}'
+        return f"NAT {self.packet}"
 
 
 class CategorySix:
@@ -62,9 +61,7 @@ class CategorySix:
 
     def __init__(self, *args, network_size=50, **kwargs):
         self.network_size = network_size
-        self.network = {
-            computer_num: IntcodeComputer23(signals=[computer_num]) for computer_num in range(network_size)
-        }
+        self.network = {computer_num: IntcodeComputer23(signals=[computer_num]) for computer_num in range(network_size)}
         self.network[self._nat_address] = NAT()
 
     @property
@@ -76,29 +73,29 @@ class CategorySix:
         computer_num = 0
         while address != expected_address:
             # receive
-            print(f'receive from {computer_num}:')
+            print(f"receive from {computer_num}:")
             computer = self.network[computer_num]
 
             try:
                 address = next(computer)
             except LongIDLE:
-                print('IDLE address', end='\n\n')
+                print("IDLE address", end="\n\n")
                 computer_num = (computer_num + 1) % self.network_size
                 continue
             except StopIteration:
-                print('StopIteration address', end='\n\n')
+                print("StopIteration address", end="\n\n")
                 computer_num = (computer_num + 1) % self.network_size
                 continue
 
             try:
                 x = next(computer)
             except LongIDLE:
-                print('IDLE x', end='\n\n')
+                print("IDLE x", end="\n\n")
                 computer_num = (computer_num + 1) % self.network_size
                 continue
 
             y = next(computer)
-            print(f'{address} {x} {y}')
+            print(f"{address} {x} {y}")
 
             if address == expected_address:
                 return y
@@ -107,7 +104,7 @@ class CategorySix:
             next_computer = self.network[address]
             next_computer.feed(x)
             next_computer.feed(y)
-            print(f'send to {address}: {x} {y}', end='\n\n')
+            print(f"send to {address}: {x} {y}", end="\n\n")
 
             computer_num = address
 
@@ -116,7 +113,7 @@ class CategorySix:
         last_NAT_y = None
         while True:
             # receive
-            print(f'receive from {computer_num}:')
+            print(f"receive from {computer_num}:")
             computer = self.network[computer_num]
             if computer is self.nat:
                 address = nat_output_address
@@ -124,27 +121,27 @@ class CategorySix:
                 try:
                     address = next(computer)
                 except LongIDLE:
-                    print('IDLE address', end='\n\n')
+                    print("IDLE address", end="\n\n")
                     if all(self.network[idx].idle for idx in range(self.network_size)):
-                        print('network in IDLE')
+                        print("network in IDLE")
                         computer_num = self._nat_address
                     else:
                         computer_num = (computer_num + 1) % self.network_size
                     continue
                 except StopIteration:
-                    print('StopIteration address', end='\n\n')
+                    print("StopIteration address", end="\n\n")
                     computer_num = (computer_num + 1) % self.network_size
                     continue
 
             x = next(computer)
             y = next(computer)
-            print(f'{address} {x} {y}')
+            print(f"{address} {x} {y}")
 
             # send
             next_computer = self.network[address]
             next_computer.feed(x)
             next_computer.feed(y)
-            print(f'send to {address}: {x} {y}', end='\n\n')
+            print(f"send to {address}: {x} {y}", end="\n\n")
 
             if computer is self.nat:
                 if last_NAT_y == y:
@@ -181,6 +178,7 @@ def test_nat():
     assert b == 8
     assert list(nat.packet) == [], nat.packet
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     assert part1() == 15969
     assert part2() == 10650

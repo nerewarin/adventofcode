@@ -5,30 +5,25 @@ https://adventofcode.com/2019/day/10
 
 """
 
-import os
 import math
+import os
 
 
 class MonitoringStation:
     BUSY = 1
     EMPTY = 0
     place2int = {
-        '.': EMPTY,
-        '#': BUSY,
+        ".": EMPTY,
+        "#": BUSY,
     }
 
     def __init__(self, _map=None):
         if _map is None:
-            with open(os.path.join('inputs', '{}.txt'.format(__file__.split('/')[-1].split('.')[0]))) as f:
+            with open(os.path.join("inputs", "{}.txt".format(__file__.split("/")[-1].split(".")[0]))) as f:
                 _map = f.read()
         else:
-            _map = '\n'.join((
-                line.strip() for line in _map.split('\n')
-            ))
-        _map = [
-            [self.place2int.get(place, self.BUSY) for place in line]
-            for line in _map.split('\n') if line
-        ]
+            _map = "\n".join(line.strip() for line in _map.split("\n"))
+        _map = [[self.place2int.get(place, self.BUSY) for place in line] for line in _map.split("\n") if line]
 
         self.map = _map
 
@@ -84,7 +79,7 @@ class MonitoringStation:
     def find_best_place_and_count(self):
         visibility_map = self.get_visibility_map()
         x, y = (0, 0)
-        max_vision = float('-inf')
+        max_vision = float("-inf")
         for y1, line1 in enumerate(visibility_map):
             for x1, value in enumerate(line1):
                 if value > max_vision:
@@ -96,7 +91,7 @@ class MonitoringStation:
     def find_best_place_and_angle2asteroid_map(self):
         visibility_map, angle2asteroid_map = self.get_visibility_map(return_angle2asteroid_map=True)
         x, y = (0, 0)
-        max_vision = float('-inf')
+        max_vision = float("-inf")
         for y1, line1 in enumerate(visibility_map):
             for x1, value in enumerate(line1):
                 if value > max_vision:
@@ -138,21 +133,22 @@ class MonitoringStation:
 
 
 def test1():
-    inp = '''
+    inp = """
         .#..#
         .....
         #####
         ....#
         ...##
-    '''
+    """
     res = MonitoringStation(inp).get_visibility_map()
-    assert res == [[0, 7, 0, 0, 7], [0, 0, 0, 0, 0], [6, 7, 7, 7, 5], [0, 0, 0, 0, 7], [0, 0, 0, 8, 7]], \
-        'test1 failed!: {}'.format(res)
-    return 'test1 ok'
+    assert res == [[0, 7, 0, 0, 7], [0, 0, 0, 0, 0], [6, 7, 7, 7, 5], [0, 0, 0, 0, 7], [0, 0, 0, 8, 7]], (
+        f"test1 failed!: {res}"
+    )
+    return "test1 ok"
 
 
 def test2():
-    inp = '''
+    inp = """
         #.........
         ...A......
         ...B..a...
@@ -163,12 +159,12 @@ def test2():
         .......c..
         ....f...c.
         ...e..d..c
-    '''
-    return 'test2 is not implemented'
+    """
+    return "test2 is not implemented"
 
 
 def test3():
-    inp = '''
+    inp = """
         ......#.#.
         #..#.#....
         ..#######.
@@ -179,15 +175,15 @@ def test3():
         .##.#..###
         ##...#..#.
         .#....####
-    '''
+    """
     ms = MonitoringStation(inp)
     res = ms.find_best_place_and_count()
-    assert res == ((5, 8), 33), 'test3 failed!: {}'.format(res)
-    return 'test3 ok'
+    assert res == ((5, 8), 33), f"test3 failed!: {res}"
+    return "test3 ok"
 
 
 def test4():
-    inp = '''
+    inp = """
         #.#...#.#.
         .###....#.
         .#....#...
@@ -198,15 +194,15 @@ def test4():
         ..##....##
         ......#...
         .####.###.
-    '''
+    """
     res = MonitoringStation(inp).find_best_place_and_count()
-    assert res == ((1, 2), 35), 'test4 failed!: {}'.format(res)
-    return 'test4 ok'
+    assert res == ((1, 2), 35), f"test4 failed!: {res}"
+    return "test4 ok"
 
 
 def test5():
     test_num = 5
-    inp = '''
+    inp = """
         .#..#..###
         ####.###.#
         ....###.#.
@@ -217,13 +213,13 @@ def test5():
         #..#.#.###
         .##...##.#
         .....#.#..
-    '''
+    """
     res = MonitoringStation(inp).find_best_place_and_count()
-    assert res == ((6, 3), 41), 'test{} failed!: {}'.format(test_num, res)
-    return 'test{} ok'.format(test_num)
+    assert res == ((6, 3), 41), f"test{test_num} failed!: {res}"
+    return f"test{test_num} ok"
 
 
-inp6 = '''
+inp6 = """
     .#..##.###...#######
     ##.############..##.
     .#.######.########.#
@@ -244,21 +240,21 @@ inp6 = '''
     .#.#.###########.###
     #.#.#.#####.####.###
     ###.##.####.##.#..##
-'''
+"""
 
 
 def test6():
     test_num = 6
     res = MonitoringStation(inp6).find_best_place_and_count()
-    assert res == ((11, 13), 210), 'test{} failed!: {}'.format(test_num, res)
-    return 'test{} ok'.format(test_num)
+    assert res == ((11, 13), 210), f"test{test_num} failed!: {res}"
+    return f"test{test_num} ok"
 
 
 def test7():
     test_num = 7
     res = MonitoringStation(inp6).vaporize(200)
-    assert res == (8, 2), 'test{} failed!: {}'.format(test_num, res)
-    return 'test{} ok'.format(test_num)
+    assert res == (8, 2), f"test{test_num} failed!: {res}"
+    return f"test{test_num} ok"
 
 
 def part1(*args, **kwargs):
@@ -270,7 +266,7 @@ def part2(*args, **kwargs):
     return x * 100 + y
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         test1(),
         test2(),

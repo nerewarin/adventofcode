@@ -2,6 +2,7 @@
 --- Day 4: Scratchcards  ---
 https://adventofcode.com/2023/day/4
 """
+
 from src.utils.test_and_run import run, test
 
 

@@ -1,5 +1,5 @@
-import pathlib
 import inspect
+import pathlib
 import re
 
 _TASK_NUM_FROM_FILE_REGEXP = re.compile(r"(?:day)?(\d+)")
@@ -18,7 +18,7 @@ def _get_resources_dir():
             # File is in src/tasks/{year}/tasks/dayX.py, inputs are in src/tasks/{year}/inputs/
             parts = fname.parts
             try:
-                tasks_idx = parts.index('tasks')
+                tasks_idx = parts.index("tasks")
                 year_folder = parts[tasks_idx + 1]
                 # Go up from src/tasks/{year}/tasks/dayX.py to src/tasks/{year}/inputs/
                 year_path = fname.parent.parent

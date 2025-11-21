@@ -2,7 +2,7 @@
 https://adventofcode.com/2022/day/3
 """
 
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 
 def _estimate_letter_score(letter):
@@ -17,7 +17,7 @@ def rucksack_reorganization(inp, task="rucksack_reorganization"):
 
     datasets = inp
     if task == "group_badges":
-        datasets = [inp[idx*3:idx*3+3] for idx in range(len(datasets) // 3)]
+        datasets = [inp[idx * 3 : idx * 3 + 3] for idx in range(len(datasets) // 3)]
 
     for dataset in datasets:
         if task == "group_badges":

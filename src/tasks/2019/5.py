@@ -4,8 +4,8 @@ https://adventofcode.com/2019/day/5
 
 
 def calc():
-    with open('inputs/5.txt') as f:
-        inp = [int(x) for x in f.read().split(',')]
+    with open("inputs/5.txt") as f:
+        inp = [int(x) for x in f.read().split(",")]
         # inp = [int(x) for x in '3,9,8,9,10,9,4,9,99,-1,8'.split(',')]
 
         def get_value(val_or_idx, mode):

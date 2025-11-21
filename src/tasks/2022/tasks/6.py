@@ -1,9 +1,10 @@
 """--- Day 6: Tuning Trouble ---
 https://adventofcode.com/2022/day/6
 """
+
 import collections
 
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 
 def tuning_trouble(inp, max_len=4):

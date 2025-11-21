@@ -2,9 +2,10 @@
 --- Day 10: Pipe Maze ---
 https://adventofcode.com/2023/day/10
 """
+
 import collections
 
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import run
 
 
 def sum_2d(tuples_2d):
@@ -28,9 +29,7 @@ class State:
         self.width = len(self.inp[0])
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__qualname__}(pos={self.pos}, symbol={self.symbol}, step={self.step})"
-        )
+        return f"{self.__class__.__qualname__}(pos={self.pos}, symbol={self.symbol}, step={self.step})"
 
     def _is_connected(self, pos, start=None):
         x2, y2 = pos
@@ -107,7 +106,7 @@ class State:
                 "7": [top, right],
                 "J": [right],
                 "L": [],
-            }
+            },
         }
         if sym1 == "S":
             for sym1 in possible_connections:
@@ -277,7 +276,7 @@ class PipeMaze:
                         for i, (x, y) in enumerate(path_coordinates):
                             action = succ.path[i]
                             if self._inp[y][x] == ".":
-                               res += 1
+                                res += 1
                         assert x, y == self._get_start_pos()  # make sure we end just where we start
                         return res
 
@@ -302,5 +301,3 @@ if __name__ == "__main__":
     # test(pipe_maze, part=2, test_part=4, expected=8)
     # test(pipe_maze, part=2, test_part=5, expected=10)
     assert run(pipe_maze, part=2) == 451
-
-

@@ -1,11 +1,11 @@
 """--- Day 17: Pyroclastic Flow ---
 https://adventofcode.com/2022/day/17
 """
+
 import datetime
-from collections import deque
 from functools import lru_cache
 
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 
 @lru_cache
@@ -36,6 +36,7 @@ class Figure:
     ##
     ##
     """
+
     # shapes = dict(
     #     horizontal=[[1, 1, 1, 1]],
     #     cross=[[0, 1, 0], [1, 1, 1], [0, 1, 0]],
@@ -50,9 +51,9 @@ class Figure:
     #     # cross=[[0, 1, 0], [1, 1, 1], [0, 1, 0]],
     # )
     _shape_pos = dict(
-        horizontal=[(0,0), (1, 0 ), (2,0), (3, 0)],
-        cross=[(0,1), (1,1 ), (1,0), (1,2), (2, 1)],
-        letter_L=[(0,0), (1, 0 ), (2,0), (2,1), (2,2)],
+        horizontal=[(0, 0), (1, 0), (2, 0), (3, 0)],
+        cross=[(0, 1), (1, 1), (1, 0), (1, 2), (2, 1)],
+        letter_L=[(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)],
         vertical=[(0, 0), (0, 1), (0, 2), (0, 3)],
         square=[(0, 0), (0, 1), (1, 0), (1, 1)],
     )
@@ -115,7 +116,7 @@ class Map:
     def view(self):
         r = []
         for row in self.tiles:
-            r.append( "".join(["#" if x else "." for x in row]))
+            r.append("".join(["#" if x else "." for x in row]))
         return r
 
     def __repr__(self):
@@ -124,7 +125,7 @@ class Map:
     def add_figure(self, figure: Figure):
         max_depth = max(self.depth)
         if 3 > max_depth:
-            add = 3 -- max_depth
+            add = 3 - -max_depth
             self.depth = [d + add for d in self.depth]
 
         self.figure = figure
@@ -221,7 +222,7 @@ def task1(inp, limit=2022):
                     print(figure_idx, height)
 
                 flow_idx += 1
-                figure.shift(flow, state) # flow_idx % flow_len == 0 and figure_idx % figures_len == 0
+                figure.shift(flow, state)  # flow_idx % flow_len == 0 and figure_idx % figures_len == 0
 
                 figure.rest = state.move_down(figure)
 
@@ -234,6 +235,7 @@ def task1(inp, limit=2022):
         return height  # 1586627906917 < res < 1586627906922
         # not 1586627906920
         #  1586627906921 ?
+
     return drop_figures(limit=limit)
 
 
@@ -264,8 +266,8 @@ def part2(expected):
      (N + 1) * flow_len * fig_len
     then collect start_flow and start_h as a result of stabling system to cyclic mdoe (somewhere from 0 to N)
     then add the tail (rest) manyally  from cycle (N + rest)
-    
-    
+
+
     trl = 1000000000000
     divmod(trl, 35)
     (28571428571, 15)
@@ -274,8 +276,8 @@ def part2(expected):
     start_fig = 36
     fig_cycle = 35
     h_cycle = 53
-    cycles, rest = divmod(trl - start_fig, fig_cycle)  
-    res = start_fig + cycles * h_cycle + 23  
+    cycles, rest = divmod(trl - start_fig, fig_cycle)
+    res = start_fig + cycles * h_cycle + 23
     res
     1514285714269
     res = start_fig + cycles * h_cycle +18

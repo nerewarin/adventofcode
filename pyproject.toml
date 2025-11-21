@@ -15,12 +15,26 @@ networkx = "^3.2.1"
 matplotlib = "^3.6.2"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^2.20.0"
-isort = "^5.10.1"
-black = "^22.10.0"
-flake8 = "^6.0.0"
-mypy = "^1.8.0"
+pre-commit = "^4.4.0"
+ruff = "^0.14.5"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E203"]  # Black compatibility
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+warn_return_any = false
+warn_unused_configs = true

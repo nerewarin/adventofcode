@@ -5,23 +5,17 @@ https://adventofcode.com/2019/day/4
 
 """
 
-import os
-import math
-import re
-import itertools
 import collections
-
-from dataclasses import dataclass
-from typing import Tuple
+import os
 
 
 class SecureContainer:
     def __init__(self, inp=None, mode=None):
         if inp is None:
-            with open(os.path.join('inputs', '{}.txt'.format(__file__.split('/')[-1].split('.')[0]))) as f:
+            with open(os.path.join("inputs", "{}.txt".format(__file__.split("/")[-1].split(".")[0]))) as f:
                 inp = f.read()
 
-        self.min, self.max = (int(digit) for digit in inp.split('-'))
+        self.min, self.max = (int(digit) for digit in inp.split("-"))
 
     def count_different_passwords(self, mode=None):
         """
@@ -68,18 +62,19 @@ class SecureContainer:
         return res
 
 
-inp = '245318-765747'
+inp = "245318-765747"
 
 
 def part1():
     return SecureContainer(inp).count_different_passwords()
+
 
 def part2():
     # 569 too low
     return SecureContainer(inp).count_different_passwords(mode=2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         # part1(),
         part2(),

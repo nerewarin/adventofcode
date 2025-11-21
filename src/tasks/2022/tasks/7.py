@@ -1,10 +1,11 @@
 """--- Day 7: No Space Left On Device ---
 https://adventofcode.com/2022/day/7
 """
-import pathlib
 
-from src.utils.test_and_run import test, run
+import pathlib
 import re
+
+from src.utils.test_and_run import run, test
 
 _CMD_REXP = re.compile(r"cd ([\S+])]")
 

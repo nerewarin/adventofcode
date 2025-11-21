@@ -2,15 +2,14 @@
 --- Day 7: Camel Cards ---
 https://adventofcode.com/2023/day/7
 """
-import math
+
 from collections import Counter
 
 from src.utils.test_and_run import run, test
-from functools import reduce
-
 
 # def print(*_):
 #     pass
+
 
 class CamelCards:
     special_cards = "AKQJT"
@@ -22,9 +21,7 @@ class CamelCards:
 
     def _parse_line(self, line):
         raw_hand, bid = line.split()
-        hand = [
-            self.get_card_power(card) for card in raw_hand
-        ]
+        hand = [self.get_card_power(card) for card in raw_hand]
         return hand, int(bid)
 
     def get_all_but_joker(self):
@@ -95,18 +92,13 @@ class CamelCards:
             power = self.get_combo(hand)
             if self.part2 and 0 in hand:
                 for card in self.get_all_but_joker():
-                    _hand = [
-                        c if c != 0 else self.get_card_power(card)
-                        for c in hand
-                    ]
+                    _hand = [c if c != 0 else self.get_card_power(card) for c in hand]
                     _power = self.get_combo(_hand)
                     if _power > power:
                         power = _power
 
             rank = tuple([power] + hand + [bid])
-            ranking.append(
-                rank
-            )
+            ranking.append(rank)
             raw_hand = line.split()[0]
             rank2hand[rank] = raw_hand
 

@@ -1,7 +1,8 @@
 """--- Day 9: Rope Bridge ---
 https://adventofcode.com/2022/day/9
 """
-from src.utils.test_and_run import test, run
+
+from src.utils.test_and_run import run, test
 
 
 class Position:
@@ -18,7 +19,7 @@ class Position:
             return self.label
 
         if not self.x and not self.y:
-            return 'ROOT'
+            return "ROOT"
 
         return f"({self.x}, {self.y})"
 
@@ -45,10 +46,10 @@ class Position:
 
 
 DIRECTIONS = {
-    "L":  Position(-1, 0, 'LEFT'),
-    "R":  Position(1, 0, 'RIGHT'),
-    "U":  Position(0, 1, 'UP'),
-    "D":  Position(0, -1, 'DOWN'),
+    "L": Position(-1, 0, "LEFT"),
+    "R": Position(1, 0, "RIGHT"),
+    "U": Position(0, 1, "UP"),
+    "D": Position(0, -1, "DOWN"),
 }
 
 

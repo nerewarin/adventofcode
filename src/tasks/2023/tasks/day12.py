@@ -2,10 +2,11 @@
 --- Day 12: Hot Springs ---
 https://adventofcode.com/2023/day/12
 """
+
 from itertools import combinations
 
-from src.utils.test_and_run import run, test
 from src.utils.pathfinding import manhattan_distance
+from src.utils.test_and_run import run, test
 
 EMPTY = "."
 GALAXY = "#"
@@ -79,7 +80,9 @@ class CosmicExpansion:
                     empty_cols += 1
 
             distance = base_dist + (self._expansion_rate - 1) * (empty_rows + empty_cols)
-            print(f"{pair=} distance = {base_dist} + {str(self._expansion_rate - 1)} * ({empty_rows=} + {empty_cols=}) = {distance}")
+            print(
+                f"{pair=} distance = {base_dist} + {str(self._expansion_rate - 1)} * ({empty_rows=} + {empty_cols=}) = {distance}"
+            )
 
             res += distance
         return res
@@ -98,4 +101,3 @@ def hot_springs(inp, part=1, expansion_rate=None, **kw):
 if __name__ == "__main__":
     test(hot_springs, 21)
     run(hot_springs)
-

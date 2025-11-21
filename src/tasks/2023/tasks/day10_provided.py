@@ -3,8 +3,9 @@ txt = open(r"G:\PycharmProjects\adventofcode\adventofcode2023\inputs\10\run")
 pipeMatrix = []
 
 for line in txt.readlines():
-    line = line.replace("-", "═").replace("|", "║").replace("F", "╔").replace("J", "╝").replace("7", "╗").replace("L",
-        "╚")
+    line = (
+        line.replace("-", "═").replace("|", "║").replace("F", "╔").replace("J", "╝").replace("7", "╗").replace("L", "╚")
+    )
     row = [*line.strip()]
     row.insert(0, ".")
     row.append(".")

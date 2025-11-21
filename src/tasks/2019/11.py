@@ -5,8 +5,6 @@ https://adventofcode.com/2019/day/11
 
 """
 
-import os
-import math
 import collections
 import operator
 
@@ -61,15 +59,14 @@ class SpacePolice:
                 state = self.map.get(pos)
                 # print(pos)
 
-
                 curr_color = 1 if state and state[0] else 0
                 if not state:
-                    inp_msg = f'default ({curr_color})'
+                    inp_msg = f"default ({curr_color})"
                 else:
                     inp_msg = curr_color
 
                 self.computer.feed(curr_color)
-                print(f'input {inp_msg}')
+                print(f"input {inp_msg}")
                 print()
 
                 # First, it will output a value indicating the color to paint the panel the robot is over:
@@ -82,7 +79,7 @@ class SpacePolice:
                 turn = next(self.computer)
                 # print('RIGHT' if turn else 'LEFT')
 
-                print(f'on position {pos} got paint {color} turn {turn}')
+                print(f"on position {pos} got paint {color} turn {turn}")
 
                 self.map[pos] = color, True
 
@@ -90,37 +87,39 @@ class SpacePolice:
 
                 step = self._get_step()
                 pos = tuple(map(operator.add, pos, step))
-                print(f'move to  {pos}')
+                print(f"move to  {pos}")
 
                 poses += [pos]
                 dirs += [self.direction]
 
-            except StopIteration as e:
+            except StopIteration:
                 return sum(val[1] for val in self.map.values())
 
 
 def test1():
-    inp = '''
+    inp = """
         .#..#
         .....
         #####
         ....#
         ...##
-    '''
+    """
     res = SpacePolice(inp).paint()
-    assert res == 6, 'test1 failed!: {}'.format(res)
-    return 'test1 ok'
+    assert res == 6, f"test1 failed!: {res}"
+    return "test1 ok"
 
 
 def test7():
     test_num = 7
     res = MonitoringStation(inp6).vaporize(200)
-    assert res == (8, 2), 'test{} failed!: {}'.format(test_num, res)
-    return 'test{} ok'.format(test_num)
+    assert res == (8, 2), f"test{test_num} failed!: {res}"
+    return f"test{test_num} ok"
 
 
 def part1(*args, **kwargs):
     return SpacePolice(*args, **kwargs).paint()
+
+
 #
 #
 # def part2(*args, **kwargs):
@@ -128,7 +127,7 @@ def part1(*args, **kwargs):
 #     return x * 100 + y
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         # test1(),
         # test2(),

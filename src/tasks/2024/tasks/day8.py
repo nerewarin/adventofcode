@@ -74,10 +74,13 @@ Because the topmost A-frequency antenna overlaps with a 0-frequency antinode, th
 
 Calculate the impact of the signal. How many unique locations within the bounds of the map contain an antinode?
 """
+
 import math
 from collections import defaultdict
 from itertools import combinations
-from src.utils.test_and_run import test, run
+
+from src.utils.test_and_run import run, test
+
 
 def calculate_antinodes(input_map):
     # Parse the input map and identify the positions of all antennas
@@ -105,6 +108,7 @@ def calculate_antinodes(input_map):
 
     # Return the total number of unique antinode positions
     return len(antinodes)
+
 
 def calculate_antinodes_part2(input_map):
     # Parse the input map and identify the positions of all antennas

@@ -12,10 +12,10 @@ import _tools
 
 
 class Tile:
-    free = '.'
-    wall = '#'
-    entry_portal = 'A'
-    exit_portal = 'Z'
+    free = "."
+    wall = "#"
+    entry_portal = "A"
+    exit_portal = "Z"
     end = object()
 
 
@@ -77,7 +77,7 @@ class DonutMaze:
             else:
                 continue
         else:
-            raise ValueError(f'no adjacent entry_portal_poses! {entry_portal_poses}')
+            raise ValueError(f"no adjacent entry_portal_poses! {entry_portal_poses}")
 
         for candidate in candidates:
             candidate = tuple(int(part) for part in candidate)
@@ -121,8 +121,12 @@ class DonutMaze:
             return first_portal_symbol + second_portal_symbol
         return second_portal_symbol + first_portal_symbol
 
-    def _get_portal_exit(self, first_portal_symbol, first_portal_part_pos, second_portal_symbol, second_portal_part_pos, floor):
-        portal_title = self._get_portal_title(first_portal_symbol, first_portal_part_pos, second_portal_symbol, second_portal_part_pos)
+    def _get_portal_exit(
+        self, first_portal_symbol, first_portal_part_pos, second_portal_symbol, second_portal_part_pos, floor
+    ):
+        portal_title = self._get_portal_title(
+            first_portal_symbol, first_portal_part_pos, second_portal_symbol, second_portal_part_pos
+        )
 
         if portal_title == Tile.entry_portal * 2:
             return None
@@ -151,7 +155,7 @@ class DonutMaze:
                 if self._maze[exit_pos_candidate] == first_portal_symbol:
                     symbol_poses.append(exit_pos_candidate)
         if len(symbol_poses) > 2:
-            raise RuntimeError('prog error')
+            raise RuntimeError("prog error")
 
         # find exit
         for exit_portal_part1 in symbol_poses:
@@ -178,7 +182,7 @@ class DonutMaze:
         if portal_key not in self._portal2exit_pos:
             self._portal2exit_pos[portal_key] = exit_pos
         elif self._portal2exit_pos[portal_key] != exit_pos:
-            raise ValueError('bad caching!')
+            raise ValueError("bad caching!")
 
         return exit_pos, next_floor, portal_title
 
@@ -210,7 +214,9 @@ class DonutMaze:
             elif self._is_portal(symbol):
                 second_portal_part_pos = (x0 + (x - x0) * 2, (y0 + (y - y0) * 2))
                 second_portal_symbol = self._maze[second_portal_part_pos]
-                portal_exit = self._get_portal_exit(symbol, adjacent_node, second_portal_symbol, second_portal_part_pos, floor)
+                portal_exit = self._get_portal_exit(
+                    symbol, adjacent_node, second_portal_symbol, second_portal_part_pos, floor
+                )
                 if portal_exit:
                     yield portal_exit
 
@@ -220,10 +226,14 @@ class DonutMaze:
     @staticmethod
     def _is_portal_in_path(portal_title, expected_floor, expected_level, path):
         for perm in itertools.permutations(portal_title, 2):
-            title = ''.join(perm)
+            title = "".join(perm)
             for step in path:
                 vertex, floor, portal, level = step
-                if portal == title and floor == expected_floor and (level == expected_level if expected_level else True):
+                if (
+                    portal == title
+                    and floor == expected_floor
+                    and (level == expected_level if expected_level else True)
+                ):
                     return True
         return False
 
@@ -237,35 +247,35 @@ class DonutMaze:
 
         if self._is_test and self._part_num == 2:
             tst_steps = (
-                ('XF', 1, 16),
-                ('CK', 2, 27),
-                ('ZH', 3, 42),
-                ('WB', 4, 53),
-                ('IC', 5, 64),
-                ('RF', 6, 75),
-                ('NM', 7, 84),
-                ('LP', 8, 97),
-                ('FD', 9, 122),
-                ('XQ', 10, 131),
-                ('WB', 9, 136),
-                ('ZH', 8, 147),
-                ('CK', 7, 162),
-                ('XF', 6, 173),
-                ('OA', 5, 188),
-                ('CJ', 4, 197),
-                ('RE', 3, 206),
-                ('IC', 4, 211),
-                ('RF', 5, 222),
-                ('NM', 6, 231),
-                ('LP', 7, 244),
-                ('FD', 8, 269),
-                ('XQ', 9, 278),
-                ('WB', 8, 283),
-                ('ZH', 7, 294),
-                ('CK', 6, 309),
-                ('XF', 5, 320),
-                ('OA', 4, 335),
-                ('CJ', 3, 344),
+                ("XF", 1, 16),
+                ("CK", 2, 27),
+                ("ZH", 3, 42),
+                ("WB", 4, 53),
+                ("IC", 5, 64),
+                ("RF", 6, 75),
+                ("NM", 7, 84),
+                ("LP", 8, 97),
+                ("FD", 9, 122),
+                ("XQ", 10, 131),
+                ("WB", 9, 136),
+                ("ZH", 8, 147),
+                ("CK", 7, 162),
+                ("XF", 6, 173),
+                ("OA", 5, 188),
+                ("CJ", 4, 197),
+                ("RE", 3, 206),
+                ("IC", 4, 211),
+                ("RF", 5, 222),
+                ("NM", 6, 231),
+                ("LP", 7, 244),
+                ("FD", 8, 269),
+                ("XQ", 9, 278),
+                ("WB", 8, 283),
+                ("ZH", 7, 294),
+                ("CK", 6, 309),
+                ("XF", 5, 320),
+                ("OA", 4, 335),
+                ("CJ", 3, 344),
             )
         else:
             return True
@@ -295,9 +305,7 @@ class DonutMaze:
         start_floor = 0
         path = []
         queue = collections.deque([(self._start, start_level, start_floor, path)])
-        seen = {
-            (start_floor, self._start): start_level
-        }
+        seen = {(start_floor, self._start): start_level}
         visit_order = [(start_level, start_floor, self._start)]
 
         top_paths = []
@@ -312,15 +320,15 @@ class DonutMaze:
                     vertex, next_floor, portal_title, level = step
                     if not portal_title:
                         continue
-                    print((portal_title, 'inner' if next_floor < _floor else 'outer', next_floor))
+                    print((portal_title, "inner" if next_floor < _floor else "outer", next_floor))
                     _floor = next_floor
-                print('***'*10)
+                print("***" * 10)
 
                 # for analyze in sublime
                 prev_was_portal = False
                 for step in path:
                     vertex, next_floor, portal_title, level = step
-                    _sublime_cursor = f':{vertex[1] + 5}:{vertex[0] + 1}'
+                    _sublime_cursor = f":{vertex[1] + 5}:{vertex[0] + 1}"
                     if not portal_title:
                         if prev_was_portal:
                             print(_sublime_cursor)
@@ -329,8 +337,8 @@ class DonutMaze:
                         continue
                     prev_was_portal = True
                     print(_sublime_cursor)
-                    print(', '.join((str(x) for x in (portal_title, next_floor, level))))
-                print('==='*10)
+                    print(", ".join(str(x) for x in (portal_title, next_floor, level)))
+                print("===" * 10)
                 return level
 
             # if not self._custom_check(floor, self._get_path_through_portals(path)):
@@ -349,19 +357,17 @@ class DonutMaze:
 
                 _path.append((vertex, next_floor, portal_title, level))
 
-                queue.append(
-                    (xy, new_level, next_floor, _path)
-                )
+                queue.append((xy, new_level, next_floor, _path))
 
         raise NoSolution()
 
 
 def _parse_input(inp):
-    min_col_idx = float('inf')
-    lines = [val for val in inp.split('\n') if val.strip()]
+    min_col_idx = float("inf")
+    lines = [val for val in inp.split("\n") if val.strip()]
     for line in lines:
         for col_idx, symbol in enumerate(line):
-            if symbol != ' ' and col_idx < min_col_idx:
+            if symbol != " " and col_idx < min_col_idx:
                 min_col_idx = col_idx
 
     return [[symbol for symbol in line[min_col_idx:]] for line in lines]
@@ -369,82 +375,82 @@ def _parse_input(inp):
 
 def test(test_num, recursive=False):
     if test_num == 1:
-        _inp = '''
-                     A           
-                     A           
-              #######.#########  
-              #######.........#  
-              #######.#######.#  
-              #######.#######.#  
-              #######.#######.#  
-              #####  B    ###.#  
-            BC...##  C    ###.#  
-              ##.##       ###.#  
-              ##...DE  F  ###.#  
-              #####    G  ###.#  
-              #########.#####.#  
-            DE..#######...###.#  
-              #.#########.###.#  
-            FG..#########.....#  
-              ###########.#####  
-                         Z       
-                         Z       
-            '''
+        _inp = """
+                     A
+                     A
+              #######.#########
+              #######.........#
+              #######.#######.#
+              #######.#######.#
+              #######.#######.#
+              #####  B    ###.#
+            BC...##  C    ###.#
+              ##.##       ###.#
+              ##...DE  F  ###.#
+              #####    G  ###.#
+              #########.#####.#
+            DE..#######...###.#
+              #.#########.###.#
+            FG..#########.....#
+              ###########.#####
+                         Z
+                         Z
+            """
         if recursive:
             expected = 26
         else:
             expected = 23
     elif test_num == 2:
-        _inp = '''
-             Z L X W       C                 
-             Z P Q B       K                 
-  ###########.#.#.#.#######.###############  
-  #...#.......#.#.......#.#.......#.#.#...#  
-  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###  
-  #.#...#.#.#...#.#.#...#...#...#.#.......#  
-  #.###.#######.###.###.#.###.###.#.#######  
-  #...#.......#.#...#...#.............#...#  
-  #.#########.#######.#.#######.#######.###  
-  #...#.#    F       R I       Z    #.#.#.#  
-  #.###.#    D       E C       H    #.#.#.#  
-  #.#...#                           #...#.#  
-  #.###.#                           #.###.#  
+        _inp = """
+             Z L X W       C
+             Z P Q B       K
+  ###########.#.#.#.#######.###############
+  #...#.......#.#.......#.#.......#.#.#...#
+  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###
+  #.#...#.#.#...#.#.#...#...#...#.#.......#
+  #.###.#######.###.###.#.###.###.#.#######
+  #...#.......#.#...#...#.............#...#
+  #.#########.#######.#.#######.#######.###
+  #...#.#    F       R I       Z    #.#.#.#
+  #.###.#    D       E C       H    #.#.#.#
+  #.#...#                           #...#.#
+  #.###.#                           #.###.#
   #.#....OA                       WB..#.#..ZH
-  #.###.#                           #.#.#.#  
-CJ......#                           #.....#  
-  #######                           #######  
+  #.###.#                           #.#.#.#
+CJ......#                           #.....#
+  #######                           #######
   #.#....CK                         #......IC
-  #.###.#                           #.###.#  
-  #.....#                           #...#.#  
-  ###.###                           #.#.#.#  
-XF....#.#                         RF..#.#.#  
-  #####.#                           #######  
-  #......CJ                       NM..#...#  
-  ###.#.#                           #.###.#  
+  #.###.#                           #.###.#
+  #.....#                           #...#.#
+  ###.###                           #.#.#.#
+XF....#.#                         RF..#.#.#
+  #####.#                           #######
+  #......CJ                       NM..#...#
+  ###.#.#                           #.###.#
 RE....#.#                           #......RF
-  ###.###        X   X       L      #.#.#.#  
-  #.....#        F   Q       P      #.#.#.#  
-  ###.###########.###.#######.#########.###  
-  #.....#...#.....#.......#...#.....#.#...#  
-  #####.#.###.#######.#######.###.###.#.#.#  
-  #.......#.......#.#.#.#.#...#...#...#.#.#  
-  #####.###.#####.#.#.#.#.###.###.#.###.###  
-  #.......#.....#.#...#...............#...#  
-  #############.#.#.###.###################  
-               A O F   N                     
-               A A D   M                     
-               '''
+  ###.###        X   X       L      #.#.#.#
+  #.....#        F   Q       P      #.#.#.#
+  ###.###########.###.#######.#########.###
+  #.....#...#.....#.......#...#.....#.#...#
+  #####.#.###.#######.#######.###.###.#.#.#
+  #.......#.......#.#.#.#.#...#...#...#.#.#
+  #####.###.#####.#.#.#.#.###.###.#.###.###
+  #.......#.....#.#...#...............#...#
+  #############.#.#.###.###################
+               A O F   N
+               A A D   M
+               """
         if recursive:
             expected = 396
         else:
             raise NotImplementedError()
     else:
-        raise NotImplementedError(f'unknown test_num = {test_num}')
+        raise NotImplementedError(f"unknown test_num = {test_num}")
 
     inp = _parse_input(_inp)
     res = DonutMaze(test_num, inp, is_test=True, to_print=True, recursive=recursive).get_shortest_path()
-    assert res == expected, 'test{} failed!: {}'.format(test_num, res)
-    return 'test{} {}ok'.format(test_num, '(recursice) ' if recursive else '')
+    assert res == expected, f"test{test_num} failed!: {res}"
+    return "test{} {}ok".format(test_num, "(recursice) " if recursive else "")
 
 
 def run(part_num, *args, **kwargs):
@@ -455,15 +461,15 @@ def run(part_num, *args, **kwargs):
         res = DonutMaze(part_num, *args, recursive=True, **kwargs).get_shortest_path()
         expected = 5564
     else:
-        raise NotImplementedError(f'unknown part_num = {part_num}')
+        raise NotImplementedError(f"unknown part_num = {part_num}")
 
-    if expected != 'unknown':
-        assert res == expected,  f'part{part_num} failed!: res = {res} but {expected} expected!'
+    if expected != "unknown":
+        assert res == expected, f"part{part_num} failed!: res = {res} but {expected} expected!"
 
-    return 'run{} = {}'.format(part_num, res)
+    return f"run{part_num} = {res}"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for _res in (
         # test(1),
         # run(1),

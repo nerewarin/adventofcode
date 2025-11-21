@@ -4,7 +4,7 @@
 https://adventofcode.com/2019/day/19
 
 """
-import math
+
 import collections
 
 from _intcode_computer import IntcodeComputer
@@ -61,9 +61,9 @@ class TractorBeam:
 def _get_part2_result(x, y):
     res = x * 10000 + y
     if res >= 15240780:
-        raise ValueError('answer is too high!', res)
+        raise ValueError("answer is too high!", res)
     if res <= 4950286:
-        raise ValueError('answer is too low!', res)
+        raise ValueError("answer is too low!", res)
     if res in (
         15250787,
         15240780,
@@ -71,7 +71,7 @@ def _get_part2_result(x, y):
         15240781,
         15130775,
     ):
-        raise ValueError('entered before!', res)
+        raise ValueError("entered before!", res)
     return res
 
 
@@ -83,11 +83,9 @@ def part2(*args, **kwargs):
     return TractorBeam(*args, **kwargs).find_closest_square_under_beam(100, 100)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # assert part1() == 121
 
-    for res in (
-        part2(),
-    ):
+    for res in (part2(),):
         print(res)
         # 15240780 is too high!

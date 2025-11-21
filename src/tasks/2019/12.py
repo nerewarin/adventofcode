@@ -5,10 +5,9 @@ https://adventofcode.com/2019/day/12
 
 """
 
+import itertools
 import os
 import re
-import itertools
-
 from dataclasses import dataclass
 
 
@@ -39,7 +38,7 @@ class _Moon:
         self.vx, self.vy, self.vz = xyz
 
     def __repr__(self):
-        return f'pos=<x={self.x}, y={self.y}, z={self.z}>, vel=<x={self.vx}, y={self.vy}, z={self.vz}>'
+        return f"pos=<x={self.x}, y={self.y}, z={self.z}>, vel=<x={self.vx}, y={self.vy}, z={self.vz}>"
 
     @staticmethod
     def _get_velocity(a, b):
@@ -62,7 +61,7 @@ class _Moon:
         return self.potential_energy * self.kinetic_energy
 
     def __str__(self):
-        return f'pot: {self.potential_energy};   kin: {self.kinetic_energy};   total:  {self.total_energy}'
+        return f"pot: {self.potential_energy};   kin: {self.kinetic_energy};   total:  {self.total_energy}"
 
 
 @dataclass
@@ -79,27 +78,23 @@ class Moon(_Moon):
 
 
 class NbodyProblem:
-    inp_rexp = re.compile(r'<x=(-*\d+), y=(-*\d+), z=(-*\d+)>\s*')
+    inp_rexp = re.compile(r"<x=(-*\d+), y=(-*\d+), z=(-*\d+)>\s*")
     dim = 3
 
     def __init__(self, moons=None):
         if moons is None:
-            with open(os.path.join('inputs', '{}.txt'.format(__file__.split('/')[-1].split('.')[0]))) as f:
+            with open(os.path.join("inputs", "{}.txt".format(__file__.split("/")[-1].split(".")[0]))) as f:
                 lines = f.readlines()
         else:
-            lines = [line for line in moons.split('\n') if line.strip()]
+            lines = [line for line in moons.split("\n") if line.strip()]
 
         moons = [map(int, self.inp_rexp.match(moon).groups()) for moon in lines]
 
         self.moons = [Moon(*coords) for coords in moons]
         self.tick = 0
-        self.history = [
-            [] for x in range(self.dim)
-        ]
+        self.history = [[] for x in range(self.dim)]
 
-        self.periods = [
-            0 for x in range(self.dim)
-        ]
+        self.periods = [0 for x in range(self.dim)]
 
     @property
     def period_found(self):
@@ -115,7 +110,7 @@ class NbodyProblem:
             state = (coord, vel)
 
             if state in self.history[idx]:
-                self.periods[idx] = self.tick -1
+                self.periods[idx] = self.tick - 1
 
             if not self.history[idx]:
                 self.history[idx].append(state)
@@ -142,39 +137,36 @@ class NbodyProblem:
         while not self.period_found:
             self.simulate(1)
 
-        return nok2(
-            nok2(*self.periods[:2]),
-            self.periods[2]
-        )
+        return nok2(nok2(*self.periods[:2]), self.periods[2])
 
 
-inp = '''
+inp = """
 <x=-1, y=0, z=2>
 <x=2, y=-10, z=-7>
 <x=4, y=-8, z=8>
 <x=3, y=5, z=-1>
-'''
+"""
 
-inp2 = '''
+inp2 = """
 <x=-8, y=-10, z=0>
 <x=5, y=5, z=10>
 <x=2, y=-7, z=3>
 <x=9, y=-8, z=-3>
-'''
+"""
 
 
 def test(test_num):
     if test_num == 1:
         res = NbodyProblem(inp).simulate(10)
-        assert res == 179, 'test{} failed!: {}'.format(test_num, res)
+        assert res == 179, f"test{test_num} failed!: {res}"
     if test_num == 2:
         res = NbodyProblem(inp).find_period()
-        assert res == 2772, 'test{} failed!: {} USE simulate(2772) TO TEST!'.format(test_num, res)
+        assert res == 2772, f"test{test_num} failed!: {res} USE simulate(2772) TO TEST!"
     if test_num == 3:
         res = NbodyProblem(inp2).find_period()
-        assert res == 4686774924, 'test{} failed!: {}'.format(test_num, res)
+        assert res == 4686774924, f"test{test_num} failed!: {res}"
 
-    return 'test{} ok'.format(test_num)
+    return f"test{test_num} ok"
 
 
 def part1(*args, **kwargs):
@@ -195,7 +187,7 @@ def nok2(a, b):
     return a * b // gcd(a, b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         # test(1),
         # part1(),

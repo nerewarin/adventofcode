@@ -2,10 +2,11 @@
 --- Day 6: Wait For It ---
 https://adventofcode.com/2023/day/6
 """
+
 import math
+from functools import reduce
 
 from src.utils.test_and_run import run, test
-from functools import reduce
 
 """
 y = (speed = wait * 1) * (t - wait)
@@ -21,7 +22,7 @@ y(x) = ab^2 / 4
 solve
 (x⋅a)⋅(b−x)>c
 d  = sqrt(b*b - 4*a*c)
-(b + d) / 2*a < x < (b - d) / 2*a 
+(b + d) / 2*a < x < (b - d) / 2*a
 """
 
 

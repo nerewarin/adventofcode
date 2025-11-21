@@ -10,10 +10,10 @@ import collections
 from _intcode_computer import IntcodeComputer
 
 TILE2DRAW = {
-    0: '#',
-    1: '.',
-    2: '~',
-    -1: ' ',
+    0: "#",
+    1: ".",
+    2: "~",
+    -1: " ",
 }
 
 
@@ -42,15 +42,13 @@ class PathFinder:
         elif direction == 4:
             right = (vertex[0] + 1, vertex[1])
             return right
-        raise RuntimeError('_get_node fcked up')
+        raise RuntimeError("_get_node fcked up")
 
     def _bfs(self, root, computer=None, mode=1):
         state = 1
         computer = computer or IntcodeComputer()
         seen = {root: (state, computer)}
-        queue = collections.deque(
-            [(root, 0, computer)]
-        )
+        queue = collections.deque([(root, 0, computer)])
         visit_order = []
         levels = []
 
@@ -70,23 +68,23 @@ class PathFinder:
                         xs = [pos[0] for pos in seen.keys()]
                         min_y, max_y = min(ys), max(ys)
                         min_x, max_x = min(xs), max(xs)
-                        print(f'after: node {node} state {state} pos {computer.pos} base {computer.relative_base}')
+                        print(f"after: node {node} state {state} pos {computer.pos} base {computer.relative_base}")
                         # print(f'after: vertex {vertex} pos {parent_computer.pos} base {parent_computer.relative_base}')
-                        print('y from {} to {}'.format(min_y, max_y))
-                        print('x from {} to {}'.format(min_x, max_x))
+                        print(f"y from {min_y} to {max_y}")
+                        print(f"x from {min_x} to {max_x}")
                         for _y in reversed(range(min_y, max_y + 1)):
                             line = []
                             for _x in range(min_x, max_x + 1):
                                 if (_x, _y) == (0, 0):
-                                    _draw = '*'
+                                    _draw = "*"
                                 if (_x, _y) == node:
-                                    _draw = 'Ж'
+                                    _draw = "Ж"
                                 else:
                                     _node = seen.get((_x, _y), (-1,))
                                     _state = _node[0]
                                     _draw = TILE2DRAW[_state]
                                 line.append(_draw)
-                            print(''.join(line))
+                            print("".join(line))
                         # end draw region
                     return vertex, level, parent_computer
 
@@ -107,7 +105,7 @@ class PathFinder:
                     # 0: The repair droid hit a wall. Its position has not changed.
                     # 1: The repair droid has moved one step in the requested direction.
                     # 2: The repair droid has moved one step in the requested direction; its new position is the location of the oxygen system.
-                except StopIteration as e:
+                except StopIteration:
                     break
 
                 # print('compare {node} to {vertex}:')
@@ -122,9 +120,7 @@ class PathFinder:
                     # 0: The repair droid hit a wall. Its position has not changed.
                     pass
                 else:
-                    queue.append(
-                        (node, level + 1, computer)
-                    )
+                    queue.append((node, level + 1, computer))
 
                 seen[node] = (state, computer)
 
@@ -154,10 +150,10 @@ class PathFinder:
                 #     # end draw region
 
         if mode == 1:
-            raise RuntimeError('couldnt find oxygen')
+            raise RuntimeError("couldnt find oxygen")
         elif mode == 2:
             return max(levels)
-        raise RuntimeError(f'unknown mode {mode}')
+        raise RuntimeError(f"unknown mode {mode}")
 
 
 def part1(*args, **kwargs):
@@ -173,7 +169,7 @@ def part2(*args, **kwargs):
     return finder.calculate_minutes_to_fill_maze_with_oxygen(vertex, computer)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         # part1(to_draw=False),
         # part1(to_draw=True),

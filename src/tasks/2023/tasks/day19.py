@@ -2,10 +2,11 @@
 --- Day 19: Aplenty  ---
 https://adventofcode.com/2023/day/19
 """
+
 import dataclasses
+from collections.abc import Callable
 from copy import deepcopy
 from operator import gt, lt
-from typing import Callable
 
 from src.utils.test_and_run import run, test
 
@@ -137,26 +138,24 @@ class Workflow:
                             for interval1 in intervals1:
                                 s1, e1 = interval1
                                 if s1 < s2 < e1:
-                                #     s1 = s2
+                                    #     s1 = s2
                                     interval1[0] = s1
                                     found = True
                                 if s1 < e2 < e1:
-                                #     e1 = e2
+                                    #     e1 = e2
                                     interval1[1] = e1
                                     found = True
                                 # interval1[0] = max(s1, s2)
                                 # interval1[1] = min(e1, e2)
 
                             if not found:
-                            #     # intervals1.append(interval2)
+                                #     # intervals1.append(interval2)
                                 a = 0
 
         return constraints
 
     def get_null_constraints(self):
-        return deepcopy([{
-            k: [[self.min_arg, self.max_arg]] for k in "xmas"
-        }])
+        return deepcopy([{k: [[self.min_arg, self.max_arg]] for k in "xmas"}])
 
     def get_acceptance_clause(self):
         if self.constraints:
@@ -174,7 +173,6 @@ class Workflow:
         full_acceptance_clause = ""
         next_operator = "and"
         for clause in self.clauses:
-
             attr = clause.attr
             comparator_str = comparator_to_str[clause.comparator]
             arg = clause.arg
@@ -220,6 +218,7 @@ class Workflow:
         self.constraints = constraints
         return constraints
 
+
 class Part(dict):
     @classmethod
     def from_line(cls, line):
@@ -236,9 +235,7 @@ class Aplenty:
         self.raw_inp = inp
         self.workflows, self.parts = self._parse_input(inp)
 
-        self.workflow_by_name = {
-            w.name: w for w in self.workflows
-        }
+        self.workflow_by_name = {w.name: w for w in self.workflows}
         for w in self.workflows:
             w.workflow_by_name = self.workflow_by_name
 
@@ -288,6 +285,7 @@ class Aplenty:
         for w in self.workflows:
             clauses = w.get_acceptance_clause()
             a = 0
+
 
 def aplenty(inp, part=1, **kw):
     if part == 1:

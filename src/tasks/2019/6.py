@@ -12,14 +12,14 @@ import networkx
 
 
 class UniversalOrbitMap:
-    _inp_rexp = re.compile(r'(\w+)\)(\w+)', re.MULTILINE)
+    _inp_rexp = re.compile(r"(\w+)\)(\w+)", re.MULTILINE)
 
     def __init__(self, inp=None, mode=None):
         if inp is None:
-            with open(os.path.join('inputs', '{}.txt'.format(__file__.split('/')[-1].split('.')[0]))) as f:
+            with open(os.path.join("inputs", "{}.txt".format(__file__.split("/")[-1].split(".")[0]))) as f:
                 inp = f.read()
 
-        edges = [self._inp_rexp.match(line.strip()).groups() for line in inp.split('\n') if line.strip()]
+        edges = [self._inp_rexp.match(line.strip()).groups() for line in inp.split("\n") if line.strip()]
         graph_class = networkx.DiGraph if not mode else networkx.Graph
 
         self.graph = graph_class()
@@ -29,7 +29,7 @@ class UniversalOrbitMap:
         return sum(len(networkx.descendants(self.graph, node)) for node, nbrsdict in self.graph.adjacency())
 
     def get_moves_to_santa(self):
-        return len(networkx.shortest_path(self.graph, source='YOU', target='SAN')) - 3
+        return len(networkx.shortest_path(self.graph, source="YOU", target="SAN")) - 3
 
 
 inp1 = """
@@ -66,13 +66,13 @@ inp2 = """
 def test(test_num):
     if test_num == 1:
         res = UniversalOrbitMap(inp1).orbit_count_checksums()
-        assert res == 42, 'test{} failed!: {}'.format(test_num, res)
+        assert res == 42, f"test{test_num} failed!: {res}"
     elif test_num == 2:
         res = UniversalOrbitMap(inp2, mode=2).get_moves_to_santa()
-        assert res == 4, 'test{} failed!: {}'.format(test_num, res)
+        assert res == 4, f"test{test_num} failed!: {res}"
     else:
-        raise ValueError('test{} not implemented'.format(test_num))
-    return 'test{} ok'.format(test_num)
+        raise ValueError(f"test{test_num} not implemented")
+    return f"test{test_num} ok"
 
 
 def part1():
@@ -83,7 +83,7 @@ def part2():
     return UniversalOrbitMap(mode=2).get_moves_to_santa()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for res in (
         test(1),
         part1(),

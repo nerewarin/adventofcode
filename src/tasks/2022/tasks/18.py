@@ -1,11 +1,12 @@
 """--- Day 17: Pyroclastic Flow ---
 https://adventofcode.com/2022/day/17
 """
+
 import datetime
 import functools
 from collections import defaultdict
 
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 DIRECTIONS = [
     (1, 0, 0),
@@ -45,6 +46,8 @@ def init(points):
         set(point)
 
     return matrix
+
+
 def get(x, y=None, z=None, matrix=None):
     if y is None and z is None:
         x, y, z = x
@@ -52,6 +55,7 @@ def get(x, y=None, z=None, matrix=None):
         if y in matrix[x]:
             if z in matrix[x][y]:
                 return True
+
 
 def vector_sum(p1, p2):
     assert len(p1) == len(p2)
@@ -89,7 +93,7 @@ def empty_is_inner_hole(p, matrix, directions_to_check=None):
             r = empty_is_inner_hole(p1, matrix, all_directions_but_back)
             print(p, r)
             if r:
-            # if empty_is_inner_hole(p1, matrix):
+                # if empty_is_inner_hole(p1, matrix):
                 locals += 1
             else:
                 CACHE[p] = False
@@ -102,9 +106,11 @@ def empty_is_inner_hole(p, matrix, directions_to_check=None):
     print(p, res)
     return res
 
+
 def task1(inp, p2=False):
     points = _parse_puzzle(inp)
     return _task(points, p2)
+
 
 def _task(points, p2=False):
     # init 3d world
@@ -183,12 +189,7 @@ def part2(expected):
 
 if __name__ == "__main__":
     # part1(expected=64)
-    assert _task([(0,0,0), (0, 0,1)], p2=True) == 10
-    assert _task([(0,0,0), (0, 0,2)], p2=True) == 12
-    assert _task([
-        (0,0,0),
-        (0,0,1),
-        (0,0,2),
-        (0, 0,3)
-    ], p2=True) == 12
+    assert _task([(0, 0, 0), (0, 0, 1)], p2=True) == 10
+    assert _task([(0, 0, 0), (0, 0, 2)], p2=True) == 12
+    assert _task([(0, 0, 0), (0, 0, 1), (0, 0, 2), (0, 0, 3)], p2=True) == 12
     part2(expected=58)

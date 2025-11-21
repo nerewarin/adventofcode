@@ -20,15 +20,16 @@ def manhattan_distance(point1, point2):
 
 class PriorityQueue:
     """
-      Implements a priority queue data structure. Each inserted item
-      has a priority associated with it and the client is usually interested
-      in quick retrieval of the lowest-priority item in the queue. This
-      data structure allows O(1) access to the lowest-priority item.
-      Note that this PriorityQueue does not allow you to change the priority
-      of an item.  However, you may insert the same item multiple times with
-      different priorities.
+    Implements a priority queue data structure. Each inserted item
+    has a priority associated with it and the client is usually interested
+    in quick retrieval of the lowest-priority item in the queue. This
+    data structure allows O(1) access to the lowest-priority item.
+    Note that this PriorityQueue does not allow you to change the priority
+    of an item.  However, you may insert the same item multiple times with
+    different priorities.
     """
-    def  __init__(self):
+
+    def __init__(self):
         self.heap = []
         self.count = 0
 
@@ -48,10 +49,13 @@ class PriorityQueue:
     def isEmpty(self):
         return len(self.heap) == 0
 
+
 class Node:
     """A node class for A* Pathfinding"""
 
-    def __init__(self, parent=None, position=None, signal=0, closest_signal_in=0, closest_signal_pos_from_end=0, path=None):
+    def __init__(
+        self, parent=None, position=None, signal=0, closest_signal_in=0, closest_signal_pos_from_end=0, path=None
+    ):
         self.parent = parent
         self.position = position
         self.signal = signal
@@ -78,7 +82,7 @@ class Node:
         c = 1
         parent = self.parent
         while parent:
-            parent_str += ("\n" + "\t" * c + f"parent = {parent!r}")
+            parent_str += "\n" + "\t" * c + f"parent = {parent!r}"
             # c += 1
             # parent = parent.parent
             parent = None
@@ -97,7 +101,15 @@ def get_signal(maze, pos):
     return maze[pos[0]][pos[1]]
 
 
-def astar(maze, start, end, allow_diagonal=True, signal_limit=None, get_signal_func=None, max_blocks_in_a_single_direction=None):
+def astar(
+    maze,
+    start,
+    end,
+    allow_diagonal=True,
+    signal_limit=None,
+    get_signal_func=None,
+    max_blocks_in_a_single_direction=None,
+):
     """Returns a list of tuples as a path from the given start to the given end in the given maze"""
     if get_signal_func is None:
         get_signal_func = get_signal
@@ -159,21 +171,30 @@ def astar(maze, start, end, allow_diagonal=True, signal_limit=None, get_signal_f
 
         # Generate children
         children = []
-        adjacent_squares = [(-1, 0), (0, 1), (1, 0), (0, -1),]
+        adjacent_squares = [
+            (-1, 0),
+            (0, 1),
+            (1, 0),
+            (0, -1),
+        ]
         if allow_diagonal:
             adjacent_squares += [(-1, -1), (-1, 1), (1, -1), (1, 1)]
-
 
         for new_position in adjacent_squares:  # Adjacent squares
             # Get node position
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
 
             # Make sure within range
-            if node_position[0] > (len(maze) - 1) or node_position[0] < 0 or node_position[1] > (len(maze[len(maze)-1]) -1) or node_position[1] < 0:
+            if (
+                node_position[0] > (len(maze) - 1)
+                or node_position[0] < 0
+                or node_position[1] > (len(maze[len(maze) - 1]) - 1)
+                or node_position[1] < 0
+            ):
                 continue
 
             if max_blocks_in_a_single_direction:
-                _last = current_node.path[:max_blocks_in_a_single_direction - 1] + [new_position]
+                _last = current_node.path[: max_blocks_in_a_single_direction - 1] + [new_position]
                 if len(_last) == max_blocks_in_a_single_direction and set(_last) != 1:
                     print(f"reached max_blocks_in_a_single_direction: {_last}")
                     continue
@@ -202,7 +223,14 @@ def astar(maze, start, end, allow_diagonal=True, signal_limit=None, get_signal_f
                 closest_signal_pos = end
             closest_signal_pos_from_end = dist(closest_signal_pos, end)
 
-            new_node = Node(current_node, node_position, new_signal, closest_signal_in, closest_signal_pos_from_end, path=current_node.path + [new_position])
+            new_node = Node(
+                current_node,
+                node_position,
+                new_signal,
+                closest_signal_in,
+                closest_signal_pos_from_end,
+                path=current_node.path + [new_position],
+            )
 
             # Append
             children.append(new_node)
@@ -230,8 +258,8 @@ def astar(maze, start, end, allow_diagonal=True, signal_limit=None, get_signal_f
             # child.f = child.g + child.closest_signal_in * 2 # 494 / 490
             # if child.signal - current_node.signal == 1:
             #     child.f -= 10000
-            if child.position in ((16 - 1 - 1, 88 - 1),  (16 - 1 + 1, 88 - 1)):
-                a = 90 # for debug
+            if child.position in ((16 - 1 - 1, 88 - 1), (16 - 1 + 1, 88 - 1)):
+                a = 90  # for debug
 
             # Child is already in the open list
             skip = False
@@ -278,12 +306,14 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    start_state =  problem.getStartState()
+    start_state = problem.getStartState()
     start_successors = problem.getSuccessors(start_state)
-    successors = {start_state : start_successors}
+    successors = {start_state: start_successors}
     # print "Start:", start_state
     # print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     # print "Start's successors:", start_successors
@@ -305,13 +335,13 @@ def uniformCostSearch(problem):
         if problem.isGoalState(moving[0]):
             return moving[1]
         closed.append(moving[0])
-        if moving[0] not in successors.keys(): # the main change is to define a dict
+        if moving[0] not in successors.keys():  # the main change is to define a dict
             successors[moving[0]] = problem.getSuccessors(moving[0])
 
         for child in successors[moving[0]]:
             if (child[0] not in closed) and (child not in pushed):
                 best_cost[child[0]] = moving[2] + child[2]
-                fringe.push( (child[0], moving[1] + [child[1]], moving[2] + child[2]), moving[2] + child[2] )
+                fringe.push((child[0], moving[1] + [child[1]], moving[2] + child[2]), moving[2] + child[2])
                 pushed.add(child)
     else:
         return []
@@ -405,17 +435,18 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
 class Queue:
     "A container with a first-in-first-out (FIFO) queuing policy."
+
     def __init__(self):
         self.list = []
 
-    def push(self,item):
+    def push(self, item):
         "Enqueue the 'item' into the queue"
-        self.list.insert(0,item)
+        self.list.insert(0, item)
 
     def pop(self):
         """
-          Dequeue the earliest enqueued item still in the queue. This
-          operation removes the item from the queue.
+        Dequeue the earliest enqueued item still in the queue. This
+        operation removes the item from the queue.
         """
         return self.list.pop()
 
@@ -451,17 +482,19 @@ def breadthFirstSearch(problem):
         return []
 
 
-if __name__ == '__main__':
-    maze = [[0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+if __name__ == "__main__":
+    maze = [
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
 
     start = (0, 0)
     end = (7, 6)
@@ -469,6 +502,18 @@ if __name__ == '__main__':
     assert astar(maze, start, end) == [(0, 0), (1, 1), (2, 2), (3, 3), (4, 3), (5, 4), (6, 5), (7, 6)]
 
     assert astar(maze, start, end, allow_diagonal=False) == [
-        (0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3),
-        (4, 3), (5, 3), (5, 4), (5, 5), (6, 5), (6, 6), (7, 6)
+        (0, 0),
+        (1, 0),
+        (1, 1),
+        (2, 1),
+        (2, 2),
+        (3, 2),
+        (3, 3),
+        (4, 3),
+        (5, 3),
+        (5, 4),
+        (5, 5),
+        (6, 5),
+        (6, 6),
+        (7, 6),
     ]

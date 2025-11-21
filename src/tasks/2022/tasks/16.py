@@ -1,19 +1,17 @@
 """--- Day 16: Proboscidea Volcanium ---
 https://adventofcode.com/2022/day/16
 """
+
 import datetime
+import itertools
 import logging
 import re
 from copy import copy
 from functools import lru_cache
-from itertools import permutations, combinations
-from typing import Iterable
-
-import itertools
 
 from src.utils.pathfinding import uniformCostSearch
 from src.utils.position_search_problem import PositionSearchProblem
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 _REXP = re.compile(r"Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? (.+)")
 PRINTED_STATES = set([])
@@ -59,17 +57,19 @@ def _parse_puzzle(inp):
                                     v = min(v, cv.connections[name])
                                 cv.connections[name] = v
                             else:
-                                excluded_valve =  valves_copy[name]
+                                excluded_valve = valves_copy[name]
                                 for name, val in excluded_valve.connections.items():
                                     _ = 0
                                     cv.connections[name] = val + 1
-                    if valve.name == 'AA': continue
+                    if valve.name == "AA":
+                        continue
                     cv.connections.pop(valve.name)
             else:
                 continue
 
         if valve.flow_rate <= 0:
-            if valve.name == 'AA': continue
+            if valve.name == "AA":
+                continue
             del valve_by_name[valve.name]
 
     # need a connection from every to every
@@ -83,7 +83,7 @@ def _parse_puzzle(inp):
             start_vale = valve_by_name[start_name]
             if goal_name in start_vale.connections:
                 continue
-            if goal_name == 'AA':
+            if goal_name == "AA":
                 continue
             state = State(valve_by_name, pos=start_name)
 
@@ -102,7 +102,7 @@ def _parse_puzzle(inp):
     global MODE
     MODE = "prod"
     for name, v in valve_by_name.items():
-        v.connections = {k: v for k, v in v.connections.items() if k != 'AA'}
+        v.connections = {k: v for k, v in v.connections.items() if k != "AA"}
 
     return valve_by_name
 
@@ -112,7 +112,18 @@ TIME_TO_MOVE = 1
 
 
 class State:
-    def __init__(self, valve_by_name, step=0, pos="AA", fuel=0, opened_valves: set[str]=None, fps=0, path=None, step2action=None, step2openings=None):
+    def __init__(
+        self,
+        valve_by_name,
+        step=0,
+        pos="AA",
+        fuel=0,
+        opened_valves: set[str] = None,
+        fps=0,
+        path=None,
+        step2action=None,
+        step2openings=None,
+    ):
         self.valve_by_name = valve_by_name
         self.step = step
         self.pos = pos
@@ -130,8 +141,10 @@ class State:
         return set(self.valve_by_name) - set(self.opened_valves) - {"AA"}
 
     def __repr__(self):
-        return f"{self.__class__.__qualname__}(step2openings={self.step2openings}, pos={self.pos}, step={self.step}, " \
-               f"fuel={self.fuel}, fps={self.fps}), opened_valves={self.opened_valves}"
+        return (
+            f"{self.__class__.__qualname__}(step2openings={self.step2openings}, pos={self.pos}, step={self.step}, "
+            f"fuel={self.fuel}, fps={self.fps}), opened_valves={self.opened_valves}"
+        )
 
     def get_successors(self):
         res = {}
@@ -161,7 +174,7 @@ class State:
         # r = {k: res[k] for k in sorted_res }
         # return r
         return res
-    
+
     def move_to_valve(self, name):
         if name == self.pos:
             a = 0
@@ -188,7 +201,7 @@ class State:
     def open_value(self, name):
         step = self.step
         fuel = self.fuel
-        if name == 'AA' and self.step == 0:
+        if name == "AA" and self.step == 0:
             assert False
         valve = self.valve_by_name[name]
 
@@ -204,7 +217,7 @@ class State:
         new_fps = self.fps + valve.flow_rate
 
         self.step2action[step] = f"Open {name} fps={self.fps}->{new_fps}, fuel+={add}"
-        self.step2openings[step] = name # valve.flow_rate
+        self.step2openings[step] = name  # valve.flow_rate
 
         self.fps = new_fps
 
@@ -283,10 +296,11 @@ class State:
             fuel=self.fuel - other.fuel,
             opened_valves=self.opened_valves - other.opened_valves,
             fps=self.fps - other.fps,
-            path=self.path[len(other.path):],
+            path=self.path[len(other.path) :],
             step2action={step: action for step, action in self.step2action.items() if step not in other.step2action},
-            step2openings={step: action for step, action in self.step2openings.items() if
-                           step not in other.step2openings},
+            step2openings={
+                step: action for step, action in self.step2openings.items() if step not in other.step2openings
+            },
         )
 
     def add(self, other: "State"):
@@ -354,7 +368,8 @@ class State:
 
 
 def to_inspect(state):
-    if state is None: return
+    if state is None:
+        return
     toInspect = [
         "DD_1/1",
         "+DD",
@@ -367,7 +382,7 @@ def to_inspect(state):
         # "JJ_3/3",
         # "+JJ",
     ]
-    if state.path[:len(toInspect)] == toInspect:
+    if state.path[: len(toInspect)] == toInspect:
         a = 9
 
 
@@ -391,9 +406,7 @@ def get_max_fuel_for_pair_agents(start_states: tuple[State]) -> tuple[State]:
     diff_candidates = []
 
     successors_by_state = tuple((sorted(state.get_successors())) for state in start_states)
-    successors = tuple(
-        set.union(*(set(s.get_successors()) for s in start_states))
-    )
+    successors = tuple(set.union(*(set(s.get_successors()) for s in start_states)))
     if set(successors_by_state[0]) != set(successors_by_state[1]):
         a = 0
     if not successors:
@@ -432,7 +445,7 @@ def get_max_fuel_for_pair_agents(start_states: tuple[State]) -> tuple[State]:
 
     diff_candidates.sort(key=lambda x: -sum(s.fuel for s in x))
 
-    if not diff_candidates: # THERE US A PROBLEM IF ONLY 1 LEFT FOR BOTH
+    if not diff_candidates:  # THERE US A PROBLEM IF ONLY 1 LEFT FOR BOTH
         final_diffs0 = start_states[0].copy().get_diffs_to_final_state()
         final_diffs1 = start_states[1].copy().get_diffs_to_final_state()
 

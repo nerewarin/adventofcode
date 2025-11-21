@@ -2,17 +2,11 @@
 --- Day 24: Never Tell Me The Odds ---
 https://adventofcode.com/2023/day/24
 """
-import collections
+
 import dataclasses
-from collections import defaultdict
 from itertools import combinations
 
-import numpy as np
-import pulp
-
-from src.utils.input_formatters import cast_2d_list_elements
-from src.utils.position_search_problem import PositionSearchProblem
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import test
 
 
 @dataclasses.dataclass
@@ -114,22 +108,22 @@ class NeverTellMeTheOdds:
 
         t2 = - (
             dy + vy1 * (dx + vx2 * t2 )/ vx1
-        ) / vy2 
+        ) / vy2
 
         slope1 = vy1 / vx1
-        - vy2 * t2 =  dy + (dx + vx2 * t2 ) * slope1  
+        - vy2 * t2 =  dy + (dx + vx2 * t2 ) * slope1
 
-        - vy2 * t2 =  dy + (dx + vx2 * t2 ) * vy1 / vx1  
+        - vy2 * t2 =  dy + (dx + vx2 * t2 ) * vy1 / vx1
 
         # multiply by vx1
         - vx1 * vy2 * t2 =   dy * vx1  + vy1 * dx + vx2 * t2
 
         t2 *   (vx2 + vx1 * vy2) = - (dy * vx1  + vy1 * dx)
 
-        t2 = - (dy * vx1  + vy1 * dx) / (vx2 + vx1 * vy2) 
+        t2 = - (dy * vx1  + vy1 * dx) / (vx2 + vx1 * vy2)
 
         # recheck with  t1 = (dx + vx2 * t2 )/ vx1
-        t1 =  (dx + vx2 * - (dy * vx1  + vy1 * dx) / (vx2 + vx1 * vy2)  )/ vx1 = 
+        t1 =  (dx + vx2 * - (dy * vx1  + vy1 * dx) / (vx2 + vx1 * vy2)  )/ vx1 =
             =  (dx + vx2 * - (dy * vx1  + vy1 * dx) / (vx2 + vx1 * vy2)  )/ vx1
 
         # fill it into  y1 + vy1 * t1 = y2 + vy2 * t2

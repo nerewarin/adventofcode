@@ -1,8 +1,7 @@
 import collections
-from typing import Iterator
+from collections.abc import Iterator
 
 from _tools import get_puzzle_input
-
 
 default_memory = get_puzzle_input()
 
@@ -49,7 +48,7 @@ class IntcodeComputer(Iterator):
         elif isinstance(memory, list):
             pass
         else:
-            memory = [int(x) for x in memory.split(',')]
+            memory = [int(x) for x in memory.split(",")]
 
         mem = Memory()
         for i, val in enumerate(memory):
@@ -70,7 +69,7 @@ class IntcodeComputer(Iterator):
         # feed the generator
         _to_print = self._get_to_print(to_print)
         if _to_print:
-            print(f'{chr(value)}', end='')
+            print(f"{chr(value)}", end="")
 
         self.signals.append(value)
 
@@ -78,7 +77,7 @@ class IntcodeComputer(Iterator):
         if mode == 0:
             idx = val_or_idx
             if idx < 0:
-                raise ValueError("idx {} cannot be negative!".format(mode))
+                raise ValueError(f"idx {mode} cannot be negative!")
             return self.memory[idx]
         elif mode == 1:
             val = val_or_idx
@@ -86,20 +85,20 @@ class IntcodeComputer(Iterator):
         elif mode == 2:
             idx = self.relative_base + val_or_idx
             if idx < 0:
-                raise ValueError("idx {} cannot be negative!".format(mode))
+                raise ValueError(f"idx {mode} cannot be negative!")
             return self.memory[idx]
         else:
-            raise ValueError("mode {} is unknown".format(mode))
+            raise ValueError(f"mode {mode} is unknown")
 
     def get_write_idx(self, param, mode):
         if mode == 0:
             return param
         elif mode == 1:
-            raise ValueError("mode {} is wrong for write mode!".format(mode))
+            raise ValueError(f"mode {mode} is wrong for write mode!")
         elif mode == 2:
             return param + self.relative_base
         else:
-            raise ValueError("mode {} is unknown".format(mode))
+            raise ValueError(f"mode {mode} is unknown")
 
     def _get_op3_input(self):
         if self.signals:
@@ -135,7 +134,7 @@ class IntcodeComputer(Iterator):
             self._on_step_start()
 
             instruction = self.memory[self.pos]
-            instruction_str = f'{instruction:05d}'
+            instruction_str = f"{instruction:05d}"
 
             op_code = int(instruction_str[-2:])
             mode1 = int(instruction_str[-3])
@@ -146,7 +145,10 @@ class IntcodeComputer(Iterator):
 
             if op_code == 1:
                 op1, op2, op3 = self.memory[self.pos + 1], self.memory[self.pos + 2], self.memory[self.pos + 3]
-                op1, op2 = _get_param(self.memory, op1, mode1, self.relative_base), _get_param(self.memory, op2, mode2, self.relative_base)
+                op1, op2 = (
+                    _get_param(self.memory, op1, mode1, self.relative_base),
+                    _get_param(self.memory, op2, mode2, self.relative_base),
+                )
                 if mode3 == 2:
                     op3 += self.relative_base
 
@@ -155,7 +157,10 @@ class IntcodeComputer(Iterator):
                 self.pos += 4
             elif op_code == 2:
                 op1, op2, op3 = self.memory[self.pos + 1], self.memory[self.pos + 2], self.memory[self.pos + 3]
-                op1, op2 = _get_param(self.memory, op1, mode1, self.relative_base), _get_param(self.memory, op2, mode2, self.relative_base)
+                op1, op2 = (
+                    _get_param(self.memory, op1, mode1, self.relative_base),
+                    _get_param(self.memory, op2, mode2, self.relative_base),
+                )
                 if mode3 == 2:
                     op3 += self.relative_base
 
@@ -208,7 +213,10 @@ class IntcodeComputer(Iterator):
 
             elif op_code == 7:
                 op1, op2, op3 = self.memory[self.pos + 1], self.memory[self.pos + 2], self.memory[self.pos + 3]
-                op1, op2 = _get_param(self.memory, op1, mode1, self.relative_base), _get_param(self.memory, op2, mode2, self.relative_base)
+                op1, op2 = (
+                    _get_param(self.memory, op1, mode1, self.relative_base),
+                    _get_param(self.memory, op2, mode2, self.relative_base),
+                )
 
                 if mode3 == 2:
                     op3 += self.relative_base
@@ -219,7 +227,10 @@ class IntcodeComputer(Iterator):
 
             elif op_code == 8:
                 op1, op2, op3 = self.memory[self.pos + 1], self.memory[self.pos + 2], self.memory[self.pos + 3]
-                op1, op2 = _get_param(self.memory, op1, mode1, self.relative_base), _get_param(self.memory, op2, mode2, self.relative_base)
+                op1, op2 = (
+                    _get_param(self.memory, op1, mode1, self.relative_base),
+                    _get_param(self.memory, op2, mode2, self.relative_base),
+                )
 
                 if mode3 == 2:
                     op3 += self.relative_base
@@ -239,8 +250,8 @@ class IntcodeComputer(Iterator):
                 break
             else:
                 # error
-                print(f'bad opp code: pos {self.pos} op_code {op_code}')
-                raise ValueError(f'bad opp code: pos {self.pos} op_code {op_code}')
+                print(f"bad opp code: pos {self.pos} op_code {op_code}")
+                raise ValueError(f"bad opp code: pos {self.pos} op_code {op_code}")
 
         return None
 
@@ -270,7 +281,7 @@ class ASCIICapableComputer(IntcodeComputer):
                 break
             except StopIteration:
                 break
-        res = ''.join(chars)
+        res = "".join(chars)
         if to_print:
             print(res)
         return res
@@ -282,15 +293,17 @@ class ASCIICapableComputer(IntcodeComputer):
         row = layout[y]
         if x < 0 or x >= len(row):
             return 0
-        return row[x] == '#'
+        return row[x] == "#"
 
     def all_adjacent_are_scaffold(self, layout, x, y):
-        return all((
-            self._get_value(layout, x + 1, y),
-            self._get_value(layout, x - 1, y),
-            self._get_value(layout, x, y + 1),
-            self._get_value(layout, x, y - 1),
-        ))
+        return all(
+            (
+                self._get_value(layout, x + 1, y),
+                self._get_value(layout, x - 1, y),
+                self._get_value(layout, x, y + 1),
+                self._get_value(layout, x, y - 1),
+            )
+        )
 
     @property
     def _new_line(self):
@@ -301,7 +314,7 @@ class ASCIICapableComputer(IntcodeComputer):
         return 44  # ord('\,')
 
     def _input_commands(self, commands):
-        command_path = commands['path']
+        command_path = commands["path"]
         for i, x in enumerate(command_path[:-1]):
             self.feed(ord(x))
             self.feed(self._comma)
@@ -310,7 +323,7 @@ class ASCIICapableComputer(IntcodeComputer):
 
         print(self._get_msg())
 
-        for command_description in ('A', 'B', 'C'):
+        for command_description in ("A", "B", "C"):
             command = commands[command_description]
             for x in command[:-1]:
                 for val in str(x):
@@ -324,4 +337,3 @@ class ASCIICapableComputer(IntcodeComputer):
             msg = self._get_msg()
             print()
             print(msg)
-

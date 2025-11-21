@@ -2,12 +2,13 @@
 --- Day 8: Haunted Wasteland ---
 https://adventofcode.com/2023/day/8
 """
-import re
+
 import math
+import re
 
 from src.utils.test_and_run import run, test
 
-pattern = re.compile(r'(\w+)\s*=\s*\(([^)]+)\)')
+pattern = re.compile(r"(\w+)\s*=\s*\(([^)]+)\)")
 
 
 def _parse_inp(inp):
@@ -18,7 +19,7 @@ def _parse_inp(inp):
         match = pattern.match(line)
         if match:
             name = match.group(1)
-            values = tuple(map(str.strip, match.group(2).split(',')))
+            values = tuple(map(str.strip, match.group(2).split(",")))
             nodes[name] = values
 
     return instructions, nodes
@@ -48,9 +49,9 @@ def haunted_wasteland(inp):
 
     while current != end:
         for i in instructions:
-            if i == 'R':
+            if i == "R":
                 ind = 1
-            elif i == 'L':
+            elif i == "L":
                 ind = 0
             else:
                 raise ValueError
@@ -61,6 +62,7 @@ def haunted_wasteland(inp):
 
     return lap * len(instructions)
 
+
 def haunted_wasteland2(inp, **kw):
     instructions, nodes = _parse_inp(inp)
     print(f"{instructions[:20]}...")
@@ -68,24 +70,20 @@ def haunted_wasteland2(inp, **kw):
     is_end = lambda x: x[-1] == "Z"
     is_start = lambda x: x[-1] == "A"
 
-    currents = [
-        node for node in nodes if is_start(node)
-    ]
+    currents = [node for node in nodes if is_start(node)]
     initial_currents = list(currents)
-    ends = [
-        node for node in nodes if is_end(node)
-    ]
+    ends = [node for node in nodes if is_end(node)]
     lap = 0
 
     instructions_length = len(instructions)
     matches = {i: [] for i in range(len(currents))}
 
-    while not all((current in ends for current in currents)):
+    while not all(current in ends for current in currents):
         for c_ind in range(len(currents)):
             for i, instr in enumerate(instructions):
-                if instr == 'R':
+                if instr == "R":
                     ind = 1
-                elif instr == 'L':
+                elif instr == "L":
                     ind = 0
                 else:
                     raise ValueError

@@ -1,10 +1,11 @@
 """---- Day 8: Treetop Tree House ---
 https://adventofcode.com/2022/day/8
 """
+
 import math
 
 from src.utils.input_formatters import cast_2d_list_elements
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 
 def count_visible_trees(inp):
@@ -20,14 +21,14 @@ def count_visible_trees(inp):
 
         col = [m[r][col_num] for r in range(rows)]
         for direction in (
-                # left
-                row[:col_num],
-                # right
-                row[col_num + 1:],
-                # top
-                col[:row_num],
-                # bot
-                col[row_num + 1:],
+            # left
+            row[:col_num],
+            # right
+            row[col_num + 1 :],
+            # top
+            col[:row_num],
+            # bot
+            col[row_num + 1 :],
         ):
             if max(direction) < size:
                 return True
@@ -52,16 +53,18 @@ def choose_best_spot(inp):
         for col_num, size in enumerate(row):
             score_by_size = []
             col = [m[r][col_num] for r in range(rows)]
-            for i, direction in enumerate((
+            for i, direction in enumerate(
+                (
                     # left
                     reversed(row[:col_num]),
                     # right
-                    row[col_num + 1:],
+                    row[col_num + 1 :],
                     # top
                     reversed(col[:row_num]),
                     # bot
-                    col[row_num + 1:],
-            )):
+                    col[row_num + 1 :],
+                )
+            ):
                 size_score = 0
                 for neighbor_size in direction:
                     size_score += 1

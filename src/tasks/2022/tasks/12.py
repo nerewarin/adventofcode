@@ -1,8 +1,9 @@
 """--- Day 12: Hill Climbing Algorithm ---
 https://adventofcode.com/2022/day/12
 """
+
 from src.utils.pathfinding import astar
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 
 def _parse_puzzle(inp):
@@ -12,11 +13,11 @@ def _parse_puzzle(inp):
     for row_num, line in enumerate(inp):
         row = []
         for col_num, elm in enumerate(line):
-            if elm == 'S':
-                elm = 'a'
+            if elm == "S":
+                elm = "a"
                 start = (row_num, col_num)
-            elif elm == 'E':
-                elm = 'z'
+            elif elm == "E":
+                elm = "z"
                 end = (row_num, col_num)
 
             signal = ord(elm) - 96  # a = 1

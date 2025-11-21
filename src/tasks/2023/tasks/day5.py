@@ -2,6 +2,7 @@
 --- Day 5: If You Give A Seed A Fertilizer  ---
 https://adventofcode.com/2023/day/5
 """
+
 from src.utils.test_and_run import run, test
 
 
@@ -34,9 +35,8 @@ def parse_almanac(inp, part=1):
     section_idx = 0
     prev_section = seeds_section
     section = prev_section.copy()
-    print(fr"seed {section=}")
+    print(rf"seed {section=}")
     for i, line in enumerate(inp):
-
         if i < last_row_idx:
             continue
         last_row_idx += 1
@@ -52,8 +52,8 @@ def parse_almanac(inp, part=1):
                 section[i] = (start + shift, end + shift, 0)
 
             print("")
-            print(fr"{prev_section=}")
-            print(fr"{section=}")
+            print(rf"{prev_section=}")
+            print(rf"{section=}")
             _ = 0
             continue
 
@@ -74,9 +74,7 @@ def parse_almanac(inp, part=1):
             r = None
             if source_start <= prev_src_start and source_end >= prev_src_end:
                 # fully replace existing section
-                r = [
-                    (prev_src_start, prev_src_end, shift)
-                ]
+                r = [(prev_src_start, prev_src_end, shift)]
             elif source_start >= prev_src_start and source_end <= prev_src_end:
                 # fully fits inside existing section
                 r = [

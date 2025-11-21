@@ -2,7 +2,7 @@
 --- Day 25: Snowverload ---
 https://adventofcode.com/2023/day/25
 """
-import dataclasses
+
 from collections import defaultdict
 from itertools import combinations
 

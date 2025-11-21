@@ -1,18 +1,18 @@
 """--- Day 2: Rock Paper Scissors ---
 https://adventofcode.com/2022/day/2
 """
+
 from src.utils.input_formatters import lines_to_tuples
-from src.utils.test_and_run import test, run
+from src.utils.test_and_run import run, test
 
 _SHAPES = {
-        "A": 1,
-        "B": 2,
-        "C": 3,
-
-        "X": 1,
-        "Y": 2,
-        "Z": 3,
-    }
+    "A": 1,
+    "B": 2,
+    "C": 3,
+    "X": 1,
+    "Y": 2,
+    "Z": 3,
+}
 
 _SHAPE_SIZE = len(set(_SHAPES.values()))
 
@@ -53,10 +53,10 @@ def _pick_given_sign(_, your_task_shape) -> int:
 
 def _pick_to_match_result(opponent_shape, your_task) -> int:
     """
-        Anyway, the second column says how the round needs to end:
-        X means you need to lose,
-        Y means you need to end the round in a draw,
-        and Z means you need to win. Good luck!
+    Anyway, the second column says how the round needs to end:
+    X means you need to lose,
+    Y means you need to end the round in a draw,
+    and Z means you need to win. Good luck!
     """
     goal = {1: "lose", 2: "draw", 3: "win"}[your_task]
     return _get_shape_for_goal(opponent_shape, goal=goal) or 3

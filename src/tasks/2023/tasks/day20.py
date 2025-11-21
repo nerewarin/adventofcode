@@ -2,13 +2,13 @@
 --- Day 20: Pulse Propagation ---
 https://adventofcode.com/2023/day/20
 """
+
 import collections
 from collections import deque
+from collections.abc import Callable
 from functools import partial
 from math import lcm
-from typing import List, Callable, cast
-
-from src.utils.test_and_run import run, test
+from typing import cast
 
 _PULSE2STR = {0: "low", 1: "high"}
 
@@ -59,14 +59,7 @@ def register_module(cls):
 class Module:
     prefix = ...
 
-    def __init__(
-            self,
-            name,
-            destinations: List["Module"],
-            *args,
-            inputs: List["Module"] = None,
-            **kwargs
-    ):
+    def __init__(self, name, destinations: list["Module"], *args, inputs: list["Module"] = None, **kwargs):
         self.name = name
         self.inputs = inputs or []
         self.destinations = destinations
@@ -80,8 +73,8 @@ class Module:
     def add_input(self, module: "Module"):
         self.inputs.append(module)
 
-    def receive(self, src, pulse) -> List[Callable]:
-        raise NotImplemented
+    def receive(self, src, pulse) -> list[Callable]:
+        raise NotImplementedError
 
     def is_final_con(self):
         return "rx" in self.destinations
@@ -96,9 +89,7 @@ class Module:
             action = partial(dst.receive, self, pulse)
             printable = f"{self.name} -{_PULSE2STR[pulse]}-> {dst_name}"
 
-            receive_actions.append(
-                (action, printable)
-            )
+            receive_actions.append((action, printable))
 
             self.pulses_sent[pulse] += 1
 
@@ -138,6 +129,7 @@ class Conjunction(Module):
     the conjunction module first updates its memory for that input. Then, if it remembers high pulses for all inputs,
     it sends a low pulse; otherwise, it sends a high pulse.
     """
+
     prefix = "&"
 
     def __init__(self, *args, **kwargs):
@@ -282,9 +274,7 @@ class PulsePropagation:
         printable = f"{self.btn.name} -{_PULSE2STR[0]}-> {self.btn.destinations[0]}"
         # print(printable)
 
-        schema.append(
-            (initial_action, printable)
-        )
+        schema.append((initial_action, printable))
         # button -low-> broadcaster
         # print(button -low-> broadcaster)
 
@@ -299,9 +289,7 @@ class PulsePropagation:
 
             new_actions = act()
             for new_act, new_printable in new_actions:
-                schema.append(
-                    (new_act, new_printable)
-                )
+                schema.append((new_act, new_printable))
                 printables.append(new_printable)
 
                 if new_printable.endswith("zr") and "high" in new_printable:
@@ -369,7 +357,6 @@ if __name__ == "__main__":
 
     # run(get_fewest_number_of_button_presses)
 
-
     def verify_sequence(lst):
         if not lst:
             return False
@@ -381,7 +368,6 @@ if __name__ == "__main__":
                 return False
         return True
 
-
     def verify_sequence(lst):
         if not lst:
             return False
@@ -392,7 +378,6 @@ if __name__ == "__main__":
             if lst[i] != expected:
                 return False
         return True
-
 
     # Example usage:
     gc = [3853, 7706, 11559, 15412, 19265, 23118, 26971, 30824]
@@ -406,11 +391,6 @@ if __name__ == "__main__":
     print("sz:", verify_sequence(sz))
 
     a = 0
-
-    import math
-
-
-
 
     # Example usage:
     elms = [l[0] for l in (gc, xf, cm, sz)]

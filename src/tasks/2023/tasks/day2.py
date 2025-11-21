@@ -2,13 +2,14 @@
 --- Day 2: Cube Conundrum---
 https://adventofcode.com/2023/day/2
 """
+
 import re
 from functools import reduce
 from operator import mul
 
 from src.utils.test_and_run import run, test
 
-_REXP = re.compile(r'(\d+)\s*(\w+)')
+_REXP = re.compile(r"(\d+)\s*(\w+)")
 
 
 def cube_conundrum(inp, limit=None, **_):
@@ -18,7 +19,7 @@ def cube_conundrum(inp, limit=None, **_):
 
     valid = []
     for i, line in enumerate(inp):
-        line = line[line.index(":") + 1:].strip()
+        line = line[line.index(":") + 1 :].strip()
 
         # Extract color and number pairs using regular expression
         matches = _REXP.findall(line)

@@ -1,12 +1,13 @@
 """--- Day 15: Beacon Exclusion Zone ---
 https://adventofcode.com/2022/day/15
 """
+
 import dataclasses
+import re
 from functools import cached_property
 
 from src.utils.pathfinding import dist
-from src.utils.test_and_run import test, run
-import re
+from src.utils.test_and_run import run, test
 
 _REXP = re.compile(r"Sensor at x=(-*\d+), y=(-*\d+): closest beacon is at x=(-*\d+), y=(-*\d+)")
 
@@ -27,27 +28,35 @@ def _parse_puzzle(inp):
     if DEBUG:
         f = min
         min_x = f(
-            f((s.x for s in sensors)),
-            f((s.beacon.x for s in sensors)),
+            f(s.x for s in sensors),
+            f(s.beacon.x for s in sensors),
         )
         min_y = f(
-            f((s.y for s in sensors)),
-            f((s.beacon.y for s in sensors)),
+            f(s.y for s in sensors),
+            f(s.beacon.y for s in sensors),
         )
 
         f = max
         max_x = f(
-            f((s.x for s in sensors)),
-            f((s.beacon.x for s in sensors)),
+            f(s.x for s in sensors),
+            f(s.beacon.x for s in sensors),
         )
         max_y = f(
-            f((s.y for s in sensors)),
-            f((s.beacon.y for s in sensors)),
+            f(s.y for s in sensors),
+            f(s.beacon.y for s in sensors),
         )
         sensors_pos = [(s.x, s.y) for s in sensors]
         beacons_pos = [(s.beacon.x, s.beacon.y) for s in sensors]
 
-        print(min_x, "...", max_x, " / ", min_y, "...", max_y, )
+        print(
+            min_x,
+            "...",
+            max_x,
+            " / ",
+            min_y,
+            "...",
+            max_y,
+        )
         for j in range(min_y, max_y + 1):
             line = []
             for i in range(min_x, max_x + 1):
@@ -75,8 +84,7 @@ class Point2D:
 
 
 @dataclasses.dataclass
-class Beacon(Point2D):
-    ...
+class Beacon(Point2D): ...
 
 
 @dataclasses.dataclass
@@ -103,8 +111,8 @@ def task(inp, y):
     """
     sensors = _parse_puzzle(inp)
 
-    min_x = min((s.x - s.dist_to_beacon for s in sensors))
-    max_x = max((s.x + s.dist_to_beacon for s in sensors))
+    min_x = min(s.x - s.dist_to_beacon for s in sensors)
+    max_x = max(s.x + s.dist_to_beacon for s in sensors)
 
     covered = []
     print(f"Inspecting {min_x} - {max_x}")
@@ -129,10 +137,8 @@ def tuning_frequency(inp, field):
 
     def get_interval(min_x, max_x):
         return (
-            (
-                min(max(0, min_x), field),
-                min(max(0, max_x), field),
-            )
+            min(max(0, min_x), field),
+            min(max(0, max_x), field),
         )
 
     for y in range(field):
@@ -182,6 +188,7 @@ if __name__ == "__main__":
     test(tuning_frequency, field=20, expected=56000011)
     print("test ok")
     import datetime
+
     x = datetime.datetime.now()
 
     res = run(tuning_frequency, field=4000000)
@@ -189,5 +196,3 @@ if __name__ == "__main__":
     print(datetime.datetime.now() - x)
 
     # assert res == 24377, f"{res=} but it should be 24377 for my input!"
-
-

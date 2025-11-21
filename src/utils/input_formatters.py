@@ -1,6 +1,5 @@
 def group_by_blank(lines: list[str]) -> list[list[str]]:
-    """Groups list of strings to 2d list by blank line as separator
-    """
+    """Groups list of strings to 2d list by blank line as separator"""
     res = []
     group = []
     for line in lines:
@@ -25,6 +24,4 @@ def cast_2d_list_elements(lst, type_=int):
 
 
 def lines_to_tuples(lines: list[str]) -> list[tuple[str]]:
-    return [
-        tuple(line.split()) for line in lines
-    ]
+    return [tuple(line.split()) for line in lines]
