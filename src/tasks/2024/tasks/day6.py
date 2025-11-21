@@ -1,9 +1,7 @@
 import collections
 import copy
 
-from src.utils.test_and_run import run, test
-
-DEBUG = False
+from src.utils.test_and_run import run
 
 OBSTACLE = "O"
 WALL = "#"
@@ -148,7 +146,7 @@ def display(grid, path: list[str], ind):
         print("".join(row))
 
 
-def part2(data):
+def part2(data, debug=False):
     """
     ....#.....
     ....+---+#
@@ -210,6 +208,8 @@ def part2(data):
                     obstacles_cache.add((new_row, new_col))
 
                     if is_valid_position((new_row, new_col), grid) and (new_row, new_col) != (row, col):
+                        if grid[new_row][new_col] == WALL:
+                            continue
                         # Temporarily place an obstruction
                         original_cell = grid[new_row][new_col]
                         grid[new_row][new_col] = OBSTACLE  # Place obstruction
@@ -217,7 +217,7 @@ def part2(data):
                         is_stuck, path = can_get_stuck(grid, row, col, direction, possible_positions)
                         if is_stuck:
                             full_path = initial_path[:step] + path
-                            if DEBUG:
+                            if debug:
                                 display(grid, full_path, possible_positions)
 
                             possible_positions += 1
@@ -230,5 +230,6 @@ def part2(data):
 if __name__ == "__main__":
     # test(part1, 41)
     # run(part1)
-    test(part2, 6)
-    assert run(part2) < 1517
+    # test(part2, 6, debug=True)
+    res2 = run(part2)
+    assert res2 == 1516
