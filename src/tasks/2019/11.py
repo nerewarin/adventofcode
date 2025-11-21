@@ -109,11 +109,12 @@ def test1():
     return "test1 ok"
 
 
-def test7():
-    test_num = 7
-    res = MonitoringStation(inp6).vaporize(200)
-    assert res == (8, 2), f"test{test_num} failed!: {res}"
-    return f"test{test_num} ok"
+# Dead code - MonitoringStation and inp6 are not defined
+# def test7():
+#     test_num = 7
+#     res = MonitoringStation(inp6).vaporize(200)
+#     assert res == (8, 2), f"test{test_num} failed!: {res}"
+#     return f"test{test_num} ok"
 
 
 def part1(*args, **kwargs):

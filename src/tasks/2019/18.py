@@ -215,7 +215,7 @@ class MazeWithKeysAndDoorsFourAgents(MazeWithKeysAndDoors):
         north_part = self._maze[:center_y]
         south_part = self._maze[center_y + 1 :]
         assert len(south_part) == len(north_part), (
-            f"len(north_part) ({len(north_part)}) != len(south_path) ({south_path})"
+            f"len(north_part) ({len(north_part)}) != len(south_part) ({len(south_part)})"
         )
         self._solvers = [
             MazeWithKeysAndDoors(maze, idx)

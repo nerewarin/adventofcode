@@ -68,7 +68,7 @@ class PathFinder:
                         xs = [pos[0] for pos in seen.keys()]
                         min_y, max_y = min(ys), max(ys)
                         min_x, max_x = min(xs), max(xs)
-                        print(f"after: node {node} state {state} pos {computer.pos} base {computer.relative_base}")
+                        print(f"after: vertex {vertex} state {state} pos {computer.pos} base {computer.relative_base}")
                         # print(f'after: vertex {vertex} pos {parent_computer.pos} base {parent_computer.relative_base}')
                         print(f"y from {min_y} to {max_y}")
                         print(f"x from {min_x} to {max_x}")
@@ -77,7 +77,7 @@ class PathFinder:
                             for _x in range(min_x, max_x + 1):
                                 if (_x, _y) == (0, 0):
                                     _draw = "*"
-                                if (_x, _y) == node:
+                                if (_x, _y) == vertex:
                                     _draw = "Ж"
                                 else:
                                     _node = seen.get((_x, _y), (-1,))
