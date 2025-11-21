@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "adventofcode-2020"
+version = "0.1.0"
+description = ""
+authors = ["Gorbachev <a.gorbachev@cryptology.com>"]
+readme = "README.md"
+packages = [{include = "adventofcode_2020"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+matplotlib = "^3.6.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.20.0"
+isort = "^5.10.1"
+black = "^22.10.0"
+flake8 = "^6.0.0"
+mypy = "^0.991"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "adventofcode-2024"
+version = "0.1.0"
+description = ""
+authors = ["Gorbachev <a.gorbachev@cryptology.com>"]
+readme = "README.md"
+packages = [{include = "adventofcode2024"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+tqdm = "^4.66.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.20.0"
+isort = "^5.10.1"
+black = "^22.10.0"
+flake8 = "^6.0.0"
+mypy = "^1.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

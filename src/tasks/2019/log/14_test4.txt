@@ -1,0 +1,81 @@
+F:\Users\NereWARin\PycharmProjects\adventofcode\venv\Scripts\python.exe F:/Users/NereWARin/PycharmProjects/adventofcode/2019/14.py
+cooking 1 FUEL by formula {'count': 1, 'ingredients': {'STKFG': 53, 'MNCFX': 6, 'VJHF': 46, 'HVMC': 81, 'CXFTF': 68, 'GNMV': 25}}, bag={}
+ cooking 53 STKFG by formula {'count': 1, 'ingredients': {'VPVL': 2, 'FWMGM': 7, 'CXFTF': 2, 'MNCFX': 11}}, bag={}
+  cooking 106 VPVL by formula {'count': 8, 'ingredients': {'NVRVD': 17, 'JNWZP': 3}}, bag={}
+   cooking 238 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, bag={}
+   cooked 238 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, consumed=8340, bag={'NVRVD': 2, 'consumed ORE': 8340}
+   cooking 42 JNWZP by formula {'count': 7, 'ingredients': {'ORE': 144}}, bag={'NVRVD': 2, 'consumed ORE': 8340}
+   cooked 42 JNWZP by formula {'count': 7, 'ingredients': {'ORE': 144}}, consumed=864, bag={'NVRVD': 2, 'consumed ORE': 9204}
+  cooked 106 VPVL by formula {'count': 8, 'ingredients': {'NVRVD': 17, 'JNWZP': 3}}, consumed=0, bag={'NVRVD': 2, 'consumed ORE': 9204}
+  cooking 371 FWMGM by formula {'count': 5, 'ingredients': {'VJHF': 22, 'MNCFX': 37}}, bag={'NVRVD': 2, 'consumed ORE': 9204}
+   cooking 1650 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, bag={'NVRVD': 2, 'consumed ORE': 9204}
+   cooked 1650 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, consumed=48400, bag={'NVRVD': 2, 'consumed ORE': 57604}
+   cooking 2775 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, bag={'NVRVD': 2, 'consumed ORE': 57604}
+   cooked 2775 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, consumed=67135, bag={'NVRVD': 2, 'consumed ORE': 124739, 'MNCFX': 3}
+  cooked 371 FWMGM by formula {'count': 5, 'ingredients': {'VJHF': 22, 'MNCFX': 37}}, consumed=0, bag={'NVRVD': 2, 'consumed ORE': 124739, 'MNCFX': 3}
+  cooking 106 CXFTF by formula {'count': 8, 'ingredients': {'NVRVD': 1}}, bag={'NVRVD': 2, 'consumed ORE': 124739, 'MNCFX': 3}
+   cooking 14 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, bag={'NVRVD': 2, 'consumed ORE': 124739, 'MNCFX': 3}
+   cooked 12 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, consumed=417, bag={'consumed ORE': 125156, 'MNCFX': 3}
+  cooked 106 CXFTF by formula {'count': 8, 'ingredients': {'NVRVD': 1}}, consumed=0, bag={'consumed ORE': 125156, 'MNCFX': 3}
+  cooking 583 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, bag={'consumed ORE': 125156, 'MNCFX': 3}
+  cooked 580 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, consumed=14065, bag={'consumed ORE': 139221, 'MNCFX': 2}
+ cooked 53 STKFG by formula {'count': 1, 'ingredients': {'VPVL': 2, 'FWMGM': 7, 'CXFTF': 2, 'MNCFX': 11}}, consumed=0, bag={'consumed ORE': 139221, 'MNCFX': 2}
+ cooking 6 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, bag={'consumed ORE': 139221, 'MNCFX': 2}
+ cooked 4 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, consumed=145, bag={'consumed ORE': 139366, 'MNCFX': 2}
+ cooking 46 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, bag={'consumed ORE': 139366, 'MNCFX': 2}
+ cooked 46 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, consumed=1408, bag={'consumed ORE': 140774, 'VJHF': 2, 'MNCFX': 2}
+ cooking 81 HVMC by formula {'count': 3, 'ingredients': {'MNCFX': 5, 'RFSQX': 7, 'FWMGM': 2, 'VPVL': 2, 'CXFTF': 19}}, bag={'consumed ORE': 140774, 'VJHF': 2, 'MNCFX': 2}
+  cooking 135 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, bag={'consumed ORE': 140774, 'VJHF': 2, 'MNCFX': 2}
+  cooked 133 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, consumed=3335, bag={'consumed ORE': 144109, 'VJHF': 2, 'MNCFX': 5}
+  cooking 189 RFSQX by formula {'count': 4, 'ingredients': {'VJHF': 1, 'MNCFX': 6}}, bag={'consumed ORE': 144109, 'VJHF': 2, 'MNCFX': 5}
+   cooking 48 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, bag={'consumed ORE': 144109, 'VJHF': 2, 'MNCFX': 5}
+   cooked 46 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, consumed=1408, bag={'consumed ORE': 145517, 'VJHF': 2, 'MNCFX': 5}
+   cooking 288 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, bag={'consumed ORE': 145517, 'VJHF': 2, 'MNCFX': 5}
+   cooked 283 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, consumed=6960, bag={'consumed ORE': 152477, 'VJHF': 2, 'MNCFX': 5}
+  cooked 189 RFSQX by formula {'count': 4, 'ingredients': {'VJHF': 1, 'MNCFX': 6}}, consumed=0, bag={'consumed ORE': 152477, 'VJHF': 2, 'MNCFX': 5}
+  cooking 54 FWMGM by formula {'count': 5, 'ingredients': {'VJHF': 22, 'MNCFX': 37}}, bag={'consumed ORE': 152477, 'VJHF': 2, 'MNCFX': 5}
+   cooking 242 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, bag={'consumed ORE': 152477, 'VJHF': 2, 'MNCFX': 5}
+   cooked 240 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, consumed=7040, bag={'consumed ORE': 159517, 'MNCFX': 5}
+   cooking 407 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, bag={'consumed ORE': 159517, 'MNCFX': 5}
+   cooked 402 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, consumed=9715, bag={'consumed ORE': 169232}
+  cooked 54 FWMGM by formula {'count': 5, 'ingredients': {'VJHF': 22, 'MNCFX': 37}}, consumed=0, bag={'consumed ORE': 169232}
+  cooking 54 VPVL by formula {'count': 8, 'ingredients': {'NVRVD': 17, 'JNWZP': 3}}, bag={'consumed ORE': 169232}
+   cooking 119 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, bag={'consumed ORE': 169232}
+   cooked 119 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, consumed=4170, bag={'NVRVD': 1, 'consumed ORE': 173402}
+   cooking 21 JNWZP by formula {'count': 7, 'ingredients': {'ORE': 144}}, bag={'NVRVD': 1, 'consumed ORE': 173402}
+   cooked 21 JNWZP by formula {'count': 7, 'ingredients': {'ORE': 144}}, consumed=432, bag={'NVRVD': 1, 'consumed ORE': 173834}
+  cooked 54 VPVL by formula {'count': 8, 'ingredients': {'NVRVD': 17, 'JNWZP': 3}}, consumed=0, bag={'NVRVD': 1, 'consumed ORE': 173834}
+  cooking 513 CXFTF by formula {'count': 8, 'ingredients': {'NVRVD': 1}}, bag={'NVRVD': 1, 'consumed ORE': 173834}
+   cooking 65 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, bag={'NVRVD': 1, 'consumed ORE': 173834}
+   cooked 64 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, consumed=2224, bag={'consumed ORE': 176058}
+  cooked 513 CXFTF by formula {'count': 8, 'ingredients': {'NVRVD': 1}}, consumed=0, bag={'consumed ORE': 176058}
+ cooked 81 HVMC by formula {'count': 3, 'ingredients': {'MNCFX': 5, 'RFSQX': 7, 'FWMGM': 2, 'VPVL': 2, 'CXFTF': 19}}, consumed=0, bag={'consumed ORE': 176058}
+ cooking 68 CXFTF by formula {'count': 8, 'ingredients': {'NVRVD': 1}}, bag={'consumed ORE': 176058}
+  cooking 9 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, bag={'consumed ORE': 176058}
+  cooked 9 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, consumed=417, bag={'NVRVD': 3, 'consumed ORE': 176475}
+ cooked 68 CXFTF by formula {'count': 8, 'ingredients': {'NVRVD': 1}}, consumed=0, bag={'NVRVD': 3, 'consumed ORE': 176475}
+ cooking 25 GNMV by formula {'count': 6, 'ingredients': {'VJHF': 5, 'MNCFX': 7, 'VPVL': 9, 'CXFTF': 37}}, bag={'NVRVD': 3, 'consumed ORE': 176475}
+  cooking 25 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, bag={'NVRVD': 3, 'consumed ORE': 176475}
+  cooked 25 VJHF by formula {'count': 6, 'ingredients': {'ORE': 176}}, consumed=880, bag={'NVRVD': 3, 'consumed ORE': 177355, 'VJHF': 5}
+  cooking 35 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, bag={'NVRVD': 3, 'consumed ORE': 177355, 'VJHF': 5}
+  cooked 35 MNCFX by formula {'count': 6, 'ingredients': {'ORE': 145}}, consumed=870, bag={'NVRVD': 3, 'consumed ORE': 178225, 'VJHF': 5, 'MNCFX': 1}
+  cooking 45 VPVL by formula {'count': 8, 'ingredients': {'NVRVD': 17, 'JNWZP': 3}}, bag={'NVRVD': 3, 'consumed ORE': 178225, 'VJHF': 5, 'MNCFX': 1}
+   cooking 102 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, bag={'NVRVD': 3, 'consumed ORE': 178225, 'VJHF': 5, 'MNCFX': 1}
+   cooked 99 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, consumed=3475, bag={'NVRVD': 1, 'consumed ORE': 181700, 'VJHF': 5, 'MNCFX': 1}
+   cooking 18 JNWZP by formula {'count': 7, 'ingredients': {'ORE': 144}}, bag={'NVRVD': 1, 'consumed ORE': 181700, 'VJHF': 5, 'MNCFX': 1}
+   cooked 18 JNWZP by formula {'count': 7, 'ingredients': {'ORE': 144}}, consumed=432, bag={'NVRVD': 1, 'consumed ORE': 182132, 'JNWZP': 3, 'VJHF': 5, 'MNCFX': 1}
+  cooked 45 VPVL by formula {'count': 8, 'ingredients': {'NVRVD': 17, 'JNWZP': 3}}, consumed=0, bag={'NVRVD': 1, 'consumed ORE': 182132, 'JNWZP': 3, 'VJHF': 5, 'MNCFX': 1}
+  cooking 185 CXFTF by formula {'count': 8, 'ingredients': {'NVRVD': 1}}, bag={'NVRVD': 1, 'consumed ORE': 182132, 'JNWZP': 3, 'VJHF': 5, 'MNCFX': 1}
+   cooking 24 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, bag={'NVRVD': 1, 'consumed ORE': 182132, 'JNWZP': 3, 'VJHF': 5, 'MNCFX': 1}
+   cooked 23 NVRVD by formula {'count': 4, 'ingredients': {'ORE': 139}}, consumed=834, bag={'NVRVD': 1, 'consumed ORE': 182966, 'JNWZP': 3, 'VJHF': 5, 'MNCFX': 1}
+  cooked 185 CXFTF by formula {'count': 8, 'ingredients': {'NVRVD': 1}}, consumed=0, bag={'NVRVD': 1, 'consumed ORE': 182966, 'JNWZP': 3, 'VJHF': 5, 'MNCFX': 1}
+ cooked 25 GNMV by formula {'count': 6, 'ingredients': {'VJHF': 5, 'MNCFX': 7, 'VPVL': 9, 'CXFTF': 37}}, consumed=0, bag={'NVRVD': 1, 'consumed ORE': 182966, 'JNWZP': 3, 'VJHF': 5, 'MNCFX': 1}
+cooked 1 FUEL by formula {'count': 1, 'ingredients': {'STKFG': 53, 'MNCFX': 6, 'VJHF': 46, 'HVMC': 81, 'CXFTF': 68, 'GNMV': 25}}, consumed=0, bag={'NVRVD': 1, 'consumed ORE': 182966, 'JNWZP': 3, 'VJHF': 5, 'MNCFX': 1}
+Traceback (most recent call last):
+  File "F:/Users/NereWARin/PycharmProjects/adventofcode/2019/14.py", line 222, in <module>
+    test(4),
+  File "F:/Users/NereWARin/PycharmProjects/adventofcode/2019/14.py", line 201, in test
+    assert res == 180697, 'test{} failed!: {}'.format(test_num, res)
+AssertionError: test4 failed!: 182966
+
+Process finished with exit code 1
