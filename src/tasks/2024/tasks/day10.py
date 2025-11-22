@@ -55,6 +55,7 @@ def get_trailhead_score(
     grid: list[list[int]],
     path: list[tuple[int, int]] | None = None,
     reached_nines: list[tuple[int, int]] | None = None,
+    part=None,
 ) -> int:
     if path is None:
         path = []
@@ -65,7 +66,7 @@ def get_trailhead_score(
     pos = (y, x)
 
     val0 = grid[y][x]
-    if val0 == 9 and pos not in reached_nines:
+    if val0 == 9 and ((part is None and pos not in reached_nines) or part == 2):
         reached_nines.append(pos)
         path.append(pos)
         _logger.debug(path)
@@ -84,12 +85,12 @@ def get_trailhead_score(
         if val1 != val0 + 1:
             continue
 
-        score += get_trailhead_score(y1, x1, grid, path + [pos], reached_nines)
+        score += get_trailhead_score(y1, x1, grid, path + [pos], reached_nines, part=part)
 
     return score
 
 
-def task1(input: list[str]) -> int:
+def task1(input: list[str], part=None) -> int:
     grid = []
     for y, row in enumerate(input):
         new_row = []
@@ -104,10 +105,14 @@ def task1(input: list[str]) -> int:
     for y, row in enumerate(grid):
         for x, val in enumerate(row):
             if val == 0:
-                score = get_trailhead_score(y, x, grid)
+                score = get_trailhead_score(y, x, grid, part=part)
                 result += score
 
     return result
+
+
+def task2(input: list[str]) -> int:
+    return task1(input, part=2)
 
 
 if __name__ == "__main__":
@@ -118,3 +123,6 @@ if __name__ == "__main__":
     test(task1, 36, test_part=5)
 
     assert run(task1) == 816
+
+    test(task2, 81, test_part=5)
+    assert run(task2) == 1960
