@@ -38,12 +38,11 @@ def _file_to_list(fname):
     return lst
 
 
-def test(fn, expected, *args, **kwargs):
+def test(fn, expected, *args, test_part=None, **kwargs):
     """Checks the output of applying function to test data matches expected result"""
     root = _get_resources_dir()
 
     fname = "tst"
-    test_part = kwargs.pop("test_part", None)
     if test_part and test_part > 1:
         fname += str(test_part)
         success_msg = f"test {fn.__name__} ({test_part=}) passed"
