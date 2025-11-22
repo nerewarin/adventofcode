@@ -1,7 +1,7 @@
 import logging
 import os
 
-from src.utils.test_and_run import test
+from src.utils.test_and_run import run, test
 
 # Configure logging based on environment variable
 log_level = os.getenv("level", "INFO")
@@ -116,3 +116,5 @@ if __name__ == "__main__":
     test(task1, 4, test_part=3)
     test(task1, 3, test_part=4)
     test(task1, 36, test_part=5)
+
+    assert run(task1) == 816
