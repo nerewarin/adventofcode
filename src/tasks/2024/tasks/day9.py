@@ -138,22 +138,6 @@ def get_initial_state(disk_map: list[int]) -> list[tuple[int, int, int]]:
     return blocks
 
 
-def get_holes_by_position(disk_map: list[int]) -> dict[int, int]:
-    # optional TODO: must be combines to get_initial_state to reduce double O(N)
-    holes_by_position = dict()
-    file_id = 0
-    current_pos = 0
-
-    for i, length in enumerate(disk_map):
-        if i % 2 == 1:  # File block
-            if length == 0:
-                continue
-            holes_by_position[current_pos] = length
-            file_id += 1
-        current_pos += length
-    return holes_by_position
-
-
 def solve_part2(input_data: str | list) -> int:
     """Move files according to part 2 rules."""
 
@@ -164,17 +148,23 @@ def solve_part2(input_data: str | list) -> int:
     logging.debug(f"Initial: {visualize_state(files_state, total_length)}")
 
     disk = ["." for _ in range(total_length)]
-    holes_by_position = get_holes_by_position(disk_map)
 
     # First, mark all initial positions
     for file_id, start, length in files_state:
         for i in range(length):
             disk[start + i] = str(file_id)
 
-    def get_available_hole(length, holes_by_position):
-        for position, hole_len in holes_by_position.items():
-            if hole_len >= length:
-                return position
+    def get_available_hole(length, disk, start):
+        count = 0
+        for pos, val in enumerate(disk):
+            if pos >= start:
+                return None
+            if val == ".":
+                count += 1
+                if count == length:
+                    return pos - length + 1
+            else:
+                count = 0
         return None
 
     # Process files from the highest ID to lowest
@@ -182,24 +172,10 @@ def solve_part2(input_data: str | list) -> int:
         file_id, start, length = files_state[block_id_to_move]
         logging.debug(f"\nMoving file {file_id} (length {length})")
 
-        hole_position = get_available_hole(length, holes_by_position)
+        hole_position = get_available_hole(length, disk, start)
         if hole_position is None:
             continue
         else:
-            # update holes
-            hole_len = holes_by_position.pop(hole_position)
-            new_hole_len = hole_len - length
-            # merge holes
-            if not new_hole_len:
-                pass
-            else:
-                new_hole_pos = hole_position + length
-                holes_by_position[new_hole_pos] = new_hole_len
-                holes_by_position = dict(sorted(holes_by_position.items()))  # not sure we need it TODO
-
-            # add hole respecting old file position
-            # either find prior hole and prolongate it... but wait why we need it? TODO if not works - do it
-
             # update disk state
             files_state[block_id_to_move] = (file_id, hole_position, length)
 
@@ -208,27 +184,6 @@ def solve_part2(input_data: str | list) -> int:
 
             # this is for show only
             logging.debug(f"Current state: {''.join(disk)}")
-
-        # # Move one digit at a time
-        # for digit in range(length):
-        #     # Clear current position of this digit
-        #     disk[start + digit] = "."
-        #
-        #     # Find position after last unmoved file
-        #     pos = 0
-        #     for j in range(block_id_to_move):
-        #         # Look for positions of unmoved files
-        #         other_id = files_state[j][0]
-        #         for k in range(total_length):
-        #             if disk[k] == str(other_id):
-        #                 pos = max(pos, k + 1)
-        #
-        #     # Place this digit
-        #     disk[pos + digit] = str(file_id)
-        #     logging.debug(f"Current state: {''.join(disk)}")
-        #
-        # # Record final position of this file
-        # result.append((file_id, pos, length))
 
     final_state = sorted(files_state, key=lambda x: x[0])  # Sort by file_id
 
@@ -273,4 +228,4 @@ def solve_part1(input_data: str | list) -> int:
 # assert run(solve_part1) == 6307275788409
 # test(solve_part2, expected=2858)
 res2 = run(solve_part2)
-assert res2 < 8039434080946
+assert res2 == 6327174563252
