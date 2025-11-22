@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Protocol
 
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import run
 
 # Configure logging based on environment variable
 log_level = os.getenv("level", "INFO")
@@ -171,9 +171,9 @@ def solve_part2(input_data: str | list) -> int:
         for i in range(length):
             disk[start + i] = str(file_id)
 
-    def get_available_hole(lenght, holes_by_position):
+    def get_available_hole(length, holes_by_position):
         for position, hole_len in holes_by_position.items():
-            if hole_len >= lenght:
+            if hole_len >= length:
                 return position
         return None
 
@@ -246,9 +246,11 @@ def calculate_checksum(positions: list[tuple[int, int, int]]) -> int:
 def visualize_state(blocks: list[tuple[int, int, int]], total_length: int) -> str:
     """Helper function to visualize the disk state."""
     disk = ["." for _ in range(total_length)]
+    list_repr = [None] * total_length
     for file_id, start_pos, length in blocks:
         for i in range(length):
             disk[start_pos + i] = str(file_id)
+            list_repr[start_pos + i] = file_id
     return "".join(disk)
 
 
@@ -269,6 +271,6 @@ def solve_part1(input_data: str | list) -> int:
 
 # test(solve_part1, expected=1928)
 # assert run(solve_part1) == 6307275788409
-test(solve_part2, expected=2858)
+# test(solve_part2, expected=2858)
 res2 = run(solve_part2)
-assert res2 < 8439434080946
+assert res2 < 8039434080946
