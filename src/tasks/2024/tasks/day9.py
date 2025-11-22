@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Protocol
 
-from src.utils.test_and_run import test
+from src.utils.test_and_run import run, test
 
 # Configure logging based on environment variable
 log_level = os.getenv("level", "INFO")
@@ -138,44 +138,102 @@ def get_initial_state(disk_map: list[int]) -> list[tuple[int, int, int]]:
     return blocks
 
 
-def move_files_part2(blocks: list[tuple[int, int, int]]) -> list[tuple[int, int, int]]:
+def get_holes_by_position(disk_map: list[int]) -> dict[int, int]:
+    # optional TODO: must be combines to get_initial_state to reduce double O(N)
+    holes_by_position = dict()
+    file_id = 0
+    current_pos = 0
+
+    for i, length in enumerate(disk_map):
+        if i % 2 == 1:  # File block
+            if length == 0:
+                continue
+            holes_by_position[current_pos] = length
+            file_id += 1
+        current_pos += length
+    return holes_by_position
+
+
+def solve_part2(input_data: str | list) -> int:
     """Move files according to part 2 rules."""
-    total_length = sum(1 for _, _, length in blocks for _ in range(length)) * 2
+
+    disk_map = parse_disk_map(input_data)
+    files_state = get_initial_state(disk_map)
+
+    total_length = sum(disk_map)
+    logging.debug(f"Initial: {visualize_state(files_state, total_length)}")
+
     disk = ["." for _ in range(total_length)]
-    result = []
+    holes_by_position = get_holes_by_position(disk_map)
 
     # First, mark all initial positions
-    for file_id, start, length in blocks:
+    for file_id, start, length in files_state:
         for i in range(length):
             disk[start + i] = str(file_id)
 
-    # Process files from highest ID to lowest
-    for i in range(len(blocks) - 1, -1, -1):
-        file_id, start, length = blocks[i]
+    def get_available_hole(lenght, holes_by_position):
+        for position, hole_len in holes_by_position.items():
+            if hole_len >= lenght:
+                return position
+        return None
+
+    # Process files from the highest ID to lowest
+    for block_id_to_move in range(len(files_state) - 1, -1, -1):
+        file_id, start, length = files_state[block_id_to_move]
         logging.debug(f"\nMoving file {file_id} (length {length})")
 
-        # Move one digit at a time
-        for digit in range(length):
-            # Clear current position of this digit
-            disk[start + digit] = "."
+        hole_position = get_available_hole(length, holes_by_position)
+        if hole_position is None:
+            continue
+        else:
+            # update holes
+            hole_len = holes_by_position.pop(hole_position)
+            new_hole_len = hole_len - length
+            # merge holes
+            if not new_hole_len:
+                pass
+            else:
+                new_hole_pos = hole_position + length
+                holes_by_position[new_hole_pos] = new_hole_len
+                holes_by_position = dict(sorted(holes_by_position.items()))  # not sure we need it TODO
 
-            # Find position after last unmoved file
-            pos = 0
-            for j in range(i):
-                # Look for positions of unmoved files
-                other_id = blocks[j][0]
-                for k in range(total_length):
-                    if disk[k] == str(other_id):
-                        pos = max(pos, k + 1)
+            # add hole respecting old file position
+            # either find prior hole and prolongate it... but wait why we need it? TODO if not works - do it
 
-            # Place this digit
-            disk[pos + digit] = str(file_id)
+            # update disk state
+            files_state[block_id_to_move] = (file_id, hole_position, length)
+
+            disk[start : start + length] = ["." for _ in range(length)]
+            disk[hole_position : hole_position + length] = [str(file_id) for _ in range(length)]
+
+            # this is for show only
             logging.debug(f"Current state: {''.join(disk)}")
 
-        # Record final position of this file
-        result.append((file_id, pos, length))
+        # # Move one digit at a time
+        # for digit in range(length):
+        #     # Clear current position of this digit
+        #     disk[start + digit] = "."
+        #
+        #     # Find position after last unmoved file
+        #     pos = 0
+        #     for j in range(block_id_to_move):
+        #         # Look for positions of unmoved files
+        #         other_id = files_state[j][0]
+        #         for k in range(total_length):
+        #             if disk[k] == str(other_id):
+        #                 pos = max(pos, k + 1)
+        #
+        #     # Place this digit
+        #     disk[pos + digit] = str(file_id)
+        #     logging.debug(f"Current state: {''.join(disk)}")
+        #
+        # # Record final position of this file
+        # result.append((file_id, pos, length))
 
-    return sorted(result, key=lambda x: x[0])  # Sort by file_id
+    final_state = sorted(files_state, key=lambda x: x[0])  # Sort by file_id
+
+    logging.debug(f"Final: {visualize_state(final_state, total_length)}")
+    return calculate_checksum(final_state)
 
 
 def calculate_checksum(positions: list[tuple[int, int, int]]) -> int:
@@ -209,20 +267,8 @@ def solve_part1(input_data: str | list) -> int:
     return solve(input_data, SplitBlockStrategy())
 
 
-def solve_part2(input_data: str | list) -> int:
-    disk_map = parse_disk_map(input_data)
-    initial_state = get_initial_state(disk_map)
-
-    total_length = sum(disk_map)
-    logging.debug(f"Initial: {visualize_state(initial_state, total_length)}")
-    final_state = move_files_part2(initial_state)
-    logging.debug(f"Final: {visualize_state(final_state, total_length)}")
-
-    return calculate_checksum(final_state)
-
-
-test(solve_part1, expected=1928)
-# test(solve_part2, expected=2858)
-# run(solve_part1)
-# run(solve_part2)
-# 6307275788409
+# test(solve_part1, expected=1928)
+# assert run(solve_part1) == 6307275788409
+test(solve_part2, expected=2858)
+res2 = run(solve_part2)
+assert res2 < 8439434080946
