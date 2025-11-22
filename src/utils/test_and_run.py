@@ -46,6 +46,9 @@ def test(fn, expected, *args, **kwargs):
     test_part = kwargs.pop("test_part", None)
     if test_part and test_part > 1:
         fname += str(test_part)
+        success_msg = f"test {fn.__name__} ({test_part=}) passed"
+    else:
+        success_msg = f"test {fn.__name__} passed"
 
     test_data = _file_to_list(root / fname)
 
@@ -54,7 +57,7 @@ def test(fn, expected, *args, **kwargs):
     if res != expected:
         raise ValueError(f"fn {fn} returned wrong result: {res=} != {expected=}!")
 
-    print(f"test {fn.__name__} passed")
+    print(success_msg)
 
 
 def run(fn, *args, **kwargs):
