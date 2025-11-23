@@ -1,7 +1,7 @@
 import logging
 import os
 
-from src.utils.directions import DIRECTIONS, out_of_borders
+from src.utils.directions_orthogonal import DIRECTIONS, out_of_borders
 from src.utils.test_and_run import run, test
 
 # Configure logging based on environment variable

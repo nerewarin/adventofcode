@@ -5,17 +5,12 @@ https://adventofcode.com/2024/day/11
 
 """
 
-import logging
-import os
-
 import tqdm
 
+from src.utils.logger import get_logger
 from src.utils.test_and_run import run
 
-# Configure logging based on environment variable
-log_level = os.getenv("level", "INFO")
-logging.basicConfig(level=log_level)
-_logger = logging.getLogger(__name__)
+_logger = get_logger()
 
 
 def compute_stones_list(inp, blinks):
