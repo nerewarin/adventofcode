@@ -40,10 +40,17 @@ DIRECTIONS = {
 DIRECTIONS_BY_ENUM = {v: k for k, v in DIRECTIONS.items()}
 
 
-def get_2d_diff(pos1: tuple[int, int], pos2: tuple[int, int]):
+def get_abs(y, x):
+    return abs(y), abs(x)
+
+
+def get_2d_diff(pos1: tuple[int, int], pos2: tuple[int, int], absolute=False):
     y1, x1 = pos1
     y2, x2 = pos2
-    return y2 - y1, x2 - x1
+    res = y2 - y1, x2 - x1
+    if absolute:
+        res = get_abs(*res)
+    return res
 
 
 def go(
