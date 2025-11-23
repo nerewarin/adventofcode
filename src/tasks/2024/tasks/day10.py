@@ -1,52 +1,13 @@
 import logging
 import os
 
+from src.utils.directions import DIRECTIONS, out_of_borders
 from src.utils.test_and_run import run, test
 
 # Configure logging based on environment variable
 log_level = os.getenv("level", "INFO")
 logging.basicConfig(level=log_level)
 _logger = logging.getLogger(__name__)
-
-# from math lessons:
-#
-# y
-# ^
-# |
-# |
-# |
-# .----> x
-#
-# from computer history (first display)
-# 0...-> v
-# ---->
-# ...... >    ..so
-#
-# .----> x
-# |
-# |
-# |
-# v
-# y
-DIRECTIONS = [
-    # y, x
-    (0, -1),  # left
-    (-1, 0),  # down
-    (0, 1),  # right
-    (1, 0),  # top
-]
-
-
-def out_of_borders(y, x, grid):
-    max_y = len(grid)
-    if y < 0 or y >= max_y:
-        return True
-
-    max_x = len(grid[y])
-    if x < 0 or x >= max_x:
-        return True
-
-    return False
 
 
 def get_trailhead_score(
