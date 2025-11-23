@@ -63,5 +63,5 @@ def run(fn, *args, **kwargs):
     """Prints the output of applying function to task data to console"""
     data = _file_to_list(_get_resources_dir() / "run")
     res = fn(data, *args, **kwargs)
-    print(res)
+    print(f"run {fn.__name__} result: {res}")
     return res
