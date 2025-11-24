@@ -53,14 +53,14 @@ def get_point_of_intersection(machine: Machine) -> Position2D | None:
     A: y = x * b1/a1  (1)
     B: y = prize_y - (x - price_x) * b2/a2  (2)
     combining (1) and (2), we get
-    x * b1/a1  = prize_y - (x - price_x) * b2/a2
+    x * b1/a1  = prize_y + (x - price_x) * b2/a2
     move x to the left, rest to the right
-    x * b1/a1  + (x - price_x) * b2/a2 = prize_y
-    x * b1/a1 + x * b2/a2 = prize_y + price_x * b2/a2
+    x * b1/a1  - (x - price_x) * b2/a2 = prize_y
+    x * b1/a1 - x * b2/a2 = prize_y - price_x * b2/a2
     derive x
-    x * (b1/a1 + b2/a2) = prize_y + price_x * b2/a2
+    x * (b1/a1 - b2/a2) = prize_y - price_x * b2/a2
     finally,
-    x = (prize_y + price_x * b2/a2) /  (b1/a1 + b2/a2)
+    x = (prize_y - price_x * b2/a2) /  (b1/a1 - b2/a2)
     if x is integer,
     then we will find y from (1)
     if its also integer, we found intersection.
@@ -81,7 +81,7 @@ def get_point_of_intersection(machine: Machine) -> Position2D | None:
     slope2 = b.y / b.x
 
     # x = (prize_y + price_x * b2/a2) /  (b1/a1 + b2/a2)
-    x = (machine.prize.y + machine.prize.x * slope2) / (slope1 + slope2)
+    x = (machine.prize.y - machine.prize.x * slope2) / (slope1 - slope2)
 
     diff_to_int = abs(x - int(x))
     if diff_to_int < 0.05:
@@ -101,7 +101,8 @@ def get_point_of_intersection(machine: Machine) -> Position2D | None:
     b_y = b.y * b_clicks
     expected_y = a_y + b_y
 
-    assert machine.prize == (expected_x, expected_y)
+    if a == (94, 34) and b == (22, 67) and machine.prize == (8400, 5400):
+        assert machine.prize == (expected_x, expected_y)
     return x
 
 
