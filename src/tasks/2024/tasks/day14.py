@@ -1,3 +1,4 @@
+import logging
 import re
 from dataclasses import dataclass
 from functools import cached_property
@@ -49,7 +50,7 @@ class TestSpace(AbstractSpace):
 
 @dataclass
 class RuntimeSpace(AbstractSpace):
-    x: int = 103
+    x: int = 101
     y: int = 103
 
 
@@ -85,13 +86,25 @@ def task1(inp: list[str], space_cls: type[AbstractSpace] = RuntimeSpace, seconds
     robots = _parse_input(inp, 1)
 
     res_by_quarter = [0, 0, 0, 0]
+    positions = []
     for robot in robots:
         final_position = simulate(robot, space, seconds)
+        positions.append(final_position)
         if final_position.x == space.mid_x or final_position.y == space.mid_y:
             continue
 
         quarter = space.get_quarter(final_position)
         res_by_quarter[quarter] += 1
+
+    if _logger.level <= logging.DEBUG:
+        grid = [["." for _ in range(space.x)] for _ in range(space.y)]
+        for x, y in positions:
+            if grid[y][x] == ".":
+                grid[y][x] = "1"
+            else:
+                grid[y][x] = str(int(grid[y][x]) + 1)
+        for row in grid:
+            _logger.debug("".join(row))
 
     return prod(res_by_quarter)
 
