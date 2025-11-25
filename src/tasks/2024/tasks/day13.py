@@ -98,25 +98,6 @@ def get_tokens_to_pay(machine: Machine) -> int:
         int
 
     """
-    a = machine.button_a
-    b = machine.button_b
-
-    # make variables for y = x * b1/a1
-    # a1 = a.y
-    # b1 = a.x
-    # we then use b1/a1 and b2/a2 much, define them
-    slope1 = a.y / a.x
-    slope2 = b.y / b.x
-
-    # x = (prize_y + price_x * b2/a2) /  (b1/a1 + b2/a2)
-    x = (machine.prize.y - machine.prize.x * slope2) / (slope1 - slope2)
-
-    diff_to_int = abs(x - int(x))
-    if diff_to_int < 0.05:
-        _logger.debug(f"{x=}, {diff_to_int=} OK")
-    else:
-        _logger.debug(f"{x=}, {diff_to_int=} bad =(")
-
     # now let's use Cramer rule to minimize fractions at slope calculation
     ax, ay = machine.button_a.x, machine.button_a.y
     bx, by = machine.button_b.x, machine.button_b.y
@@ -151,24 +132,6 @@ def get_tokens_to_pay(machine: Machine) -> int:
 
 
 def calculate_tokens_to_prize(machine: Machine, max_tokens: int, use_fast_fail: bool = True) -> int:
-    a_slope = machine.button_a.slope()
-    b_slope = machine.button_b.slope()
-    prize_slope = machine.prize.slope()
-
-    msg = f"{a_slope=}, {b_slope=}"
-    slope_diff = abs(a_slope - b_slope)
-    if not slope_diff:
-        msg += " EQUAL!"
-        raise ValueError(msg)  # we need to investigate that case separately
-    elif slope_diff < 0.1:
-        msg += f" almost EQUAL: {slope_diff}!"
-        raise ValueError(msg)  # we need to investigate that case separately
-    else:
-        msg += f" {slope_diff=}"
-
-    msg += f" {prize_slope=}. full state: {machine.button_a=}, {machine.button_b=}, {machine.prize=}"
-    _logger.debug(msg)
-
     if use_fast_fail and fast_fail(machine, max_tokens):
         return 0
 
