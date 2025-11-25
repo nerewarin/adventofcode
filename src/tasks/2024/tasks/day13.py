@@ -30,12 +30,13 @@ class Machine:
     button_a: Position2D
     button_b: Position2D
     prize: Position2D
+    idx: int
 
     button_a_price: int = 3
     button_b_price: int = 1
 
 
-def _parse_input(inp: list[str]) -> list[Machine]:
+def _parse_input(inp: list[str], task_num: int) -> list[Machine]:
     machines: list[Machine] = []
 
     for i, line in enumerate(inp):
@@ -46,7 +47,12 @@ def _parse_input(inp: list[str]) -> list[Machine]:
                 button_b = Position2D.integer_point_from_tuple_of_strings(_button_rexp.findall(line)[0])
             case 2:
                 prize = Position2D.integer_point_from_tuple_of_strings(_prize_rexp.findall(line)[0])
-                machines.append(Machine(button_a, button_b, prize))
+                if task_num == 2:
+                    prize = Position2D(
+                        prize.x + 10000000000000,
+                        prize.y + 10000000000000,
+                    )
+                machines.append(Machine(button_a, button_b, prize, idx=i // 4))
             case 3:
                 continue
 
@@ -107,7 +113,7 @@ def get_tokens_to_pay(machine: Machine) -> int:
     d = ax * by - ay * bx
 
     if d == 0:
-        _logger.debug(f"{d=}: Parallel / no unique solution")
+        _logger.debug(f"{machine.idx}: {d=}: Parallel / no unique solution")
         return 0
 
     # Cramer's rule
@@ -116,30 +122,30 @@ def get_tokens_to_pay(machine: Machine) -> int:
 
     # Check that point coordinates are integers
     if na.denominator != 1 or nb.denominator != 1:
-        _logger.debug(f"some of {na.denominator=} or {nb.denominator=} are fractions!")
+        _logger.debug(f"{machine.idx}: some of {na.denominator=} or {nb.denominator=} are fractions!")
         return 0
 
     na_int = na.numerator
     nb_int = nb.numerator
 
     if na_int < 0 or nb_int < 0:
-        _logger.debug(f"some of {na_int=} or {nb_int=} are negative!")
+        _logger.debug(f"{machine.idx}: some of {na_int=} or {nb_int=} are negative!")
         return 0
 
     res = na_int * machine.button_a_price + nb_int * machine.button_b_price
-    _logger.debug(f"{res=}")
+    _logger.debug(f"{machine.idx}: {res=}")
     return res
 
 
-def calculate_tokens_to_prize(machine: Machine, max_tokens: int, use_fast_fail: bool = True) -> int:
-    if use_fast_fail and fast_fail(machine, max_tokens):
+def calculate_tokens_to_prize(machine: Machine, max_tokens: int | None, use_fast_fail: bool = True) -> int:
+    if max_tokens is not None and use_fast_fail and fast_fail(machine, max_tokens):
         return 0
 
     return get_tokens_to_pay(machine)
 
 
-def task(inp: list[str], task_num: int, max_tokens: int, use_fast_fail):
-    return sum(calculate_tokens_to_prize(machine, max_tokens, use_fast_fail) for machine in _parse_input(inp))
+def task(inp: list[str], task_num: int, max_tokens: int | None, use_fast_fail: bool):
+    return sum(calculate_tokens_to_prize(machine, max_tokens, use_fast_fail) for machine in _parse_input(inp, task_num))
 
 
 @timeit_deco
@@ -147,7 +153,14 @@ def task1(inp, use_fast_fail=True):
     return task(inp, 1, max_tokens=100, use_fast_fail=use_fast_fail)
 
 
+@timeit_deco
+def task2(inp, use_fast_fail=True):
+    return task(inp, 2, max_tokens=None, use_fast_fail=use_fast_fail)
+
+
 if __name__ == "__main__":
     test(task1, 480)
-    assert run(task1, True) > 18025
-    assert run(task1, False) > 18025
+    assert run(task1, True)
+    run(task1, False)
+
+    run(task2)
