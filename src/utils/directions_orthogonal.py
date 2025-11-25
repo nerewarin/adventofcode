@@ -29,6 +29,18 @@ class DirectionEnum(StrEnum):
     left = "left"
 
 
+SYMBOL_UP = "^"
+SYMBOL_RIGHT = ">"
+SYMBOL_DOWN = "v"
+SYMBOL_LEFT = "<"
+
+DIRECTION_SYMBOLS = {
+    SYMBOL_DOWN: DirectionEnum.down,
+    SYMBOL_UP: DirectionEnum.up,
+    SYMBOL_RIGHT: DirectionEnum.right,
+    SYMBOL_LEFT: DirectionEnum.left,
+}
+
 DIRECTIONS = {
     # y, x
     (-1, 0): DirectionEnum.up,
@@ -62,6 +74,8 @@ def go(
     _directions = []
     if isinstance(directions, DirectionEnum):
         _directions = [directions]
+    elif isinstance(directions, tuple) and len(directions) == 2:
+        _directions.append(DIRECTIONS[directions])
     else:
         for d in directions:
             if isinstance(d, DirectionEnum):
@@ -70,7 +84,7 @@ def go(
                 _directions.extend(d)
                 break
             else:
-                _directions.append(DIRECTIONS[d])
+                raise ValueError(f"unknown branch for {d=}")
 
     is_given_separately = x is not None and y is not None
     is_given_as_tuple = pos is not None
