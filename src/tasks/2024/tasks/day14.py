@@ -6,7 +6,7 @@ from math import prod
 
 from src.utils.logger import get_logger
 from src.utils.position import Position2D
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import run
 
 _logger = get_logger()
 
@@ -81,21 +81,7 @@ def simulate(robot: Robot, space: AbstractSpace, seconds: int) -> Position2D:
     return Position2D(x, y)
 
 
-def task1(inp: list[str], space_cls: type[AbstractSpace] = RuntimeSpace, seconds=100) -> int:
-    space = space_cls()
-    robots = _parse_input(inp, 1)
-
-    res_by_quarter = [0, 0, 0, 0]
-    positions = []
-    for robot in robots:
-        final_position = simulate(robot, space, seconds)
-        positions.append(final_position)
-        if final_position.x == space.mid_x or final_position.y == space.mid_y:
-            continue
-
-        quarter = space.get_quarter(final_position)
-        res_by_quarter[quarter] += 1
-
+def _draw(positions: list[Position2D], space: AbstractSpace, turn: int):
     if _logger.level <= logging.DEBUG:
         grid = [["." for _ in range(space.x)] for _ in range(space.y)]
         for x, y in positions:
@@ -103,12 +89,68 @@ def task1(inp: list[str], space_cls: type[AbstractSpace] = RuntimeSpace, seconds
                 grid[y][x] = "1"
             else:
                 grid[y][x] = str(int(grid[y][x]) + 1)
-        for row in grid:
-            _logger.debug("".join(row))
 
-    return prod(res_by_quarter)
+        filled_middle_rows = 0
+        for row in grid:
+            if row[space.mid_x] != ".":
+                filled_middle_rows += 1
+
+        is_tree = filled_middle_rows > (space.y // 3)
+        if is_tree:
+            _logger.debug(f"{turn=}")
+            for row in grid:
+                _logger.debug("".join(row))
+
+        return is_tree
+
+
+def task(inp: list[str], space_cls: type[AbstractSpace] = RuntimeSpace, seconds: int | None = 100) -> int:
+    space = space_cls()
+    robots = _parse_input(inp, 1)
+
+    if seconds:
+        res_by_quarter = [0, 0, 0, 0]
+        for robot in robots:
+            final_position = simulate(robot, space, seconds)
+            if final_position.x == space.mid_x or final_position.y == space.mid_y:
+                continue
+
+            quarter = space.get_quarter(final_position)
+            res_by_quarter[quarter] += 1
+
+        return prod(res_by_quarter)
+
+    else:
+        # task 2
+        seconds = 0
+        while True:
+            positions = []
+            seconds += 1
+            for i, robot in enumerate(robots):
+                position = simulate(robot, space, 1)
+                positions.append(position)
+
+                robots[i] = Robot(*position, robot.vx, robot.vy, idx=i)
+
+            is_tree = _draw(positions, space, seconds)
+            if is_tree is None:
+                raise NotImplementedError
+
+            # if is_tree:
+            #     return seconds
+
+
+def task1(inp, **kw):
+    return task(inp, **kw)
+
+
+def task2(inp, **kw):
+    return task(inp, seconds=None, **kw)
 
 
 if __name__ == "__main__":
-    test(task1, 12, space_cls=TestSpace)
-    assert run(task1) > 221096928
+    # test(task1, 12, space_cls=TestSpace)
+    # assert run(task1)  # 226201248
+
+    # test(task2, 0, space_cls=TestSpace)
+    run(task2)
