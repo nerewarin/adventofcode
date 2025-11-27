@@ -1,25 +1,34 @@
-# from math lessons:
-#
-# y
-# ^
-# |
-# |
-# |
-# .----> x
-#
-# from computer history (first display)
-# 0...-> v
-# ---->
-# ...... >    ..so
-#
-# .----> x
-# |
-# |
-# |
-# v
-# y
+"""
+Instruments to work with 2D points.
+Take care: every position is represented as (Y, X) instead of (X, Y) for easier access to 2d-lists
+
+from math lessons:
+
+y
+^
+|
+|
+|
+.----> x
+
+from computer history (first display)
+0...-> v
+---->
+...... >    ..so
+
+.----> x
+|
+|
+|
+v
+y
+
+"""
+
 from collections.abc import Iterable
 from enum import StrEnum
+
+from src.utils.position import Position2D
 
 
 class DirectionEnum(StrEnum):
@@ -43,10 +52,10 @@ DIRECTION_SYMBOLS = {
 
 DIRECTIONS = {
     # y, x
-    (-1, 0): DirectionEnum.up,
-    (0, 1): DirectionEnum.right,
-    (1, 0): DirectionEnum.down,
-    (0, -1): DirectionEnum.left,
+    Position2D(-1, 0): DirectionEnum.up,
+    Position2D(0, 1): DirectionEnum.right,
+    Position2D(1, 0): DirectionEnum.down,
+    Position2D(0, -1): DirectionEnum.left,
 }
 
 DIRECTIONS_BY_ENUM = {v: k for k, v in DIRECTIONS.items()}
@@ -67,7 +76,7 @@ def get_2d_diff(pos1: tuple[int, int], pos2: tuple[int, int], absolute=False):
 
 def go(
     directions: Iterable[DirectionEnum] | Iterable[tuple[int, int]] | DirectionEnum | tuple[int, int],
-    pos: tuple[int, int] | None = None,
+    pos: tuple[int, int] | Position2D | None = None,
     y: int | None = None,
     x: int | None = None,
 ) -> tuple[int, int]:

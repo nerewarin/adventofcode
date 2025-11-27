@@ -8,7 +8,7 @@ from collections import defaultdict
 
 from src.utils.test_and_run import run, test
 
-DIRECTIONS = [
+_DIRECTIONS = [
     (1, 0, 0),
     (-1, 0, 0),
     (0, 1, 0),
@@ -78,7 +78,7 @@ def empty_is_inner_hole(p, matrix, directions_to_check=None):
 
     locals = 0
     if directions_to_check is None:
-        directions_to_check = DIRECTIONS
+        directions_to_check = _DIRECTIONS
     for d, dir1 in enumerate(directions_to_check):
         p1 = vector_sum(p, dir1)
         sx, sy, sz = dir1
@@ -121,7 +121,7 @@ def _task(points, p2=False):
     res = 0
     for x, y, z in points:
         local = 6
-        for sx, sy, sz in DIRECTIONS:
+        for sx, sy, sz in _DIRECTIONS:
             p = x + sx, y + sy, z + sz
             if get(p, matrix=matrix):
                 local -= 1
@@ -131,13 +131,13 @@ def _task(points, p2=False):
     if p2:
         holes = 0
         for x, y, z in points:
-            for sx, sy, sz in DIRECTIONS:
+            for sx, sy, sz in _DIRECTIONS:
                 p = x + sx, y + sy, z + sz
 
                 if get(p, matrix=matrix):
                     continue
 
-                all_directions_but_back = [d for d in DIRECTIONS if d != (-sx, -sy, -sz)]
+                all_directions_but_back = [d for d in _DIRECTIONS if d != (-sx, -sy, -sz)]
                 ishole = empty_is_inner_hole(p, matrix, all_directions_but_back)
                 # dd = sorted(DIRECTIONS, key=lambda d: d != (sx, sy, sz))
                 # ishole = empty_is_inner_hole(p, matrix, dd)

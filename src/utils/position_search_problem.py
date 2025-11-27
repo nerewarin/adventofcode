@@ -1,3 +1,29 @@
+from abc import ABC, abstractmethod
+from collections.abc import Generator, Iterable
+from typing import Any
+
+from src.tasks.year_2023.tasks.day10 import State
+from src.utils.position import Position2D
+
+
+@abstractmethod
+class BaseState(ABC):
+    """Abstract base class for any storage backend."""
+
+    @property
+    @abstractmethod
+    def pos(self) -> Position2D: ...
+
+    @abstractmethod
+    def get_successors(self) -> Iterable["BaseState"]: ...
+
+    @abstractmethod
+    def copy(self) -> "BaseState": ...
+
+    @abstractmethod
+    def get_last_action(self) -> Any: ...
+
+
 class PositionSearchProblem:
     """
     A search problem defines the state space, start state, goal test, successor
@@ -9,7 +35,7 @@ class PositionSearchProblem:
     Note: this search problem is fully specified; you should NOT change it.
     """
 
-    def __init__(self, state, goal, costFn=lambda x: 1, inp=None):
+    def __init__(self, state: BaseState, goal, cost_fn=lambda x: 1, inp=None):
         """
         Stores the start and goal.
 
@@ -19,34 +45,15 @@ class PositionSearchProblem:
         """
         self.startState = state
         self.goal = goal
-        self.costFn = costFn
+        self.cost_fn = cost_fn
         self.inp = inp
 
-    def getStartState(self):
+    def get_start_state(self):
         return self.startState
 
-    def isGoalState(self, state):
-        isGoal = state.pos == self.goal
+    def is_goal_state(self, state):
+        return state.pos == self.goal
 
-        return isGoal
-
-    def getSuccessors(self, state):
-        """
-        Returns successor states, the actions they require, and a cost of 1.
-
-         As noted in search.py:
-             For a given state, this should return a list of triples,
-         (successor, action, stepCost), where 'successor' is a
-         successor to the current state, 'action' is the action
-         required to get there, and 'stepCost' is the incremental
-         cost of expanding to that successor
-        """
-        #  position, action, dummy_cost
-        successors = []
-        for name, dist in state.get_successors().items():
-            s = state.copy()
-            s.move_to_valve(name)
-
-            succ = s, name, dist
-            successors.append(succ)
-        return successors
+    def get_successors(self, state: State) -> Generator[tuple[BaseState, Any, Any]]:
+        """Must return new state, last action and its cost"""
+        yield from state.get_successors()

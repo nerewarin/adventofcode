@@ -71,11 +71,8 @@ class State:
 
 
 class Problem(PositionSearchProblem):
-    def isGoalState(self, state: State):
+    def is_goal_state(self, state: State):
         return state.step == self.goal
-
-    def getSuccessors(self, state):
-        yield from state.get_successors()
 
 
 class StepCounter:
@@ -108,8 +105,8 @@ class StepCounter:
         start_state = self.start_state
         problem = Problem(start_state, goal=self.steps)
 
-        start_state = problem.getStartState()
-        start_successors = problem.getSuccessors(start_state)
+        start_state = problem.get_start_state()
+        start_successors = problem.get_successors(start_state)
         fringe = collections.deque()
         for state in start_successors:
             fringe.appendleft(state)
@@ -134,12 +131,12 @@ class StepCounter:
             if self.is_garden(state.pos):
                 step2gardens[state.step].add(state.serialize())
 
-            if problem.isGoalState(state):
+            if problem.is_goal_state(state):
                 if self.is_garden(state.pos):
                     gardens.add(state.pos)
                 continue
 
-            successors = problem.getSuccessors(state)
+            successors = problem.get_successors(state)
             for state in successors:
                 if state.serialize() in visited:
                     continue

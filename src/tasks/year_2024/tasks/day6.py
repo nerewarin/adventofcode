@@ -7,7 +7,7 @@ OBSTACLE = "O"
 WALL = "#"
 TURN = "+"
 
-DIRECTIONS = {
+_DIRECTIONS = {
     "^": (-1, 0),  # up
     ">": (0, 1),  # right
     "v": (1, 0),  # down
@@ -29,7 +29,7 @@ def find_start(grid):
     """Find starting position and direction of the guard"""
     for i, row in enumerate(grid):
         for j, cell in enumerate(row):
-            if cell in DIRECTIONS:
+            if cell in _DIRECTIONS:
                 return i, j, cell
     raise ValueError("No starting position found")
 
@@ -50,7 +50,7 @@ def simulate_guard_path(data):
 
     while True:
         # Check position in front
-        dr, dc = DIRECTIONS[direction]
+        dr, dc = _DIRECTIONS[direction]
         next_row, next_col = row + dr, col + dc
 
         # If position is invalid or has obstacle, turn right
@@ -91,7 +91,7 @@ def can_get_stuck(grid, start_row, start_col, direction, possible_positions):
 
         visited.add((row, col, direction))
 
-        dr, dc = DIRECTIONS[direction]
+        dr, dc = _DIRECTIONS[direction]
         next_row, next_col = row + dr, col + dc
 
         # If position is invalid or has an obstacle, turn right
@@ -99,7 +99,7 @@ def can_get_stuck(grid, start_row, start_col, direction, possible_positions):
             direction = TURN_RIGHT[direction]
             path.append((row, col, direction))
 
-            dr, dc = DIRECTIONS[direction]
+            dr, dc = _DIRECTIONS[direction]
             next_row, next_col = row + dr, col + dc
             row, col = next_row, next_col
 

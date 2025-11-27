@@ -45,7 +45,7 @@ class Position:
         return self.x, self.y
 
 
-DIRECTIONS = {
+_DIRECTIONS = {
     "L": Position(-1, 0, "LEFT"),
     "R": Position(1, 0, "RIGHT"),
     "U": Position(0, 1, "UP"),
@@ -61,7 +61,7 @@ class Rope:
 
     def go(self, cmd):
         raw_direction, steps = cmd.split(" ")
-        direction = DIRECTIONS[raw_direction]
+        direction = _DIRECTIONS[raw_direction]
 
         for step in range(int(steps)):
             self.head.go(direction)

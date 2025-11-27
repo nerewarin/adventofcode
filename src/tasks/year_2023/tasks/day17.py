@@ -3,9 +3,11 @@
 https://adventofcode.com/2023/day/17
 """
 
+from collections import defaultdict
+
 from src.tasks.year_2023.tasks.day10 import State as BaseState
 from src.utils.input_formatters import cast_2d_list_elements
-from src.utils.pathfinding import aStarSearch, manhattan_distance
+from src.utils.pathfinding import PriorityQueue, manhattan_distance, nullHeuristic
 from src.utils.position_search_problem import PositionSearchProblem
 from src.utils.test_and_run import run, test
 
@@ -93,9 +95,87 @@ class State(BaseState):
             )
 
 
-class Day17PositionSearchProblem(PositionSearchProblem):
-    def getSuccessors(self, state):
-        yield from state.get_successors()
+def a_star_search(problem: PositionSearchProblem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    start_state = problem.get_start_state()
+    start_successors = problem.get_successors(start_state)
+    successors = {start_state: start_successors}
+    fringe = PriorityQueue()
+    pushed = set([])
+    best_cost = {}
+    best_path = {}
+    last3steps = defaultdict(set)
+
+    for state, action, cost in start_successors:
+        moving = state, action, cost
+        score = cost + heuristic(state, problem)
+        fringe.push((state, [action], cost), score)
+        best_cost[state.pos] = score
+        pushed.add(moving)
+
+    closed = [start_state.pos]
+
+    for_debug = set([start_state.pos])
+
+    while not fringe.isEmpty():
+        moving = fringe.pop()
+        state, path, cost = moving
+
+        if problem.is_goal_state(state):
+            # TODO del this shit start
+            loss = 0
+            x, y = start_state.x, start_state.y
+            path_str = []
+            for i, (dx, dy) in enumerate(state.path):
+                x, y = x + dx, y + dy
+
+                loss_ = problem.inp[y][x]
+                loss += loss_
+                path_str.append(f"{i + 1}. ({x}, {y}) = {loss_}, {loss=}")
+            if loss < 985 and loss != 981 and loss not in range(957, 960):
+                # TODO del this shit end. left only return path
+                for p in path_str:
+                    print(p)
+                return path
+            else:
+                print(f"Found path loss of {loss}")
+                continue
+
+        closed.append(state)
+        if state.pos in for_debug:
+            pass
+
+        if state not in successors.keys():
+            successors[state] = problem.get_successors(state)
+
+        for child in successors[state]:
+            child_state, child_action, child_cost = child
+
+            full_cost = cost + child_cost
+            h = heuristic(child_state, problem)
+            score = full_cost + h
+
+            child_pos = child_state.pos
+
+            if (child_pos not in closed) and (child not in pushed):
+                is_best_cost = child_pos not in best_cost or score <= best_cost[child_pos]
+
+                # just for 2023/day17: give a chance to path with fresh direction (last action was turn)
+                # last_action_is_turn = len(child_path) > 1 and child_state.path[-1] != child_state.path[-2]
+                last_action_is_turn = False
+                last_three_actions = tuple(child_state.path[-3:])
+
+                if is_best_cost or last_action_is_turn or last_three_actions not in last3steps[child_pos]:
+                    if is_best_cost:
+                        best_cost[child_pos] = score
+
+                    last3steps[child_pos].add(last_three_actions)
+
+                    best_path[child_pos] = child_state.path_str
+                    fringe.push((child_state, path + [child_action], full_cost), score)
+                    pushed.add(child)
+    else:
+        return []
 
 
 class ClumsyCrucible:
@@ -111,7 +191,7 @@ class ClumsyCrucible:
 
         state = State(self._inp, self.start, 0, self.path)
 
-        self.problem = Day17PositionSearchProblem(state=state, goal=self.end, inp=self._inp)
+        self.problem = PositionSearchProblem(state=state, goal=self.end, inp=self._inp)
 
     def _print_test_path(self):
         # test path
@@ -180,7 +260,7 @@ class ClumsyCrucible:
             return manhattan_distance(state.pos, problem.goal) + repeats * 2
 
         # return astar(world, self.start, end=self.end, max_blocks_in_a_single_direction=3)
-        best_path = aStarSearch(self.problem, heuristic)
+        best_path = a_star_search(self.problem, heuristic)
 
         loss = 0
         x, y = self.start
