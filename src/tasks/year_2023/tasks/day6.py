@@ -1,14 +1,7 @@
 """
 --- Day 6: Wait For It ---
 https://adventofcode.com/2023/day/6
-"""
 
-import math
-from functools import reduce
-
-from src.utils.test_and_run import run, test
-
-"""
 y = (speed = wait * 1) * (t - wait)
 y = (x * a) * (b - x)
 y = abx - ax^2
@@ -24,6 +17,11 @@ solve
 d  = sqrt(b*b - 4*a*c)
 (b + d) / 2*a < x < (b - d) / 2*a
 """
+
+import math
+from functools import reduce
+
+from src.utils.test_and_run import run, test
 
 
 def print(*_):

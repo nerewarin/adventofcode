@@ -3,11 +3,11 @@
 https://adventofcode.com/2023/day/17
 """
 
+from src.tasks.year_2023.tasks.day10 import State as BaseState
 from src.utils.input_formatters import cast_2d_list_elements
 from src.utils.pathfinding import aStarSearch, manhattan_distance
 from src.utils.position_search_problem import PositionSearchProblem
 from src.utils.test_and_run import run, test
-from tasks.day10 import State as BaseState
 
 # def print(*_):
 #     pass
