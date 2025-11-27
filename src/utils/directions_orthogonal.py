@@ -115,3 +115,12 @@ def out_of_borders(y, x, grid):
         return True
 
     return False
+
+
+def is_horizontal(direction: DirectionEnum) -> bool:
+    y, x = DIRECTIONS_BY_ENUM[direction]
+    if not y and not x:
+        raise ValueError("y or x must be passed!")
+    if y and x:
+        raise ValueError("either y or x must be zero!")
+    return bool(x)
