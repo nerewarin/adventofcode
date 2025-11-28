@@ -52,10 +52,10 @@ DIRECTION_SYMBOLS = {
 
 DIRECTIONS = {
     # y, x
-    Position2D(-1, 0): DirectionEnum.up,
-    Position2D(0, 1): DirectionEnum.right,
-    Position2D(1, 0): DirectionEnum.down,
-    Position2D(0, -1): DirectionEnum.left,
+    (-1, 0): DirectionEnum.up,
+    (0, 1): DirectionEnum.right,
+    (1, 0): DirectionEnum.down,
+    (0, -1): DirectionEnum.left,
 }
 
 DIRECTIONS_BY_ENUM = {v: k for k, v in DIRECTIONS.items()}
@@ -79,7 +79,8 @@ def go(
     pos: tuple[int, int] | Position2D | None = None,
     y: int | None = None,
     x: int | None = None,
-) -> tuple[int, int]:
+    return_reversed: bool | None = None,
+) -> tuple[int, int] | Position2D:
     _directions = []
     if isinstance(directions, DirectionEnum):
         _directions = [directions]
@@ -98,7 +99,16 @@ def go(
     is_given_separately = x is not None and y is not None
     is_given_as_tuple = pos is not None
     if is_given_as_tuple:
-        y, x = pos
+        if isinstance(pos, Position2D):
+            x, y = pos
+            if return_reversed is None:
+                return_reversed = False
+        else:
+            y, x = pos
+            if return_reversed is None:
+                return_reversed = True
+    if return_reversed is None:
+        raise ValueError("could not determine return_reversed value!")
 
     if not is_given_separately and not is_given_as_tuple:
         raise ValueError("either is_given_separately or is_given_as_tuple must be passed!")
@@ -111,10 +121,15 @@ def go(
         y = y + dy
         x = x + dx
 
-    return y, x
+    if return_reversed:
+        return y, x
+    return Position2D(x, y)
 
 
-def out_of_borders(y, x, grid):
+def out_of_borders(x, y, grid, is_reversed=True):
+    if is_reversed:
+        x, y = y, x
+
     max_y = len(grid)
     if y < 0 or y >= max_y:
         return True
@@ -133,3 +148,16 @@ def is_horizontal(direction: DirectionEnum) -> bool:
     if y and x:
         raise ValueError("either y or x must be zero!")
     return bool(x)
+
+
+def reverse_coordinates(coordinates: tuple[int, int]) -> tuple[int, int]:
+    x, y = coordinates
+    return x * -1, y * -1
+
+
+def is_a_way_back(direction1: DirectionEnum, direction2: DirectionEnum) -> bool:
+    coordinates1 = DIRECTIONS_BY_ENUM[direction1]
+    coordinates2 = DIRECTIONS_BY_ENUM[direction2]
+
+    reversed_coordinates2 = reverse_coordinates(coordinates2)
+    return coordinates1 == reversed_coordinates2

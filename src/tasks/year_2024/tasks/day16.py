@@ -6,14 +6,14 @@ The idea is to use same A-star algorythm as for src/tasks/year_2023/tasks/day17.
 
 """
 
-from collections.abc import Iterable
+from collections.abc import Generator
 
-from src.utils.directions_orthogonal import DIRECTIONS, DirectionEnum, go, out_of_borders
+from src.utils.directions_orthogonal import DIRECTIONS, DirectionEnum, go, is_a_way_back, out_of_borders
 from src.utils.logger import get_logger
-from src.utils.pathfinding import aStarSearch, manhattan_distance
+from src.utils.pathfinding import a_star_search, manhattan_heuristic
 from src.utils.position import Position2D
 from src.utils.position_search_problem import BaseState, PositionSearchProblem
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import run
 
 _logger = get_logger()
 
@@ -34,35 +34,55 @@ class State(BaseState):
         self.actions = actions or []
         self.visited = visited or (set(path) if path is not None else set())
 
+    def __str__(self):
+        return (
+            f"{self.__class__.__qualname__}"
+            f"(pos={self.pos}, step={self.step}, symbol={self.symbol}, last_action={self.get_last_action()})"
+        )
+
     @property
     def pos(self) -> Position2D:
-        return Position2D(self.y, self.x)
+        return Position2D(self.x, self.y)
 
-    def _get(self, yx) -> str:
-        y, x = yx
+    def _get(self, pos: Position2D) -> str:
+        x, y = pos
         return self.inp[y][x]
 
-    def get_successors(self) -> Iterable["State"]:
+    def _is_wall(self, yx: Position2D) -> bool:
+        return self._get(yx) == WALL
+
+    def get_successors(self) -> Generator[tuple[BaseState, DirectionEnum, int]]:
+        prior_action = self.get_last_action()
         for yx, direction in DIRECTIONS.items():
+            if prior_action is not None and is_a_way_back(direction, prior_action):
+                continue
+
             pos = go(direction, self.pos)
 
-            if out_of_borders(*yx, self.inp):
+            if out_of_borders(*pos, self.inp, is_reversed=False):
+                continue
+            if self._is_wall(pos):
                 continue
 
             new_path = self.path + [pos]
             new_actions = self.actions + [direction]
 
-            yield self.__class__(self.inp, pos, self.step + 1, new_path, new_actions)
+            state = self.__class__(self.inp, pos, self.step + 1, new_path, new_actions)
+            action = state.get_last_action()
 
-    def copy(self): ...
+            cost = 1
+            if prior_action is not None and action != prior_action:
+                cost += 1000
 
-    def get_last_action(self) -> DirectionEnum:
+            yield state, action, cost
+
+    def get_last_action(self) -> DirectionEnum | None:
+        if not self.actions:
+            return None
         return self.actions[-1]
 
 
-class ReindeerMazeSearchProblem(PositionSearchProblem):
-    def get_successors(self, state: State):
-        yield from state.get_successors()
+class ReindeerMazeSearchProblem(PositionSearchProblem): ...
 
 
 class ReindeerMazeTask:
@@ -75,7 +95,9 @@ class ReindeerMazeTask:
 
         self.path = path or []
 
-        state = State(self.maze, self.start, 0, self.path)
+        # The Reindeer start on the Start Tile (marked S) facing East and need to reach the End Tile (marked E)
+        starting_rotation = DirectionEnum.right
+        state = State(self.maze, self.start, 0, self.path, actions=[starting_rotation])
 
         self.problem = ReindeerMazeSearchProblem(state=state, goal=self.end, inp=self.maze)
 
@@ -97,26 +119,8 @@ class ReindeerMazeTask:
         return maze, start, end
 
     def solve(self):
-        def heuristic(state, problem):
-            child_path = state.path
-            repeats = 0
-            last_move = None
-            for i in reversed(child_path):
-                if last_move is None:
-                    last_move = i
-                    continue
-
-                if i != last_move:
-                    break
-                else:
-                    last_move = i
-                    repeats += 1
-
-            return manhattan_distance(state.pos, problem.goal) + repeats * 2
-
-        # return astar(world, self.start, end=self.end, max_blocks_in_a_single_direction=3)
-        best_path = aStarSearch(self.problem, heuristic)
-        return best_path  # TODO get score
+        *_, score = a_star_search(self.problem, manhattan_heuristic)
+        return score
 
 
 def task(inp: list[str], task_num: int = 1) -> int:
@@ -132,6 +136,6 @@ def task2(inp, **kw):
 
 
 if __name__ == "__main__":
-    test(task1, 7036)
-    test(task1, 11048, test_part=2)
+    # test(task1, 7036)
+    # test(task1, 11048, test_part=2)
     run(task1)

@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
-from collections.abc import Generator, Iterable
+from collections.abc import Generator
 from typing import Any
-
-from src.tasks.year_2023.tasks.day10 import State
-from src.utils.position import Position2D
 
 
 @abstractmethod
@@ -12,16 +9,10 @@ class BaseState(ABC):
 
     @property
     @abstractmethod
-    def pos(self) -> Position2D: ...
+    def pos(self) -> Any: ...
 
     @abstractmethod
-    def get_successors(self) -> Iterable["BaseState"]: ...
-
-    @abstractmethod
-    def copy(self) -> "BaseState": ...
-
-    @abstractmethod
-    def get_last_action(self) -> Any: ...
+    def get_successors(self) -> Generator[tuple["BaseState", Any, Any]]: ...
 
 
 class PositionSearchProblem:
@@ -54,6 +45,7 @@ class PositionSearchProblem:
     def is_goal_state(self, state):
         return state.pos == self.goal
 
-    def get_successors(self, state: State) -> Generator[tuple[BaseState, Any, Any]]:
+    @staticmethod
+    def get_successors(state: BaseState) -> Generator[tuple[BaseState, Any, Any]]:
         """Must return new state, last action and its cost"""
         yield from state.get_successors()

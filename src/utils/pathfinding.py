@@ -4,8 +4,9 @@ copy of my solutions from CS188.1x: Artificial Intelligence course
 """
 
 import heapq
+from typing import Any
 
-from src.utils.position_search_problem import PositionSearchProblem
+from src.utils.position_search_problem import BaseState, PositionSearchProblem
 
 
 def manhattan_distance(point1, point2):
@@ -313,6 +314,11 @@ def nullHeuristic(state, problem=None):
     return 0
 
 
+def manhattan_heuristic(state: BaseState, problem: PositionSearchProblem):
+    """The Manhattan distance heuristic for a PositionSearchProblem"""
+    return state.pos.manhattan_to(problem.goal)
+
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
@@ -352,18 +358,24 @@ def uniformCostSearch(problem):
         return []
 
 
-def aStarSearch(problem: PositionSearchProblem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
+def a_star_search(problem: PositionSearchProblem, heuristic=nullHeuristic) -> tuple[BaseState, list[Any], Any] | None:
+    """Search the node that has the lowest combined cost and heuristic first.
+
+    Returns:
+        tuple:
+            final state,
+            list of actions (path)
+            and score
+        or None if final state not found
+
+    """
     start_state = problem.get_start_state()
     start_successors = problem.get_successors(start_state)
     successors = {start_state: start_successors}
     fringe = PriorityQueue()
     pushed = set([])
     best_cost = {}
-    for state in start_successors:
-        action = state.get_last_action()
-        cost = problem.get_cost_of_actions([action])
-
+    for state, action, cost in start_successors:
         moving = state, action, cost
         score = cost + heuristic(state, problem)
         fringe.push((state, [action], cost), score)
@@ -376,7 +388,7 @@ def aStarSearch(problem: PositionSearchProblem, heuristic=nullHeuristic):
         state, path, cost = moving
 
         if problem.is_goal_state(state):
-            return path
+            return state, path, best_cost[state]
 
         closed.append(state)
         if state not in successors.keys():
@@ -392,8 +404,8 @@ def aStarSearch(problem: PositionSearchProblem, heuristic=nullHeuristic):
                 best_cost[child_state] = score
                 fringe.push((child_state, path + [child_action], full_cost), score)
                 pushed.add(child)
-    else:
-        return []
+
+    return None
 
 
 class Queue:
