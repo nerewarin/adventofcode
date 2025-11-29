@@ -150,6 +150,7 @@ def generic_search(problem, fringe, add_to_fringe_fn) -> tuple[BaseState, list[A
         if problem.is_goal_state(node):
             return node, path, cost
 
+        # STATE MUST BE HASHABLE BY POSITION!
         if node not in closed:
             closed.add(node)
 

@@ -14,9 +14,19 @@ class BaseState(ABC):
     @abstractmethod
     def get_successors(self) -> Generator[tuple["BaseState", Any, Any]]: ...
 
+    def __hash__(self):
+        # hash only by position
+        return hash(self.pos)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, BaseState):
+            return NotImplemented
+        # equality only by position
+        return self.pos == other.pos
+
     def get_cost_of_actions(self, actions: Sized) -> Any:
         """
-        Returns the cost of a particular sequence of actions.
+        Returns the cost of a particular sequence of actions. Very basic logic. Override it if needed.
         """
         return len(actions)
 
