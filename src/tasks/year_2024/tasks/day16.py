@@ -13,7 +13,7 @@ from src.utils.logger import get_logger
 from src.utils.pathfinding import astar, manhattan_heuristic
 from src.utils.position import Position2D
 from src.utils.position_search_problem import BaseState, PositionSearchProblem
-from src.utils.test_and_run import test
+from src.utils.test_and_run import run, test
 
 _logger = get_logger()
 
@@ -153,5 +153,5 @@ def task2(inp, **kw):
 
 if __name__ == "__main__":
     test(task1, 7036)
-    # test(task1, 11048, test_part=2)
-    # run(task1)
+    test(task1, 11048, test_part=2)
+    run(task1)
