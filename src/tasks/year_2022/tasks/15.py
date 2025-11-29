@@ -6,7 +6,7 @@ import dataclasses
 import re
 from functools import cached_property
 
-from src.utils.pathfinding import dist
+from src.utils.pathfinding import manhattan_distance
 from src.utils.test_and_run import run, test
 
 _REXP = re.compile(r"Sensor at x=(-*\d+), y=(-*\d+): closest beacon is at x=(-*\d+), y=(-*\d+)")
@@ -96,12 +96,12 @@ class Sensor(Point2D):
 
     @cached_property
     def dist_to_beacon(self):
-        return dist(self.pos, self.beacon.pos)
+        return manhattan_distance(self.pos, self.beacon.pos)
 
     def is_reaching(self, point: Point2D):
         """Does sensor cover the point?"""
         dist_to_beacon = self.dist_to_beacon
-        dist_to_point = dist(self.pos, point.pos)
+        dist_to_point = manhattan_distance(self.pos, point.pos)
         return dist_to_point <= dist_to_beacon
 
 

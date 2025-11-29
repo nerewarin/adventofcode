@@ -2,7 +2,13 @@ import re
 
 from tqdm import tqdm
 
-from src.utils.directions_orthogonal import DIRECTION_SYMBOLS, DIRECTIONS_BY_ENUM, DirectionEnum, go, is_horizontal
+from src.utils.directions import (
+    ORTHOGONAL_DIRECTION_SYMBOLS,
+    ORTHOGONAL_DIRECTIONS_BY_ENUM,
+    OrthogonalDirectionEnum,
+    go,
+    is_horizontal,
+)
 from src.utils.logger import get_logger
 from src.utils.test_and_run import run, test
 
@@ -22,7 +28,7 @@ BOX_LEFT = "["
 BOX_RIGHT = "]"
 
 
-def _parse_input(inp: list[str]) -> tuple[list[list[str]], list[DirectionEnum]]:
+def _parse_input(inp: list[str]) -> tuple[list[list[str]], list[OrthogonalDirectionEnum]]:
     warehouse_map = []
     for i, line in enumerate(inp):
         if not line:
@@ -34,7 +40,7 @@ def _parse_input(inp: list[str]) -> tuple[list[list[str]], list[DirectionEnum]]:
         if not line:
             break
         for symbol in line:
-            directions.append(DIRECTION_SYMBOLS[symbol])
+            directions.append(ORTHOGONAL_DIRECTION_SYMBOLS[symbol])
 
     return warehouse_map, directions
 
@@ -60,7 +66,7 @@ def _scale_map(warehouse_map: list[list[str]]) -> list[list[str]]:
     return new_map
 
 
-def make_moves(warehouse_map: list[list[str]], directions: list[DirectionEnum]) -> list[list[str]]:
+def make_moves(warehouse_map: list[list[str]], directions: list[OrthogonalDirectionEnum]) -> list[list[str]]:
     for i, line in enumerate(warehouse_map[1:-1]):
         try:
             agent_position = (i + 1, line.index(AGENT))
@@ -76,7 +82,7 @@ def make_moves(warehouse_map: list[list[str]], directions: list[DirectionEnum]) 
         y, x = yx
         return wh[y][x]
 
-    def move(objects_coordinates: list[tuple[int, int]], direction: DirectionEnum):
+    def move(objects_coordinates: list[tuple[int, int]], direction: OrthogonalDirectionEnum):
         objects = [get(object_coordinates) for object_coordinates in objects_coordinates]
         assert objects_coordinates
 
@@ -108,7 +114,7 @@ def make_moves(warehouse_map: list[list[str]], directions: list[DirectionEnum]) 
         boxes_to_move = []
         boxes_heights = {}
 
-        direction_yx = DIRECTIONS_BY_ENUM[direction]
+        direction_yx = ORTHOGONAL_DIRECTIONS_BY_ENUM[direction]
         target_pos = go(direction_yx, agent_position)
         target = get(target_pos)
         # how wide is area to check e.g. considering this construction goes up
@@ -131,7 +137,7 @@ def make_moves(warehouse_map: list[list[str]], directions: list[DirectionEnum]) 
             boxes_heights = {0: 1}
 
             if target == BOX_LEFT:
-                another_part_pos = go(DirectionEnum.right, target_pos)
+                another_part_pos = go(OrthogonalDirectionEnum.right, target_pos)
                 assert get(another_part_pos) == BOX_RIGHT, get(another_part_pos)
 
                 if is_horizontal(direction):
@@ -139,7 +145,7 @@ def make_moves(warehouse_map: list[list[str]], directions: list[DirectionEnum]) 
                 else:
                     boxes_heights[1] = 1
             else:
-                another_part_pos = go(DirectionEnum.left, target_pos)
+                another_part_pos = go(OrthogonalDirectionEnum.left, target_pos)
                 assert get(another_part_pos) == BOX_LEFT, (
                     f"must be BOX_LEFT at {another_part_pos} at {action_idx=} but {get(another_part_pos)} returned"
                 )
@@ -185,7 +191,7 @@ def make_moves(warehouse_map: list[list[str]], directions: list[DirectionEnum]) 
                 if target in (BOX_LEFT, BOX_RIGHT):
                     spaces_everywhere = False
                     if target == BOX_LEFT:
-                        another_part_pos = go(DirectionEnum.right, pos_to_check)
+                        another_part_pos = go(OrthogonalDirectionEnum.right, pos_to_check)
                         assert get(another_part_pos) == BOX_RIGHT, get(another_part_pos)
                         if another_part_pos in boxes_to_move:
                             ...
@@ -198,7 +204,7 @@ def make_moves(warehouse_map: list[list[str]], directions: list[DirectionEnum]) 
                             boxes_heights[x_shift + 1] = max_height  # TODO what if max_height already = 2?
 
                     else:
-                        another_part_pos = go(DirectionEnum.left, pos_to_check)
+                        another_part_pos = go(OrthogonalDirectionEnum.left, pos_to_check)
                         if another_part_pos in boxes_to_move:
                             ...
                             # already counted

@@ -1,7 +1,7 @@
 import logging
 import os
 
-from src.utils.directions_orthogonal import DIRECTIONS, out_of_borders
+from src.utils.directions import ORTHOGONAL_DIRECTIONS, out_of_borders
 from src.utils.test_and_run import run, test
 
 # Configure logging based on environment variable
@@ -35,7 +35,7 @@ def get_trailhead_score(
 
     score = 0
 
-    for dy, dx in DIRECTIONS:
+    for dy, dx in ORTHOGONAL_DIRECTIONS:
         y1 = y + dy
         x1 = x + dx
 

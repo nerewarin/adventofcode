@@ -50,3 +50,6 @@ class Position2D(NamedTuple):
                 return math.nan
             return math.copysign(math.inf, self.y)
         return self.y / self.x
+
+    def reversed(self) -> "Position2D":
+        return Position2D(self.y, self.x)

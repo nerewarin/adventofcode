@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from collections.abc import Generator
+from collections.abc import Generator, Sized
 from typing import Any
 
 
@@ -13,6 +13,12 @@ class BaseState(ABC):
 
     @abstractmethod
     def get_successors(self) -> Generator[tuple["BaseState", Any, Any]]: ...
+
+    def get_cost_of_actions(self, actions: Sized) -> Any:
+        """
+        Returns the cost of a particular sequence of actions.
+        """
+        return len(actions)
 
 
 class PositionSearchProblem:

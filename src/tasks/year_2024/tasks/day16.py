@@ -8,12 +8,12 @@ The idea is to use same A-star algorythm as for src/tasks/year_2023/tasks/day17.
 
 from collections.abc import Generator
 
-from src.utils.directions_orthogonal import DIRECTIONS, DirectionEnum, go, is_a_way_back, out_of_borders
+from src.utils.directions import ORTHOGONAL_DIRECTIONS, OrthogonalDirectionEnum, go, is_a_way_back, out_of_borders
 from src.utils.logger import get_logger
-from src.utils.pathfinding import a_star_search, manhattan_heuristic
+from src.utils.pathfinding import astar, manhattan_heuristic
 from src.utils.position import Position2D
 from src.utils.position_search_problem import BaseState, PositionSearchProblem
-from src.utils.test_and_run import run
+from src.utils.test_and_run import test
 
 _logger = get_logger()
 
@@ -51,9 +51,13 @@ class State(BaseState):
     def _is_wall(self, yx: Position2D) -> bool:
         return self._get(yx) == WALL
 
-    def get_successors(self) -> Generator[tuple[BaseState, DirectionEnum, int]]:
+    @property
+    def _directions(self) -> Generator[OrthogonalDirectionEnum]:
+        yield from ORTHOGONAL_DIRECTIONS.items()
+
+    def get_successors(self) -> Generator[tuple[BaseState, OrthogonalDirectionEnum, int]]:
         prior_action = self.get_last_action()
-        for yx, direction in DIRECTIONS.items():
+        for yx, direction in self._directions:
             if prior_action is not None and is_a_way_back(direction, prior_action):
                 continue
 
@@ -70,13 +74,25 @@ class State(BaseState):
             state = self.__class__(self.inp, pos, self.step + 1, new_path, new_actions)
             action = state.get_last_action()
 
-            cost = 1
-            if prior_action is not None and action != prior_action:
-                cost += 1000
+            cost = self.get_cost_of_actions([action])
 
             yield state, action, cost
 
-    def get_last_action(self) -> DirectionEnum | None:
+    def get_cost_of_actions(self, actions: list[OrthogonalDirectionEnum]) -> int:
+        """
+        Returns the cost of a particular sequence of actions.
+        """
+        if len(actions) != 1:
+            raise NotImplementedError
+
+        action = actions[0]
+        prior_action = self.get_last_action()
+        cost = 1
+        if prior_action is not None and action != prior_action:
+            cost += 1000
+        return cost
+
+    def get_last_action(self) -> OrthogonalDirectionEnum | None:
         if not self.actions:
             return None
         return self.actions[-1]
@@ -96,7 +112,7 @@ class ReindeerMazeTask:
         self.path = path or []
 
         # The Reindeer start on the Start Tile (marked S) facing East and need to reach the End Tile (marked E)
-        starting_rotation = DirectionEnum.right
+        starting_rotation = OrthogonalDirectionEnum.right
         state = State(self.maze, self.start, 0, self.path, actions=[starting_rotation])
 
         self.problem = ReindeerMazeSearchProblem(state=state, goal=self.end, inp=self.maze)
@@ -119,7 +135,7 @@ class ReindeerMazeTask:
         return maze, start, end
 
     def solve(self):
-        *_, score = a_star_search(self.problem, manhattan_heuristic)
+        *_, score = astar(self.problem, manhattan_heuristic)
         return score
 
 
@@ -136,6 +152,6 @@ def task2(inp, **kw):
 
 
 if __name__ == "__main__":
-    # test(task1, 7036)
+    test(task1, 7036)
     # test(task1, 11048, test_part=2)
-    run(task1)
+    # run(task1)

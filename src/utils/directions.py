@@ -31,7 +31,11 @@ from enum import StrEnum
 from src.utils.position import Position2D
 
 
-class DirectionEnum(StrEnum):
+class AbstractDirectionEnum:
+    pass
+
+
+class OrthogonalDirectionEnum(AbstractDirectionEnum, StrEnum):
     up = "up"
     right = "right"
     down = "down"
@@ -43,22 +47,56 @@ SYMBOL_RIGHT = ">"
 SYMBOL_DOWN = "v"
 SYMBOL_LEFT = "<"
 
-DIRECTION_SYMBOLS = {
-    SYMBOL_DOWN: DirectionEnum.down,
-    SYMBOL_UP: DirectionEnum.up,
-    SYMBOL_RIGHT: DirectionEnum.right,
-    SYMBOL_LEFT: DirectionEnum.left,
+ORTHOGONAL_DIRECTION_SYMBOLS = {
+    SYMBOL_DOWN: OrthogonalDirectionEnum.down,
+    SYMBOL_UP: OrthogonalDirectionEnum.up,
+    SYMBOL_RIGHT: OrthogonalDirectionEnum.right,
+    SYMBOL_LEFT: OrthogonalDirectionEnum.left,
 }
 
-DIRECTIONS = {
+
+class DiagonalDirectionEnum(AbstractDirectionEnum, StrEnum):
+    up_left = "up_left"
+    up_right = "up_right"
+    down_left = "down_left"
+    down_right = "down_right"
+
+
+SYMBOL_UP_LEFT = "_/"
+SYMBOL_UP_RIGHT = "-\\"
+SYMBOL_DOWN_LEFT = "/-"
+SYMBOL_DOWN_RIGHT = "/-"
+
+DIAGONAL_DIRECTION_SYMBOLS = {
+    SYMBOL_UP_LEFT: DiagonalDirectionEnum.up_left,
+    SYMBOL_UP_RIGHT: DiagonalDirectionEnum.up_right,
+    SYMBOL_DOWN_LEFT: DiagonalDirectionEnum.down_left,
+    SYMBOL_DOWN_RIGHT: DiagonalDirectionEnum.down_right,
+}
+ADJACENT_DIRECTION_SYMBOLS = {
+    **ORTHOGONAL_DIRECTION_SYMBOLS,
+    **DIAGONAL_DIRECTION_SYMBOLS,
+}
+
+ORTHOGONAL_DIRECTIONS = {
     # y, x
-    (-1, 0): DirectionEnum.up,
-    (0, 1): DirectionEnum.right,
-    (1, 0): DirectionEnum.down,
-    (0, -1): DirectionEnum.left,
+    (-1, 0): OrthogonalDirectionEnum.up,
+    (0, 1): OrthogonalDirectionEnum.right,
+    (1, 0): OrthogonalDirectionEnum.down,
+    (0, -1): OrthogonalDirectionEnum.left,
 }
+DIAGONAL_DIRECTIONS = {
+    # y, x
+    (-1, -1): DiagonalDirectionEnum.up_left,
+    (-1, 1): DiagonalDirectionEnum.up_right,
+    (1, 1): DiagonalDirectionEnum.down_right,
+    (1, -1): DiagonalDirectionEnum.down_left,
+}
+ADJACENT_DIRECTIONS = {**DIAGONAL_DIRECTIONS, **ORTHOGONAL_DIRECTIONS}
 
-DIRECTIONS_BY_ENUM = {v: k for k, v in DIRECTIONS.items()}
+ORTHOGONAL_DIRECTIONS_BY_ENUM = {v: k for k, v in ORTHOGONAL_DIRECTIONS.items()}
+DIAGONAL_DIRECTIONS_BY_ENUM = {v: k for k, v in DIAGONAL_DIRECTIONS.items()}
+ADJACENT_DIRECTIONS_BY_ENUM = {v: k for k, v in ADJACENT_DIRECTIONS.items()}
 
 
 def get_abs(y, x):
@@ -75,20 +113,20 @@ def get_2d_diff(pos1: tuple[int, int], pos2: tuple[int, int], absolute=False):
 
 
 def go(
-    directions: Iterable[DirectionEnum] | Iterable[tuple[int, int]] | DirectionEnum | tuple[int, int],
+    directions: Iterable[AbstractDirectionEnum] | Iterable[tuple[int, int]] | AbstractDirectionEnum | tuple[int, int],
     pos: tuple[int, int] | Position2D | None = None,
     y: int | None = None,
     x: int | None = None,
     return_reversed: bool | None = None,
 ) -> tuple[int, int] | Position2D:
     _directions = []
-    if isinstance(directions, DirectionEnum):
+    if isinstance(directions, AbstractDirectionEnum):
         _directions = [directions]
     elif isinstance(directions, tuple) and len(directions) == 2:
-        _directions.append(DIRECTIONS[directions])
+        _directions.append(ADJACENT_DIRECTIONS[directions])
     else:
         for d in directions:
-            if isinstance(d, DirectionEnum):
+            if isinstance(d, AbstractDirectionEnum):
                 _directions.append(d)
             elif isinstance(d, tuple):
                 _directions.extend(d)
@@ -117,7 +155,7 @@ def go(
         raise ValueError("either is_given_separately or is_given_as_tuple mus be passed, not both!")
 
     for d in _directions:
-        dy, dx = DIRECTIONS_BY_ENUM[d]
+        dy, dx = ADJACENT_DIRECTIONS_BY_ENUM[d]
         y = y + dy
         x = x + dx
 
@@ -141,12 +179,12 @@ def out_of_borders(x, y, grid, is_reversed=True):
     return False
 
 
-def is_horizontal(direction: DirectionEnum) -> bool:
-    y, x = DIRECTIONS_BY_ENUM[direction]
+def is_horizontal(direction: OrthogonalDirectionEnum) -> bool:
+    y, x = ADJACENT_DIRECTIONS_BY_ENUM[direction]
     if not y and not x:
         raise ValueError("y or x must be passed!")
     if y and x:
-        raise ValueError("either y or x must be zero!")
+        return False  # diagonal
     return bool(x)
 
 
@@ -155,9 +193,9 @@ def reverse_coordinates(coordinates: tuple[int, int]) -> tuple[int, int]:
     return x * -1, y * -1
 
 
-def is_a_way_back(direction1: DirectionEnum, direction2: DirectionEnum) -> bool:
-    coordinates1 = DIRECTIONS_BY_ENUM[direction1]
-    coordinates2 = DIRECTIONS_BY_ENUM[direction2]
+def is_a_way_back(direction1: OrthogonalDirectionEnum, direction2: OrthogonalDirectionEnum) -> bool:
+    coordinates1 = ADJACENT_DIRECTIONS_BY_ENUM[direction1]
+    coordinates2 = ADJACENT_DIRECTIONS_BY_ENUM[direction2]
 
     reversed_coordinates2 = reverse_coordinates(coordinates2)
     return coordinates1 == reversed_coordinates2

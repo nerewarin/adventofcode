@@ -1,4 +1,11 @@
-from src.utils.directions_orthogonal import DIRECTIONS, DirectionEnum, get_2d_diff, get_abs, go, out_of_borders
+from src.utils.directions import (
+    ORTHOGONAL_DIRECTIONS,
+    OrthogonalDirectionEnum,
+    get_2d_diff,
+    get_abs,
+    go,
+    out_of_borders,
+)
 from src.utils.logger import get_logger
 from src.utils.test_and_run import run, test
 
@@ -11,20 +18,20 @@ def build_fence_to_neighbor(pos, neighbor_pos):
 
     dy, dx = y1 - y, x1 - x
 
-    human_direction = DIRECTIONS[(dy, dx)]
+    human_direction = ORTHOGONAL_DIRECTIONS[(dy, dx)]
     match human_direction:
-        case DirectionEnum.left:
-            fence_start = go(DirectionEnum.down, pos)
-            fence_direction = DirectionEnum.up
-        case DirectionEnum.right:
-            fence_start = go(DirectionEnum.right, pos)
-            fence_direction = DirectionEnum.down
-        case DirectionEnum.up:
+        case OrthogonalDirectionEnum.left:
+            fence_start = go(OrthogonalDirectionEnum.down, pos)
+            fence_direction = OrthogonalDirectionEnum.up
+        case OrthogonalDirectionEnum.right:
+            fence_start = go(OrthogonalDirectionEnum.right, pos)
+            fence_direction = OrthogonalDirectionEnum.down
+        case OrthogonalDirectionEnum.up:
             fence_start = pos
-            fence_direction = DirectionEnum.right
-        case DirectionEnum.down:
-            fence_start = go([DirectionEnum.down, DirectionEnum.right], pos)
-            fence_direction = DirectionEnum.left
+            fence_direction = OrthogonalDirectionEnum.right
+        case OrthogonalDirectionEnum.down:
+            fence_start = go([OrthogonalDirectionEnum.down, OrthogonalDirectionEnum.right], pos)
+            fence_direction = OrthogonalDirectionEnum.left
 
     fence_end = go(fence_direction, fence_start)
     return fence_start, fence_end
@@ -47,7 +54,7 @@ def task(inp, task_num):
 
         square += 1
 
-        for (dy, dx), direction_enum in DIRECTIONS.items():
+        for (dy, dx), direction_enum in ORTHOGONAL_DIRECTIONS.items():
             neighbor_y = y + dy
             neighbor_x = x + dx
             neighbor_pos = (neighbor_y, neighbor_x)
