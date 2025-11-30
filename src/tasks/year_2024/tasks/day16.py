@@ -165,6 +165,7 @@ class ReindeerMazeTask:
     def _find_all_best_paths_with_a_star(self, problem: PositionSearchProblem, best_cost=None):
         if best_cost is None:
             best_cost = float("inf")
+        # heap contains: priority (cost+heuristic), just counter, and state
         fringe = PriorityQueue()
 
         def add_to_fringe_fn(fringe: PriorityQueue, state, cost):
@@ -177,7 +178,8 @@ class ReindeerMazeTask:
         add_to_fringe_fn(fringe, start, 0)
 
         best_final_states = []
-
+        # for every step let's store tuple (score, list of paths to this state)
+        alternative_states_by_step = {}
         while not fringe.isEmpty():
             (state, cost, path) = fringe.pop()
 
@@ -194,10 +196,20 @@ class ReindeerMazeTask:
                 best_final_states.append(state)
                 continue
 
+            if state.step not in alternative_states_by_step:
+                alternative_states_by_step[state.step] = (cost, [state])
+            else:
+                best_cost_for_step, states_for_step = alternative_states_by_step[state.step]
+                if cost < best_cost_for_step:
+                    alternative_states_by_step[state.step] = (cost, [state])
+                elif cost == best_cost_for_step:
+                    if state in states_for_step:
+                        continue
+                    states_for_step.append(state)
+
             # STATE MUST BE HASHABLE BY POSITION!
-            # if state in closed:
-            #     continue
-            # elif state not in closed or cost <= min((state.cost for state in closed if hash(state) == state)):
+            if state in closed:
+                continue
             closed.add(state)
 
             for child_node, child_action, child_cost in problem.get_successors(state):
