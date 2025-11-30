@@ -141,20 +141,20 @@ def distance_heuristic(state: BaseState, problem: PositionSearchProblem):
 
 def generic_search(problem, fringe, add_to_fringe_fn) -> tuple[BaseState, list[Any], Any] | None:
     closed = set()
-    start = (problem.get_start_state(), 0, [])  # (node, cost, path)
+    start = (problem.get_start_state(), 0, [])  # (state, cost, path)
     add_to_fringe_fn(fringe, start, 0)
 
     while not fringe.isEmpty():
-        (node, cost, path) = fringe.pop()
+        (state, cost, path) = fringe.pop()
 
-        if problem.is_goal_state(node):
-            return node, path, cost
+        if problem.is_goal_state(state):
+            return state, path, cost
 
         # STATE MUST BE HASHABLE BY POSITION!
-        if node not in closed:
-            closed.add(node)
+        if state not in closed:
+            closed.add(state)
 
-            for child_node, child_action, child_cost in problem.get_successors(node):
+            for child_node, child_action, child_cost in problem.get_successors(state):
                 new_cost = cost + child_cost
                 new_path = path + [child_action]
                 new_state = (child_node, new_cost, new_path)
@@ -223,7 +223,7 @@ astar = aStarSearch
 ucs = uniformCostSearch
 
 if __name__ == "__main__":
-    from src.tasks.year_2024.tasks.day16 import State
+    from src.tasks.year_2024.tasks.day16 import State1
     from src.utils.directions import ADJACENT_DIRECTIONS, DiagonalDirectionEnum, go
     from src.utils.position import Position2D
 
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     start = (0, 0)
     end = Position2D(7, 6).reversed()
 
-    class TestOrthogonalState(State):
+    class TestOrthogonalState(State1):
         def _is_wall(self, yx) -> bool:
             return self._get(yx) == 1
 
