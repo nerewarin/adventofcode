@@ -164,63 +164,82 @@ class ReindeerMazeTask:
 
     def _find_all_best_paths_with_a_star(self, problem: PositionSearchProblem, best_cost=None):
         if best_cost is None:
-            best_cost = float("inf")
-        # heap contains: priority (cost+heuristic), just counter, and state
+            # First find the best cost
+            problem_temp = self._get_problem(State1)
+            *_, best_cost = astar(problem_temp, self._heuristic)
+
+        # Track minimum cost to reach each state
+        min_cost_to_state: dict[State2, int] = {}
+        # Track all states that can reach goal with best_cost
+        goal_states: list[State2] = []
+        # Track parent relationships: state -> list of (parent_state, action, cost)
+        parents: dict[State2, list[tuple[State2, OrthogonalDirectionEnum, int]]] = {}
+
         fringe = PriorityQueue()
+        start_state = problem.get_start_state()
+        min_cost_to_state[start_state] = 0
+        parents[start_state] = []
 
-        def add_to_fringe_fn(fringe: PriorityQueue, state, cost):
-            est_cost = cost + self._heuristic(state[0], problem)
-            fringe.push(state, est_cost)
-            return est_cost
+        def add_to_fringe_fn(fringe: PriorityQueue, state: State2, cost: int) -> None:
+            est_cost = cost + self._heuristic(state, problem)
+            fringe.push((state, cost), est_cost)
 
-        closed = set()
-        start = (problem.get_start_state(), 0, [])  # (state, cost, path)
-        add_to_fringe_fn(fringe, start, 0)
+        add_to_fringe_fn(fringe, start_state, 0)
 
-        best_final_states = []
-        # for every step let's store tuple (score, list of paths to this state)
-        alternative_states_by_step = {}
         while not fringe.isEmpty():
-            (state, cost, path) = fringe.pop()
+            state, cost = fringe.pop()
 
+            # Skip if we've found a better path to this state
+            if state in min_cost_to_state and cost > min_cost_to_state[state]:
+                continue
+
+            # Skip if this path can't lead to goal with best_cost
             est_cost = cost + self._heuristic(state, problem)
             if est_cost > best_cost:
                 continue
 
             if problem.is_goal_state(state):
-                print(f"Found path of {cost=}: {path}")
-                if cost < best_cost:
-                    best_cost = cost
-                    best_final_states = []
-
-                best_final_states.append(state)
+                if cost == best_cost:
+                    goal_states.append(state)
                 continue
 
-            if state.step not in alternative_states_by_step:
-                alternative_states_by_step[state.step] = (cost, [state])
-            else:
-                best_cost_for_step, states_for_step = alternative_states_by_step[state.step]
-                if cost < best_cost_for_step:
-                    alternative_states_by_step[state.step] = (cost, [state])
-                elif cost == best_cost_for_step:
-                    if state in states_for_step:
-                        continue
-                    states_for_step.append(state)
-
-            # STATE MUST BE HASHABLE BY POSITION!
-            if state in closed:
-                continue
-            closed.add(state)
-
+            # Explore successors
             for child_node, child_action, child_cost in problem.get_successors(state):
                 new_cost = cost + child_cost
-                new_path = path + [child_action]
-                # est_cost = new_path + self._heuristic(child_node, problem)
 
-                new_state = (child_node, new_cost, new_path)
-                add_to_fringe_fn(fringe, new_state, new_cost)
+                # Skip if this path can't lead to goal with best_cost
+                child_est_cost = new_cost + self._heuristic(child_node, problem)
+                if child_est_cost > best_cost:
+                    continue
 
-        return best_final_states
+                # If we haven't seen this state, or we found it with same/better cost
+                if child_node not in min_cost_to_state or new_cost <= min_cost_to_state[child_node]:
+                    if child_node not in min_cost_to_state:
+                        min_cost_to_state[child_node] = new_cost
+                        parents[child_node] = []
+                    elif new_cost < min_cost_to_state[child_node]:
+                        min_cost_to_state[child_node] = new_cost
+                        parents[child_node] = []
+
+                    # Track this parent relationship if cost matches minimum
+                    if new_cost == min_cost_to_state[child_node]:
+                        parents[child_node].append((state, child_action, child_cost))
+                        add_to_fringe_fn(fringe, child_node, new_cost)
+
+        # Now do reverse BFS from goal states to find all states on best paths
+        states_on_best_paths: set[State2] = set(goal_states)
+        queue = list(goal_states)
+
+        while queue:
+            state = queue.pop(0)
+            if state not in parents:
+                continue
+            for parent_state, _, _ in parents[state]:
+                if parent_state not in states_on_best_paths:
+                    states_on_best_paths.add(parent_state)
+                    queue.append(parent_state)
+
+        return list(states_on_best_paths)
 
 
 def task(inp: list[str], task_num: int = 1, best_score=None) -> int:
