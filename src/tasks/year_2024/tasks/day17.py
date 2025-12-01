@@ -5,7 +5,7 @@ https://adventofcode.com/2024/day/17
 """
 
 from src.utils.logger import get_logger
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import test
 
 _logger = get_logger()
 
@@ -126,6 +126,55 @@ class ChronospatialComputer:
 
         return ",".join(str(x) for x in self.output)
 
+    def analyze_backward(self):
+        reversed_program = self.program[::-1]
+        expected_output = reversed_program
+
+        self.a = 0
+        self.b = None
+        self.c = None
+        instruction_pointer = 0
+        cycle = 1
+        counter = 1
+        # registers constraints
+        # constraints = [[], [], []]
+        for output_value in expected_output:
+            while instruction_pointer < len(reversed_program):
+                to_increment_pointer = True
+                operand, instruction = reversed_program[instruction_pointer : instruction_pointer + 2]
+                _logger.debug(f"step={cycle}.{counter // (len(reversed_program) // 2)}. {instruction=}, {operand=}")
+                match instruction:
+                    case 3:
+                        if cycle == 1:
+                            assert self.a == 0
+                            _logger.debug("jnz: self.a == 0, no jump")
+                            pass
+                        else:
+                            # TODO
+                            new_instruction_pointer = operand
+                            if new_instruction_pointer != instruction_pointer:
+                                to_increment_pointer = False
+                                _logger.debug(
+                                    f"jnz: a={self.a}. shifting instruction_pointer from {instruction_pointer} to {new_instruction_pointer}"
+                                )
+                                instruction_pointer = new_instruction_pointer
+                            else:
+                                _logger.debug(f"jnz: already on {instruction_pointer=}")
+                    case 5:
+                        to_output = output_value
+                        # The out instruction (opcode 5) calculates the value of its combo operand modulo 8,
+                        # then outputs that value. (If a program outputs multiple values, they are separated by commas.)
+                        op = "out"
+
+                        combo = self._get_combo(operand)
+                        to_output = combo % 8
+                        _logger.debug(f"{op}: {to_output=} written to output")
+                        self.output.append(to_output)
+                if to_increment_pointer:
+                    instruction_pointer += 2
+                counter += 1
+            print(output_value)
+
 
 def task(inp: list[str], task_num: int = 1) -> str:
     return ChronospatialComputer.from_multiline_input(inp, task_num).run_program()
@@ -196,7 +245,65 @@ def task2(inp):
     then  B % 8 -> output must be 3 now: so B = xxx011
 
     """
-    return task(inp, task_num=2)
+    a = 0
+    found = float("inf")
+
+    _initial_computer = ChronospatialComputer.from_multiline_input(inp, 1)
+    program = _initial_computer.program
+    expected_len = len(program)
+
+    prior_matches = 0
+    diff = 0
+    counter = 0
+    matches = 0
+
+    while a < found:
+        computer = ChronospatialComputer.from_multiline_input(inp, 1)
+        computer.a = a
+        computer.run_program()
+
+        output = computer.output
+        if output == computer.program:
+            found = a
+            _logger.info(f"found {a=}")
+
+        output_len = len(output)
+        if output_len == expected_len:
+            matches = 0
+            for i in range(expected_len):
+                if output[-i - 1] == program[-i - 1]:
+                    matches += 1
+                else:
+                    break
+            min_step = (expected_len - matches) ** 10
+
+            if matches < (prior_matches - 1):
+                diff = -(max(diff // 2, min_step))
+            elif matches > prior_matches:
+                diff = max(diff // 2, min_step)
+            else:
+                next_digit_to_find = program[-matches - 1]
+                our_digit = output[-matches - 1]
+                if our_digit < next_digit_to_find:
+                    diff = abs(diff)
+                elif our_digit > next_digit_to_find:
+                    diff = -abs(diff)
+                else:
+                    raise RuntimeError()
+
+            prior_matches = matches
+
+        elif output_len < expected_len:
+            diff = (a or 1) * 2
+        else:
+            diff = int(-(a or 1) * 0.1)
+
+        if not counter % 10_001:
+            _logger.info(f"{counter=}. {a=}, {output=}, {output_len=}, {expected_len=}, {diff=}. {matches=}")
+
+        a += diff
+        counter += 1
+    return True
 
 
 class UnitTest:
@@ -261,15 +368,16 @@ class UnitTest:
 
 
 if __name__ == "__main__":
-    UnitTest.test1()
-    UnitTest.test2()
-    UnitTest.test3()
-    UnitTest.test4()
-    UnitTest.test5()
-
-    test(task1, "4,6,3,5,6,3,5,2,1,0")
-    run(task1)
-
-    UnitTest.test6()
-    # test(task2, "0,1,5,4,3,0")
-    # run(task2, "2,4,1,3,7,5,1,5,0,3,4,3,5,5,3,0")
+    # UnitTest.test1()
+    # UnitTest.test2()
+    # UnitTest.test3()
+    # UnitTest.test4()
+    # UnitTest.test5()
+    #
+    # test(task1, "4,6,3,5,6,3,5,2,1,0")
+    # run(task1)
+    #
+    # UnitTest.test6()
+    # test(task2, True)
+    test(task2, True, test_part=2)
+    # run(task2)
