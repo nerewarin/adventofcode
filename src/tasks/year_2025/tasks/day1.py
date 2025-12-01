@@ -37,16 +37,29 @@ class SecretEntrance:
         dial = 50
         zero_times = 0
         for direction, value in self.data:
+            cmd = f"{direction}{value}"
+            new_value = dial
             if direction == "L":
-                dial -= value
+                new_value -= value
             elif direction == "R":
-                dial += value
+                new_value += value
 
             if self.task_num == 2:
-                if not 0 <= dial < 100:
-                    zero_times += 1
+                clicks = 0
+                if dial < 0 <= new_value:
+                    clicks += 1
+                elif dial > 0 >= new_value:
+                    clicks += 1
 
-            dial %= 100
+                clicks += abs(new_value) // 100
+
+                if clicks:
+                    _logger.debug(f"+{clicks} clicks for dial {dial} -> {new_value % 100} for {cmd}")
+                    zero_times += clicks
+
+            new_value = new_value % 100
+
+            dial = new_value
 
             if self.task_num == 1:
                 if dial == 0:
@@ -72,4 +85,4 @@ if __name__ == "__main__":
     run(task1)
 
     test(task2, 6)
-    run(task2)  # 2703 too low
+    run(task2)  # 6695
