@@ -40,7 +40,7 @@ class ChronospatialComputer:
         return *map(int, raw_registers), list(map(int, raw_program.split(",")))
 
     @property
-    def _registers(self) -> tuple[int]:
+    def _registers(self) -> tuple[int, int, int]:
         return self.a, self.b, self.c
 
     def _get_combo(self, value: int) -> int:
@@ -58,16 +58,16 @@ class ChronospatialComputer:
 
     def run_program(self) -> str:
         instruction_pointer = 0
+        counter = 0
 
         program = self.program
         while instruction_pointer < len(program):
             instruction, operand = program[instruction_pointer : instruction_pointer + 2]
-            _logger.debug(f"{instruction=}, {operand=}")
-
             to_increment_pointer = True
+            _logger.debug(f"{counter=}. {instruction=}, {operand=}")
             match instruction:
                 case 0:
-                    # The adv instruction (opcode 0) performs division
+                    # The adv instruction (opcode 0) performs division in register A by combo of operator
                     op = "op"
                     self.a = self._get_division(operand, op)
                 case 1:
@@ -90,7 +90,7 @@ class ChronospatialComputer:
                         if new_instruction_pointer != instruction_pointer:
                             to_increment_pointer = False
                             _logger.debug(
-                                f"jnz: shifting instruction_pointer from {instruction_pointer} to {new_instruction_pointer}"
+                                f"jnz: a={self.a}. shifting instruction_pointer from {instruction_pointer} to {new_instruction_pointer}"
                             )
                             instruction_pointer = new_instruction_pointer
                         else:
@@ -122,6 +122,7 @@ class ChronospatialComputer:
 
             if to_increment_pointer:
                 instruction_pointer += 2
+            counter += 1
 
         return ",".join(str(x) for x in self.output)
 
@@ -135,78 +136,140 @@ def task1(inp, **kw):
 
 
 def task2(inp):
-    return task(inp, task_num=2)
-
-
-def test1():
-    """If register C contains 9, the program 2,6 would set register B to 1."""
-    state = ChronospatialComputer([2, 6], c=9)
-    state.run_program()
-    assert state.b == 1, state
-    _logger.debug("test1 passed")
-
-
-def test2():
-    """If register A contains 10, the program 5,0,5,1,5,4 would output 0,1,2."""
-    state = ChronospatialComputer([5, 0, 5, 1, 5, 4], a=10)
-    state.run_program()
-    assert state.output == [0, 1, 2], state
-    _logger.debug("test2 passed")
-
-
-def test3():
-    """If register A contains 2024, the program 0,1,5,4,3,0 would output 4,2,5,6,7,7,7,7,3,1,0
-    and leave 0 in register A."""
-    state = ChronospatialComputer([0, 1, 5, 4, 3, 0], a=2024)
-    state.run_program()
-    assert state.output == [4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0], state
-    assert state.a == 0, state
-    _logger.debug("test3 passed")
-
-
-def test4():
-    """If register B contains 29, the program 1,7 would set register B to 26."""
-    state = ChronospatialComputer([1, 7], b=29)
-    state.run_program()
-    assert state.b == 26, state
-    _logger.debug("test4 passed")
-
-
-def test5():
-    """If register B contains 2024 and register C contains 43690, the program 4,0 would set register B to 44354."""
-    state = ChronospatialComputer([4, 0], b=2024, c=43690)
-    state.run_program()
-    assert state.b == 44354, state
-    _logger.debug("test5 passed")
-
-
-def test6():
     """
-    For part2:
-    Register A: 2024
+    Now we need to debug program in reverse.
+    consider input from run:
+
+    Register A: 47006051 (??)
     Register B: 0
     Register C: 0
 
-    Program: 0,3,5,4,3,0
-    This program outputs a copy of itself if register A is instead initialized to 117440.
-    (The original initial value of register A, 2024, is ignored.)."""
-    program = [0, 3, 5, 4, 3, 0]
-    state = ChronospatialComputer(program, a=117440, b=0, c=0)
-    state.run_program()
-    assert state.output == program, state
-    _logger.debug("test6 passed")
+    Program: 2,4,1,3,7,5,1,5,0,3,4,3,5,5,3,0
+
+    first cycle:
+    3,0
+    this will stop id only A=0 to this point.
+    A=0
+    B=?
+    C=?
+
+    5,5
+    B % 8 -> output
+    Since output must be 0, B must be divisible by 8
+    A=0
+    B % 8 == 0 like ...000
+    C=?
+
+    4,3
+    C ^ B -> B
+    from prior step we know that new B must be divisible by 8
+    A=0
+    B after is ...000 but now - depends on C!
+    C = B ^ old_B - depends on B now
+
+    0,3
+    A // (2**3) = A // 8 -> A
+    so
+    A < 8
+    B % 8 == 0 like ...000
+
+    1,5
+    B ^ 5 = B ^ 101 -> B
+    we know after that, B must have the last 3 bits as zero (omitting depending on C tho), but can be big like ...000
+    so at that point B is like
+    A < 8
+    B = ...101
+
+    7,5
+    A // (2**B) -> C
+    B = ...101
+    C = A // (2**B) and from prior step (4,3): B ^ old_B
+
+    1,3
+    B ^ 3 = B ^ 011 -> B
+
+    2,4
+    A // 8 -> B
+
+    and before that we must jump somewhere (presumably into 2,4) having A != ...000
+
+    then  B % 8 -> output must be 3 now: so B = xxx011
+
+    """
+    return task(inp, task_num=2)
+
+
+class UnitTest:
+    @staticmethod
+    def test1():
+        """If register C contains 9, the program 2,6 would set register B to 1."""
+        state = ChronospatialComputer([2, 6], c=9)
+        state.run_program()
+        assert state.b == 1, state
+        _logger.debug("test1 passed")
+
+    @staticmethod
+    def test2():
+        """If register A contains 10, the program 5,0,5,1,5,4 would output 0,1,2."""
+        state = ChronospatialComputer([5, 0, 5, 1, 5, 4], a=10)
+        state.run_program()
+        assert state.output == [0, 1, 2], state
+        _logger.debug("test2 passed")
+
+    @staticmethod
+    def test3():
+        """If register A contains 2024, the program 0,1,5,4,3,0 would output 4,2,5,6,7,7,7,7,3,1,0
+        and leave 0 in register A."""
+        state = ChronospatialComputer([0, 1, 5, 4, 3, 0], a=2024)
+        state.run_program()
+        assert state.output == [4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0], state
+        assert state.a == 0, state
+        _logger.debug("test3 passed")
+
+    @staticmethod
+    def test4():
+        """If register B contains 29, the program 1,7 would set register B to 26."""
+        state = ChronospatialComputer([1, 7], b=29)
+        state.run_program()
+        assert state.b == 26, state
+        _logger.debug("test4 passed")
+
+    @staticmethod
+    def test5():
+        """If register B contains 2024 and register C contains 43690, the program 4,0 would set register B to 44354."""
+        state = ChronospatialComputer([4, 0], b=2024, c=43690)
+        state.run_program()
+        assert state.b == 44354, state
+        _logger.debug("test5 passed")
+
+    @staticmethod
+    def test6():
+        """
+        For part2:
+        Register A: 2024
+        Register B: 0
+        Register C: 0
+
+        Program: 0,3,5,4,3,0
+        This program outputs a copy of itself if register A is instead initialized to 117440.
+        (The original initial value of register A, 2024, is ignored.)."""
+        program = [0, 3, 5, 4, 3, 0]
+        state = ChronospatialComputer(program, a=117440, b=0, c=0)
+        state.run_program()
+        assert state.output == program, state
+        _logger.debug("test6 passed")
 
 
 if __name__ == "__main__":
-    test1()
-    test2()
-    test3()
-    test4()
-    test5()
+    UnitTest.test1()
+    UnitTest.test2()
+    UnitTest.test3()
+    UnitTest.test4()
+    UnitTest.test5()
 
     test(task1, "4,6,3,5,6,3,5,2,1,0")
     run(task1)
 
-    test6()
-    test(task2, "0,1,5,4,3,0")
-    run(task2, "2,4,1,3,7,5,1,5,0,3,4,3,5,5,3,0")
+    UnitTest.test6()
+    # test(task2, "0,1,5,4,3,0")
+    # run(task2, "2,4,1,3,7,5,1,5,0,3,4,3,5,5,3,0")
