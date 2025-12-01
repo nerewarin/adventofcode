@@ -10,15 +10,16 @@ _logger = get_logger()
 
 
 class SecretEntrance:
-    def __init__(self, data):
+    def __init__(self, data, task_num):
         self.data = data
+        self.task_num = task_num
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}(data={self.data})"
 
     @classmethod
     def from_multiline_input(cls, inp, task_num):
-        return cls(cls._parse_input(inp))
+        return cls(cls._parse_input(inp), task_num)
 
     @staticmethod
     def _parse_input(inp: list[str]) -> list[tuple[str, int]]:
@@ -40,9 +41,17 @@ class SecretEntrance:
                 dial -= value
             elif direction == "R":
                 dial += value
+
+            if self.task_num == 2:
+                if not 0 <= dial < 100:
+                    zero_times += 1
+
             dial %= 100
-            if dial == 0:
-                zero_times += 1
+
+            if self.task_num == 1:
+                if dial == 0:
+                    zero_times += 1
+
         return zero_times
 
 
@@ -61,3 +70,6 @@ def task2(inp):
 if __name__ == "__main__":
     test(task1, 3)
     run(task1)
+
+    test(task2, 6)
+    run(task2)  # 2703 too low
