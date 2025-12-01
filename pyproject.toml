@@ -13,6 +13,7 @@ numpy = "^2.0.0"
 pulp = "^2.7.0"
 networkx = "^3.2.1"
 matplotlib = "^3.6.2"
+pytest = "^9.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.4.0"
