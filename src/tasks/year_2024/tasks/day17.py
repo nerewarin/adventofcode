@@ -148,7 +148,7 @@ def task2(inp):
 
     first cycle:
     3,0
-    this will stop id only A=0 to this point.
+    this will stop if only A=0 to this point.
     A=0
     B=?
     C=?
