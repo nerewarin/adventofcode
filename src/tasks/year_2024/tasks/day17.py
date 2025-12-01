@@ -126,7 +126,7 @@ class ChronospatialComputer:
         return ",".join(str(x) for x in self.output)
 
 
-def task(inp: list[str], task_num: int = 1, best_score=None) -> str:
+def task(inp: list[str], task_num: int = 1) -> str:
     return ChronospatialComputer.from_multiline_input(inp, task_num).run_program()
 
 
@@ -134,8 +134,8 @@ def task1(inp, **kw):
     return task(inp, **kw)
 
 
-def task2(inp, best_score=None):
-    return task(inp, task_num=2, best_score=best_score)
+def task2(inp):
+    return task(inp, task_num=2)
 
 
 def test1():
@@ -208,3 +208,5 @@ if __name__ == "__main__":
     run(task1)
 
     test6()
+    test(task2, "0,1,5,4,3,0")
+    run(task2, "2,4,1,3,7,5,1,5,0,3,4,3,5,5,3,0")
