@@ -19,7 +19,10 @@ class ChronospatialComputer:
         self.output = []
 
     def __repr__(self):
-        return f"{self.__class__.__qualname__}(program={self.program}, a={self.a}, b={self.b}, c={self.c})"
+        return (
+            f"{self.__class__.__qualname__}"
+            f"(program={self.program}, a={self.a}, b={self.b}, c={self.c}, output={self.output})"
+        )
 
     @classmethod
     def from_multiline_input(cls, inp, task_num):
@@ -177,6 +180,23 @@ def test5():
     _logger.debug("test5 passed")
 
 
+def test6():
+    """
+    For part2:
+    Register A: 2024
+    Register B: 0
+    Register C: 0
+
+    Program: 0,3,5,4,3,0
+    This program outputs a copy of itself if register A is instead initialized to 117440.
+    (The original initial value of register A, 2024, is ignored.)."""
+    program = [0, 3, 5, 4, 3, 0]
+    state = ChronospatialComputer(program, a=117440, b=0, c=0)
+    state.run_program()
+    assert state.output == program, state
+    _logger.debug("test6 passed")
+
+
 if __name__ == "__main__":
     test1()
     test2()
@@ -186,3 +206,5 @@ if __name__ == "__main__":
 
     test(task1, "4,6,3,5,6,3,5,2,1,0")
     run(task1)
+
+    test6()
