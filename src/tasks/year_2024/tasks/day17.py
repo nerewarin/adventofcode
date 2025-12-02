@@ -5,7 +5,7 @@ https://adventofcode.com/2024/day/17
 """
 
 from src.utils.logger import get_logger
-from src.utils.test_and_run import test
+from src.utils.test_and_run import run
 
 _logger = get_logger()
 
@@ -256,7 +256,8 @@ def task2(inp):
     diff = 0
     counter = 0
     matches = 0
-
+    already_found_full_len = False
+    min_a = None
     while a < found:
         computer = ChronospatialComputer.from_multiline_input(inp, 1)
         computer.a = a
@@ -269,6 +270,8 @@ def task2(inp):
 
         output_len = len(output)
         if output_len == expected_len:
+            already_found_full_len = True
+
             matches = 0
             for i in range(expected_len):
                 if output[-i - 1] == program[-i - 1]:
@@ -294,6 +297,11 @@ def task2(inp):
             prior_matches = matches
 
         elif output_len < expected_len:
+            if already_found_full_len:
+                if min_a is None:
+                    min_a = a
+                else:
+                    min_a = max(min_a, a)
             diff = (a or 1) * 2
         else:
             diff = int(-(a or 1) * 0.1)
@@ -301,7 +309,10 @@ def task2(inp):
         if not counter % 10_001:
             _logger.info(f"{counter=}. {a=}, {output=}, {output_len=}, {expected_len=}, {diff=}. {matches=}")
 
-        a += diff
+        if min_a is None:
+            a += diff
+        else:
+            a = min(a + diff, min_a + 1)
         counter += 1
     return True
 
@@ -379,5 +390,5 @@ if __name__ == "__main__":
     #
     # UnitTest.test6()
     # test(task2, True)
-    test(task2, True, test_part=2)
-    # run(task2)
+    # test(task2, True, test_part=2)
+    run(task2)
