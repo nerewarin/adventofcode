@@ -1,28 +1,16 @@
 import re
 from dataclasses import dataclass
 from fractions import Fraction
-from functools import wraps
-from timeit import Timer
 
 from src.utils.logger import get_logger
 from src.utils.position import Position2D
+from src.utils.profiler import timeit_deco
 from src.utils.test_and_run import run, test
 
 _logger = get_logger()
 
 _button_rexp = re.compile(r"Button [AB]: X([-+]\d+), Y([-+]\d+)")
 _prize_rexp = re.compile(r"Prize: X=(\d+), Y=(\d+)")
-
-
-def timeit_deco(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        t = Timer(lambda: func(*args, **kwargs))
-        result = func(*args, **kwargs)
-        print(f"{func.__name__} took {t.timeit(number=1):.6f}s")
-        return result
-
-    return wrapper
 
 
 @dataclass
