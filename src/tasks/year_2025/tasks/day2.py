@@ -3,6 +3,7 @@
 https://adventofcode.com/2025/day/2
 """
 
+from functools import lru_cache
 from typing import cast
 
 from src.utils.logger import get_logger
@@ -31,13 +32,26 @@ class GiftShop:
             [tuple(map(int, pair.split("-"))) for line in inp for pair in line.split(",") if pair],
         )
 
+    @lru_cache
+    def _is_invalid(self, id_str):
+        id_len = len(id_str)
+
+        for part_size in range(1, id_len):
+            parts_amount, reminder = divmod(id_len, part_size)
+            if reminder:
+                continue
+
+            parts = [id_str[part_num * part_size : (part_num + 1) * part_size] for part_num in range(parts_amount)]
+            if len(set(parts)) == 1:
+                return True
+        return False
+
     @timeit_deco
     def solve(self) -> int:
         invalid_ids = []
         for left, right in self.data:
             for num in range(left, right + 1):
                 id_str = str(num)
-
                 if self.task_num == 1:
                     middle = len(id_str) // 2
                     left = id_str[:middle]
@@ -45,20 +59,8 @@ class GiftShop:
                     if left == right:
                         invalid_ids.append(num)
                 elif self.task_num == 2:
-                    id_len = len(id_str)
-
-                    for part_size in range(1, id_len):
-                        parts_amount, reminder = divmod(id_len, part_size)
-                        if reminder:
-                            continue
-
-                        parts = [
-                            id_str[part_num * part_size : (part_num + 1) * part_size]
-                            for part_num in range(parts_amount)
-                        ]
-                        if len(set(parts)) == 1:
-                            invalid_ids.append(num)
-                            break
+                    if self._is_invalid(id_str):
+                        invalid_ids.append(num)
                 else:
                     raise ValueError(f"Invalid task number: {self.task_num}")
 
