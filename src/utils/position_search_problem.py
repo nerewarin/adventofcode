@@ -93,20 +93,6 @@ class OrthogonalPositionState(BaseState):
 
             yield state, action, cost
 
-    def get_cost_of_actions(self, actions: list[OrthogonalDirectionEnum]) -> int:
-        """
-        Returns the cost of a particular sequence of actions.
-        """
-        if len(actions) != 1:
-            raise NotImplementedError
-
-        action = actions[0]
-        prior_action = self.get_last_action()
-        cost = 1
-        if prior_action is not None and action != prior_action:
-            cost += 1000
-        return cost
-
     def get_last_action(self) -> OrthogonalDirectionEnum | None:
         if not self.actions:
             return None

@@ -100,4 +100,4 @@ def task1(inp, **kw):
 
 if __name__ == "__main__":
     test(task1, 22, goal=Position2D(6, 6), steps_to_simulate=12)
-    run(task1)  # 444 is too high!
+    run(task1)  # 436
