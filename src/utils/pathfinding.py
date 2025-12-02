@@ -141,14 +141,14 @@ def distance_heuristic(state: BaseState, problem: PositionSearchProblem):
 
 def generic_search(problem, fringe, add_to_fringe_fn) -> tuple[BaseState, list[Any], Any] | None:
     closed = set()
-    start = (problem.get_start_state(), 0, [])  # (state, cost, path)
+    start = (problem.get_start_state(), 0, [])  # (state, cost, actions)
     add_to_fringe_fn(fringe, start, 0)
 
     while not fringe.isEmpty():
-        (state, cost, path) = fringe.pop()
+        (state, cost, actions) = fringe.pop()
 
         if problem.is_goal_state(state):
-            return state, path, cost
+            return state, actions, cost
 
         # STATE MUST BE HASHABLE BY POSITION!
         if state not in closed:
@@ -156,14 +156,14 @@ def generic_search(problem, fringe, add_to_fringe_fn) -> tuple[BaseState, list[A
 
             for child_node, child_action, child_cost in problem.get_successors(state):
                 new_cost = cost + child_cost
-                new_path = path + [child_action]
-                new_state = (child_node, new_cost, new_path)
+                new_actions = actions + [child_action]
+                new_state = (child_node, new_cost, new_actions)
                 add_to_fringe_fn(fringe, new_state, new_cost)
 
     return None
 
 
-def depthFirstSearch(problem):
+def dfs(problem):
     """
     Search the deepest nodes in the search tree first.
 
@@ -185,7 +185,7 @@ def depthFirstSearch(problem):
     return generic_search(problem, fringe, add_to_fringe_fn)
 
 
-def breadthFirstSearch(problem):
+def bfs(problem):
     """Search the shallowest nodes in the search tree first."""
     fringe = Queue()
 
@@ -195,7 +195,7 @@ def breadthFirstSearch(problem):
     return generic_search(problem, fringe, add_to_fringe_fn)
 
 
-def uniformCostSearch(problem):
+def uniform_cost_search(problem):
     """Search the node of least total cost first."""
     fringe = PriorityQueue()
 
@@ -205,7 +205,7 @@ def uniformCostSearch(problem):
     return generic_search(problem, fringe, add_to_fringe_fn)
 
 
-def aStarSearch(problem, heuristic=nullHeuristic):
+def astar(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     fringe = PriorityQueue()
 
@@ -215,12 +215,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     return generic_search(problem, fringe, add_to_fringe_fn)
 
-
-# Abbreviations
-bfs = breadthFirstSearch
-dfs = depthFirstSearch
-astar = aStarSearch
-ucs = uniformCostSearch
 
 if __name__ == "__main__":
     from src.tasks.year_2024.tasks.day16 import State1

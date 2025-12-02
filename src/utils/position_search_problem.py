@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator, Sized
 from typing import Any
 
+from src.utils.directions import ORTHOGONAL_DIRECTIONS, OrthogonalDirectionEnum, go, is_a_way_back, out_of_borders
+from src.utils.position import Position2D
+
 
 @abstractmethod
 class BaseState(ABC):
@@ -29,6 +32,85 @@ class BaseState(ABC):
         Returns the cost of a particular sequence of actions. Very basic logic. Override it if needed.
         """
         return len(actions)
+
+
+class OrthogonalPositionState(BaseState):
+    def __init__(self, inp: list[list[str]], pos, step=None, path=None, actions=None, cost=0, wall_symbol="#"):
+        self.inp = inp
+        self.x, self.y = pos
+        self.symbol = self.inp[self.y][self.x]
+
+        self.step = step or 0
+        self.path = path or [pos]
+        self.actions = actions or []
+        self.cost = cost
+        self.wall_symbol = wall_symbol
+
+    def __str__(self):
+        return (
+            f"{self.__class__.__qualname__}"
+            f"(pos={self.pos}, step={self.step}, symbol={self.symbol}, last_action={self.get_last_action()},"
+            f"cost={self.cost})"
+        )
+
+    @property
+    def pos(self) -> Position2D:
+        return Position2D(self.x, self.y)
+
+    def _get(self, pos: Position2D) -> str:
+        x, y = pos
+        return self.inp[y][x]
+
+    def _is_wall(self, yx: Position2D) -> bool:
+        return self._get(yx) == self.wall_symbol
+
+    @property
+    def _directions(self) -> Generator[OrthogonalDirectionEnum]:
+        yield from ORTHOGONAL_DIRECTIONS.items()
+
+    def get_successors(self) -> Generator[tuple[BaseState, OrthogonalDirectionEnum, int]]:
+        prior_action = self.get_last_action()
+        for yx, direction in self._directions:
+            if prior_action is not None and is_a_way_back(direction, prior_action):
+                continue
+
+            pos = go(direction, self.pos)
+
+            if out_of_borders(*pos, self.inp, is_reversed=False):
+                continue
+            if self._is_wall(pos):
+                continue
+
+            new_path = self.path + [pos]
+            actions = [direction]
+            new_actions = self.actions + actions
+            cost = self.get_cost_of_actions(actions)
+
+            state = self.__class__(
+                self.inp, pos, self.step + 1, new_path, new_actions, cost=self.cost + cost, wall_symbol=self.wall_symbol
+            )
+            action = direction
+
+            yield state, action, cost
+
+    def get_cost_of_actions(self, actions: list[OrthogonalDirectionEnum]) -> int:
+        """
+        Returns the cost of a particular sequence of actions.
+        """
+        if len(actions) != 1:
+            raise NotImplementedError
+
+        action = actions[0]
+        prior_action = self.get_last_action()
+        cost = 1
+        if prior_action is not None and action != prior_action:
+            cost += 1000
+        return cost
+
+    def get_last_action(self) -> OrthogonalDirectionEnum | None:
+        if not self.actions:
+            return None
+        return self.actions[-1]
 
 
 class PositionSearchProblem:

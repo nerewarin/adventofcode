@@ -9,7 +9,7 @@ import re
 from copy import copy
 from functools import lru_cache
 
-from src.utils.pathfinding import uniformCostSearch
+from src.utils.pathfinding import uniform_cost_search
 from src.utils.position_search_problem import PositionSearchProblem
 from src.utils.test_and_run import run, test
 
@@ -88,7 +88,7 @@ def _parse_puzzle(inp):
             state = State(valve_by_name, pos=start_name)
 
             problem = PositionSearchProblem(state, goal_name)
-            actions = uniformCostSearch(problem)
+            actions = uniform_cost_search(problem)
 
             steps = 0
             s_ = start_name
