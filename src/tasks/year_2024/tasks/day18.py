@@ -74,21 +74,14 @@ class RAMRun:
 
     def solve(self) -> int | None:
         simulation_list = self.data[: self.steps_to_simulate]
-        last_block = simulation_list[-1]
-        _logger.debug(f"last block: {last_block}")
-
-        next_10_blocks = self.data[self.steps_to_simulate :][:10]
 
         space = 0
         wall = 1
         path_member = 2
-        # last_block_symbol = 3
 
         grid = [[space for _ in range(self._height)] for _ in range(self._width)]
         for x, y in simulation_list:
             grid[y][x] = wall
-            # if (x, y) == last_block:
-            #     grid[y][x] = last_block_symbol
 
         _logger.debug("Initial grid:")
         self._show_grid(grid)
@@ -104,8 +97,6 @@ class RAMRun:
 
         for x, y in state.path:
             grid[y][x] = path_member
-        for i, (x, y) in enumerate(next_10_blocks):
-            grid[y][x] = str(i)
 
         _logger.debug("Final grid:")
         self._show_grid(grid)
@@ -121,18 +112,13 @@ def task1(inp, **kw):
     return task(inp, **kw)
 
 
-def task2(inp, **kw):
-    failures = 0
-    # for steps_to_simulate in range(2959, 3450):
-    for steps_to_simulate in (2961,):
+def task2(inp, min_steps_to_simulate=1, **kw):
+    for steps_to_simulate in range(min_steps_to_simulate, len(inp) + 1):
         _logger.info(f"{steps_to_simulate=}")
-        if _ := run(task1, steps_to_simulate=steps_to_simulate):
+        if _ := task(inp, task_num=2, steps_to_simulate=steps_to_simulate, **kw):
             continue
         else:
-            failures += 1
-            _logger.info(f"{failures=}")
-            if failures == 10:
-                return steps_to_simulate
+            return inp[steps_to_simulate - 1]
 
     return None
 
@@ -141,14 +127,5 @@ if __name__ == "__main__":
     test(task1, 22, goal=Position2D(6, 6), steps_to_simulate=12)
     run(task1)  # 436
 
-    # 2960 is wrong
-    # 2961 is wrong
-    # 2962   is wrong
-    # 2964 wrong
-    # 2965 wrong
-    # 2966 wrong
-    # 2967 wrong
-    # 2968 # wrong?
-
-    # run(task2)
-    # run(task1, steps_to_simulate=2959)  # 436
+    test(task2, "6,1", goal=Position2D(6, 6), min_steps_to_simulate=12)
+    run(task2, min_steps_to_simulate=1024)  # 61,50
