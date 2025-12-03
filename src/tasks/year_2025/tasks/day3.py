@@ -15,7 +15,13 @@ _logger = get_logger()
 class Lobby:
     def __init__(self, data, task_num):
         self.data = data
-        self.task_num = task_num
+
+        if task_num == 1:
+            self.digits = 2
+        elif task_num == 2:
+            self.digits = 12
+        else:
+            raise ValueError(f"Invalid task number: {task_num}")
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}(data={self.data})"
@@ -46,30 +52,26 @@ class Lobby:
     def solve(self) -> int:
         joltages = []
         for bank in self.data:
-            if self.task_num == 1:
-                # 2 pointers
-                i = 0
-                j = len(bank) - 1
-                max_left, max_right = 0, 0
-                max_i = None
-                while i < j:
-                    left = bank[i]
-                    if left > max_left:
-                        max_i = i
-                    max_left = max(left, max_left)
-                    if left == 9:
-                        # no more i shifts
-                        break
-                    else:
-                        i += 1
-                        continue
+            last_right_border = -1
+            values = []
 
-                assert max_i is not None
-                max_right = max(bank[max_i + 1 :])
-                joltages.append(max_left * 10 + max_right)
-            else:
-                # raise ValueError(f"Invalid task number: {self.task_num}")
-                raise NotImplementedError(f"Invalid task number: {self.task_num}")
+            for digit in range(self.digits):
+                left_border = last_right_border + 1
+                right_border = len(bank) - (self.digits - digit - 1)
+
+                max_value = float("-inf")
+                for i, value in enumerate(bank[left_border:right_border]):
+                    if value > max_value:
+                        max_value = value
+                        last_right_border = left_border + i
+
+                values.append(max_value)
+
+            joltage = 0
+            for power, value in enumerate(reversed(values)):
+                joltage += value * 10**power
+
+            joltages.append(joltage)
 
         return sum(joltages)
 
@@ -87,5 +89,8 @@ def task2(inp):
 
 
 if __name__ == "__main__":
-    test(task1, 357)
-    run(task1)
+    # test(task1, 357)
+    # run(task1)
+
+    test(task2, 3121910778619)
+    run(task2)
