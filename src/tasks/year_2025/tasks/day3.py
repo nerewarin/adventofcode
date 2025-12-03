@@ -50,14 +50,14 @@ class Lobby:
 
     @timeit_deco
     def solve(self) -> int:
-        joltages = []
+        joltage = 0
         for bank in self.data:
             last_right_border = -1
-            values = []
 
             for digit in range(self.digits):
                 left_border = last_right_border + 1
-                right_border = len(bank) - (self.digits - digit - 1)
+                power = self.digits - digit - 1
+                right_border = len(bank) - power
 
                 max_value = float("-inf")
                 for i, value in enumerate(bank[left_border:right_border]):
@@ -65,15 +65,9 @@ class Lobby:
                         max_value = value
                         last_right_border = left_border + i
 
-                values.append(max_value)
+                joltage += max_value * 10**power
 
-            joltage = 0
-            for power, value in enumerate(reversed(values)):
-                joltage += value * 10**power
-
-            joltages.append(joltage)
-
-        return sum(joltages)
+        return joltage
 
 
 def task(inp: list[str], task_num: int = 1) -> int:
