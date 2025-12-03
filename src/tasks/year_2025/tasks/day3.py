@@ -89,8 +89,8 @@ def task2(inp):
 
 
 if __name__ == "__main__":
-    # test(task1, 357)
-    # run(task1)
+    test(task1, 357)
+    run(task1)
 
     test(task2, 3121910778619)
     run(task2)
