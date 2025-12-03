@@ -18,6 +18,7 @@ _grid_logger = get_message_only_logger()
 WALL = "#"
 SPACE = "."
 PATH_MEMBER = "O"
+LAST_BLOCK_SYMBOL = "X"
 
 
 def pretty_int(n: int) -> str:
@@ -56,34 +57,56 @@ class RAMRun:
 
     @staticmethod
     def _show_grid(grid: list[list[int]], level=logging.DEBUG) -> None:
-        symbols = [SPACE, WALL, PATH_MEMBER]
-        for line in grid:
-            line_str = "".join([symbols[value] for value in line])
+        symbols = {
+            0: SPACE,
+            1: WALL,
+            2: PATH_MEMBER,
+            3: LAST_BLOCK_SYMBOL,
+        }
+        for i, line in enumerate(grid):
+            line_str = "".join([symbols.get(value, value) for value in line])
+
             _grid_logger.log(level, line_str)
 
     def _get_problem(self, grid, wall) -> PositionSearchProblem:
         state = OrthogonalPositionState(grid, self.start, 0, wall_symbol=wall)
         return PositionSearchProblem(state=state, goal=self.goal, inp=grid)
 
-    def solve(self) -> int:
+    def solve(self) -> int | None:
         simulation_list = self.data[: self.steps_to_simulate]
+        last_block = simulation_list[-1]
+        _logger.debug(f"last block: {last_block}")
+
+        next_10_blocks = self.data[self.steps_to_simulate :][:10]
 
         space = 0
         wall = 1
         path_member = 2
+        # last_block_symbol = 3
 
         grid = [[space for _ in range(self._height)] for _ in range(self._width)]
         for x, y in simulation_list:
             grid[y][x] = wall
+            # if (x, y) == last_block:
+            #     grid[y][x] = last_block_symbol
 
         _logger.debug("Initial grid:")
         self._show_grid(grid)
 
         problem = self._get_problem(grid, wall)
-        state, actions, score = astar(problem, self._heuristic)
+        res = astar(problem, self._heuristic)
+        if not res:
+            _logger.debug(f"Final grid for steps_to_simulate={self.steps_to_simulate} (None):")
+
+            self._show_grid(grid, level=logging.WARNING)
+            return None
+        state, actions, score = res
 
         for x, y in state.path:
             grid[y][x] = path_member
+        for i, (x, y) in enumerate(next_10_blocks):
+            grid[y][x] = str(i)
+
         _logger.debug("Final grid:")
         self._show_grid(grid)
 
@@ -98,6 +121,34 @@ def task1(inp, **kw):
     return task(inp, **kw)
 
 
+def task2(inp, **kw):
+    failures = 0
+    # for steps_to_simulate in range(2959, 3450):
+    for steps_to_simulate in (2961,):
+        _logger.info(f"{steps_to_simulate=}")
+        if _ := run(task1, steps_to_simulate=steps_to_simulate):
+            continue
+        else:
+            failures += 1
+            _logger.info(f"{failures=}")
+            if failures == 10:
+                return steps_to_simulate
+
+    return None
+
+
 if __name__ == "__main__":
     test(task1, 22, goal=Position2D(6, 6), steps_to_simulate=12)
     run(task1)  # 436
+
+    # 2960 is wrong
+    # 2961 is wrong
+    # 2962   is wrong
+    # 2964 wrong
+    # 2965 wrong
+    # 2966 wrong
+    # 2967 wrong
+    # 2968 # wrong?
+
+    # run(task2)
+    # run(task1, steps_to_simulate=2959)  # 436
