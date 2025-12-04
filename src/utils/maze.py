@@ -1,4 +1,9 @@
+import logging
+
+from src.utils.logger import get_message_only_logger
 from src.utils.position import Position2D
+
+_maze_logger = get_message_only_logger()
 
 
 def parse_maze(
@@ -18,3 +23,9 @@ def parse_maze(
                 end = Position2D(col, row)
     assert start and end
     return maze, start, end
+
+
+def draw_maze(maze: list[list[str]], level: int = logging.DEBUG) -> None:
+    for i, line in enumerate(maze):
+        line_str = "".join(line)
+        _maze_logger.log(level, line_str)

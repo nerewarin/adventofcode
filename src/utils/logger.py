@@ -1,12 +1,12 @@
 import logging
 import os
 
+LOG_LEVEL = os.getenv("level", "INFO")
+
 
 def get_logger():
-    log_level = os.getenv("level", "INFO")
-
     # Configure logging based on environment variable
-    logging.basicConfig(level=log_level)
+    logging.basicConfig(level=LOG_LEVEL)
 
     return logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class MessageOnlyFilter(logging.Filter):
 
 def get_message_only_logger(name: str = "grid_printer") -> logging.Logger:
     # Take effective level from root (or from your main logger if you prefer)
-    root_level = logging.getLogger().getEffectiveLevel()
+    root_level = LOG_LEVEL
 
     logger = logging.getLogger(name)
     logger.setLevel(root_level)

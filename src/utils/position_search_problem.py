@@ -3,7 +3,8 @@ from collections.abc import Generator, Sized
 from typing import Any
 
 from src.utils.directions import ORTHOGONAL_DIRECTIONS, OrthogonalDirectionEnum, go, is_a_way_back, out_of_borders
-from src.utils.position import Position2D, get_value_by_position
+from src.utils.maze import draw_maze
+from src.utils.position import Position2D, get_value_by_position, set_value_by_position
 
 
 @abstractmethod
@@ -66,6 +67,17 @@ class OrthogonalPositionState(BaseState):
     @property
     def _directions(self) -> Generator[OrthogonalDirectionEnum]:
         yield from ORTHOGONAL_DIRECTIONS.items()
+
+    def _copy_grid(self) -> list[list[str]]:
+        return [lst.copy() for lst in self.inp]
+
+    def draw(self):
+        grid = self._copy_grid()
+        for i, pos in enumerate(self.path[1:-1]):
+            set_value_by_position(pos, str((i + 1) % 10), grid)
+
+        set_value_by_position(self.path[-1], "x", grid)
+        draw_maze(grid)
 
     def get_successors(self) -> Generator[tuple[BaseState, OrthogonalDirectionEnum, int]]:
         prior_action = self.get_last_action()
