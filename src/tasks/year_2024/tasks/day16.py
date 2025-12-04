@@ -8,15 +8,13 @@ The idea is to use same A-star algorythm as for src/tasks/year_2023/tasks/day17.
 
 from src.utils.directions import OrthogonalDirectionEnum
 from src.utils.logger import get_logger
+from src.utils.maze import parse_maze
 from src.utils.pathfinding import PriorityQueue, astar, manhattan_heuristic
-from src.utils.position import Position2D
 from src.utils.position_search_problem import OrthogonalPositionState, PositionSearchProblem
 from src.utils.test_and_run import run, test
 
 _logger = get_logger()
 
-START = "S"
-END = "E"
 WALL = "#"
 SPACE = "."
 
@@ -54,7 +52,7 @@ class ReindeerMazeTask:
     starting_rotation = OrthogonalDirectionEnum.right
 
     def __init__(self, inp, task_num, path=None):
-        self.maze, self.start, self.end = self._parse_input(inp)
+        self.maze, self.start, self.end = parse_maze(inp)
         self._task_num = task_num
 
         self.height = len(self.maze)
@@ -62,23 +60,6 @@ class ReindeerMazeTask:
 
         self.path = path or []
         self._heuristic = manhattan_heuristic
-
-    @staticmethod
-    def _parse_input(inp):
-        start = None
-        end = None
-        maze = [[] for _ in inp]
-        for row, line in enumerate(inp):
-            for col, symbol in enumerate(line):
-                maze[row].append(symbol)
-                if symbol == START:
-                    assert start is None
-                    start = Position2D(col, row)
-                elif symbol == END:
-                    assert end is None
-                    end = Position2D(col, row)
-        assert start and end
-        return maze, start, end
 
     def _get_problem(self, state_cls: type[State1] | type[State2]) -> PositionSearchProblem:
         state = state_cls(self.maze, self.start, 0, self.path, actions=[self.starting_rotation])
