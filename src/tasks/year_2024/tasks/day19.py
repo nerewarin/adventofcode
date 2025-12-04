@@ -4,7 +4,7 @@ https://adventofcode.com/2024/day/19
 """
 
 from collections import defaultdict
-from functools import cached_property
+from functools import cached_property, lru_cache
 
 from src.utils.logger import get_logger
 from src.utils.profiler import timeit_deco
@@ -60,7 +60,7 @@ class LinenLayout:
         for length, patterns in self.patterns_by_len.items():
             start = design_order[:length]
             for pattern in patterns:
-                # TODO use bisect or dict by prefixes or smth like that
+                # TODO to optimize, use bisect or dict by prefixes or smth like that
                 # since we have patterns sorted, stop search when we reach next letter
                 if ord(pattern[0]) > ord(start[0]):
                     break
@@ -74,6 +74,26 @@ class LinenLayout:
                         return True
 
         return False
+
+    @lru_cache
+    def _count_possibilities(self, design_order: str) -> int:
+        possibilities = 0
+        for length, patterns in self.patterns_by_len.items():
+            start = design_order[:length]
+            for pattern in patterns:
+                # TODO to optimize, use bisect or dict by prefixes or smth like that
+                if ord(pattern[0]) > ord(start[0]):
+                    break
+
+                end = design_order[length:]
+                if start == pattern:
+                    if not end:
+                        possibilities += 1
+                    else:
+                        new_possibilities = self._count_possibilities(end)
+                        possibilities += new_possibilities
+
+        return possibilities
 
     @timeit_deco
     def solve(self) -> int:
@@ -104,3 +124,6 @@ def task2(inp):
 if __name__ == "__main__":
     test(task1, 6)
     run(task1)
+
+    test(task2, 16)
+    run(task2)
