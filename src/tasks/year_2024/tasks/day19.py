@@ -4,7 +4,7 @@ https://adventofcode.com/2024/day/19
 """
 
 from collections import defaultdict
-from functools import cached_property, lru_cache
+from functools import cached_property
 
 from src.utils.logger import get_logger
 from src.utils.profiler import timeit_deco
@@ -30,6 +30,7 @@ class LinenLayout:
             pass
         else:
             raise ValueError(f"Invalid task number: {task_num}")
+        self.task_num = task_num
 
     def __repr__(self):
         return (
@@ -54,27 +55,8 @@ class LinenLayout:
         design_orders = [line for line in inp[2:] if line]
         return available_towel_patterns, design_orders
 
-    def _fast_fail(self, design_order: str) -> bool:
-        start_is_possible = False
-        end_is_possible = False
-        for pattern in self.available_towel_patterns:
-            if not start_is_possible and design_order.startswith(pattern):
-                start_is_possible = True
-            if not end_is_possible and design_order.endswith(pattern):
-                end_is_possible = True
-
-        if not start_is_possible or not end_is_possible:
-            return True
-        return False
-
-    @lru_cache
+    # @lru_cache
     def _is_possible(self, design_order: str) -> bool:
-        if self._fast_fail(design_order):
-            return False
-
-        # if len(design_order) < min(self.patterns_by_len):
-        #     return False
-
         for length, patterns in self.patterns_by_len.items():
             start = design_order[:length]
             for pattern in patterns:
@@ -97,9 +79,13 @@ class LinenLayout:
     def solve(self) -> int:
         res = [0] * len(self.design_orders)
         for i, order in enumerate(self.design_orders):
-            if self._is_possible(order):
-                # just for debug purposes keep track of which design is possible
-                res[i] = 1
+            if self.task_num == 1:
+                if self._is_possible(order):
+                    # just for debug purposes keep track of which design is possible
+                    res[i] = 1
+            else:
+                res[i] = self._count_possibilities(order)
+
         return sum(res)
 
 
