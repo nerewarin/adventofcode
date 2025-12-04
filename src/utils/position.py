@@ -1,5 +1,8 @@
 import math
-from typing import NamedTuple
+from collections.abc import Sequence
+from typing import NamedTuple, TypeVar
+
+T = TypeVar("T")
 
 
 class Position2D(NamedTuple):
@@ -53,3 +56,11 @@ class Position2D(NamedTuple):
 
     def reversed(self) -> "Position2D":
         return Position2D(self.y, self.x)
+
+
+def get_value_by_position[T](
+    pos: Position2D,
+    grid: Sequence[Sequence[T]],
+) -> T:
+    x, y = pos
+    return grid[y][x]

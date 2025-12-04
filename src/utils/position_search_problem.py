@@ -3,7 +3,7 @@ from collections.abc import Generator, Sized
 from typing import Any
 
 from src.utils.directions import ORTHOGONAL_DIRECTIONS, OrthogonalDirectionEnum, go, is_a_way_back, out_of_borders
-from src.utils.position import Position2D
+from src.utils.position import Position2D, get_value_by_position
 
 
 @abstractmethod
@@ -58,8 +58,7 @@ class OrthogonalPositionState(BaseState):
         return Position2D(self.x, self.y)
 
     def _get(self, pos: Position2D) -> str:
-        x, y = pos
-        return self.inp[y][x]
+        return get_value_by_position(pos, self.inp)
 
     def _is_wall(self, yx: Position2D) -> bool:
         return self._get(yx) == self.wall_symbol
