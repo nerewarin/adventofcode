@@ -12,12 +12,6 @@ from src.utils.test_and_run import run, test
 
 _logger = get_logger()
 
-WHITE = "w"
-BLUE = "u"
-BLACK = "b"
-RED = "r"
-GREEN = "g"
-
 
 class LinenLayout:
     def __init__(self, available_towel_patterns, design_orders, task_num):
