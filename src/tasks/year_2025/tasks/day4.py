@@ -7,7 +7,7 @@ import logging
 
 from src.utils.directions import ADJACENT_DIRECTIONS, go, out_of_borders
 from src.utils.logger import get_logger, get_message_only_logger
-from src.utils.position import Position2D, get_value_by_position
+from src.utils.position import Position2D, get_value_by_position, set_value_by_position
 from src.utils.profiler import timeit_deco
 from src.utils.test_and_run import run, test
 
@@ -36,9 +36,11 @@ class PrintingDepartment:
         for line in self._grid:
             get_message_only_logger().log(level, "".join(line))
 
-    @timeit_deco
-    def solve(self) -> int:
-        res = 0
+    def copy_diagram(self):
+        return [lst.copy() for lst in self.diagram]
+
+    def _remove_rolls(self):
+        to_remove = []
         for row_idx, row in enumerate(self.diagram):
             for col_idx, value in enumerate(row):
                 position = Position2D(col_idx, row_idx)
@@ -54,9 +56,28 @@ class PrintingDepartment:
                     if rolls_nearby >= 4:
                         break
                 if rolls_nearby < 4:
-                    self._grid[row_idx][col_idx] = "x"
-                    res += 1
+                    to_remove.append(position)
+
+        for position in to_remove:
+            set_value_by_position(position, 0, self.diagram)
+            # for debug purposes: mark "x" for last iteration only, else "." (need to move out and track there for that)
+            # set_value_by_position(position, "x", self._grid)
+
+        return len(to_remove)
+
+    @timeit_deco
+    def solve(self) -> int:
+        res = 0
+        if self.task_num == 1:
+            res = self._remove_rolls()
+        elif self.task_num == 2:
+            while new_res := self._remove_rolls():
+                res += new_res
+        else:
+            raise ValueError(f"Invalid task number: {self.task_num}")
+
         self._show_grid()
+
         return res
 
 
@@ -75,3 +96,6 @@ def task2(inp):
 if __name__ == "__main__":
     test(task1, 13)
     run(task1)
+
+    test(task2, 43)
+    run(task2)

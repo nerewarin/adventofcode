@@ -64,3 +64,12 @@ def get_value_by_position[T](
 ) -> T:
     x, y = pos
     return grid[y][x]
+
+
+def set_value_by_position[T](
+    pos: Position2D,
+    value: T,
+    grid: list[list[T]],
+) -> None:
+    x, y = pos
+    grid[y][x] = value
