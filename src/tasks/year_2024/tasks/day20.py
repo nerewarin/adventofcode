@@ -59,25 +59,29 @@ class RaceCondition:
         state = OrthogonalPositionState(grid, self.start, 0)
         return PositionSearchProblem(state=state, goal=self.goal, inp=grid)
 
+    def _copy_grid(self) -> list[list[str]]:
+        return [lst.copy() for lst in self.maze]
+
     def solve(self) -> int | None:
         _logger.debug("Initial grid:")
         self._show_grid()
 
         problem = self._get_problem(self.maze)
-        res = astar(problem, self._heuristic)
-        if not res:
+        initial_res = astar(problem, self._heuristic)
+        if not initial_res:
             _logger.error("Path finding failed")
             return None
 
-        state, actions, score = res
-
-        for pos in state.path:
-            set_value_by_position(pos, PATH_MEMBER, self.maze)
+        _initial_final_state, _initial_actions, _ = initial_res
+        initial_path_len = len(_initial_actions)
+        grid_copy = self._copy_grid()
+        for pos in _initial_final_state.path[1:-1]:  # leave start and end as is
+            set_value_by_position(pos, PATH_MEMBER, grid_copy)
 
         _logger.debug("Final grid:")
-        self._show_grid()
+        self._show_grid(grid_copy)
 
-        return len(actions)
+        return initial_path_len
 
 
 def task(inp: list[str], task_num: int | None = 1, threshold: int | None = 100) -> int:
