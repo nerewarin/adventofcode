@@ -43,20 +43,36 @@ def test(fn, expected, *args, test_part=None, **kwargs):
     root = _get_resources_dir()
 
     fname = "tst"
+    func_name = fn.__name__
+    base_msg = "test {func_name}{extra} {result}"
+    extra_params = []
     if test_part and test_part > 1:
         fname += str(test_part)
-        success_msg = f"test {fn.__name__} ({test_part=}) passed"
+        extra_params.append(f"{test_part=}")
+
+    if args:
+        extra_params.append(f"{args=}")
+    if kwargs:
+        for k, v in kwargs.items():
+            extra_params.append(f"{k}={v}")
+
+    if extra_params:
+        extra = " (" + ", ".join(extra_params) + ")"
     else:
-        success_msg = f"test {fn.__name__} passed"
+        extra = ""
 
     test_data = _file_to_list(root / fname)
 
     res = fn(test_data, *args, **kwargs)
 
     if res != expected:
-        raise ValueError(f"fn {fn} returned wrong result: {res=} != {expected=}!")
-
-    print(success_msg)
+        result = f"returned wrong result: {res=} != {expected=}!"
+        msg = base_msg.format(func_name=func_name, extra=extra, result=result)
+        raise ValueError(msg)
+    else:
+        result = "passed"
+        msg = base_msg.format(func_name=func_name, extra=extra, result=result)
+        print(msg)
 
 
 def run(fn, *args, **kwargs):
