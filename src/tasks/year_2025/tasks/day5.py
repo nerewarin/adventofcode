@@ -17,6 +17,10 @@ class IngredientRange(NamedTuple):
     start: int
     end: int
 
+    @property
+    def length(self):
+        return self.end - self.start + 1
+
     def contains(self, value: int):
         return self.start <= value <= self.end
 
@@ -50,6 +54,9 @@ class Cafeteria:
     ):
         self._fresh_ingredient_ranges = fresh_ingredient_ranges
         self._available_ingredient_ids = available_ingredient_ids
+
+        if task_num not in (1, 2):
+            raise ValueError(f"Invalid task number: {task_num}")
         self.task_num = task_num
 
     @cached_property
@@ -94,6 +101,9 @@ class Cafeteria:
 
     @timeit_deco
     def solve(self) -> int:
+        if self.task_num == 2:
+            return sum(r.length for r in self.fresh_ingredient_ranges)
+
         res = 0
         fresh_ingredient_ranges = self.fresh_ingredient_ranges
 
@@ -127,3 +137,6 @@ def task2(inp):
 if __name__ == "__main__":
     test(task1, 3)
     run(task1)
+
+    test(task2, 14)
+    run(task2)
