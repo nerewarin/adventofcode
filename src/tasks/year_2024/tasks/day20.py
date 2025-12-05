@@ -419,4 +419,4 @@ if __name__ == "__main__":
     test(task1, 16, target_savings=6)  # +2
     test(task1, 30, target_savings=4)  # +14
     test(task1, 44, target_savings=2)  # +14
-    run(task1)
+    run(task1)  # 1490
