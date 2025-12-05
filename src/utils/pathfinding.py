@@ -96,7 +96,7 @@ class PriorityQueue:
         self.count += 1
 
     def pop(self):
-        (_, _, item) = heapq.heappop(self.heap)
+        (priority, count, item) = heapq.heappop(self.heap)
         #  (_, item) = heapq.heappop(self.heap)
         return item
 

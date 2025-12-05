@@ -2,7 +2,11 @@ import inspect
 import pathlib
 import re
 
+from src.utils.logger import get_logger
+
 _TASK_NUM_FROM_FILE_REGEXP = re.compile(r"(?:day)?(\d+)")
+
+_logger = get_logger()
 
 
 def _get_resources_dir():
@@ -44,7 +48,7 @@ def test(fn, expected, *args, test_part=None, **kwargs):
 
     fname = "tst"
     func_name = fn.__name__
-    base_msg = "test {func_name}{extra} {result}"
+    _base_msg = "test {func_name}{extra}"
     extra_params = []
     if test_part and test_part > 1:
         fname += str(test_part)
@@ -60,24 +64,29 @@ def test(fn, expected, *args, test_part=None, **kwargs):
         extra = " (" + ", ".join(extra_params) + ")"
     else:
         extra = ""
+    base_msg = _base_msg.format(func_name=func_name, extra=extra)
 
     test_data = _file_to_list(root / fname)
 
+    _logger.info(f"Running {base_msg}")
     res = fn(test_data, *args, **kwargs)
 
+    result_msg = base_msg + " {result}"
     if res != expected:
         result = f"returned wrong result: {res=} != {expected=}!"
-        msg = base_msg.format(func_name=func_name, extra=extra, result=result)
+        msg = result_msg.format(result=result)
         raise ValueError(msg)
     else:
         result = "passed"
-        msg = base_msg.format(func_name=func_name, extra=extra, result=result)
-        print(msg)
+        msg = result_msg.format(result=result)
+        _logger.warning(msg)
 
 
 def run(fn, *args, **kwargs):
     """Prints the output of applying function to task data to console"""
     data = _file_to_list(_get_resources_dir() / "run")
+    _logger.info(f"Running {fn.__name__} in 'run' mode")
+
     res = fn(data, *args, **kwargs)
-    print(f"run {fn.__name__} result: {res}")
+    _logger.warning(f"'run' {fn.__name__} result: {res}")
     return res

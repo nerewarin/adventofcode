@@ -39,13 +39,13 @@ class OrthogonalPositionState(BaseState):
     def __init__(self, inp: list[list[str]], pos, step=None, path=None, actions=None, cost=0, wall_symbol="#"):
         self.inp = inp
         self.x, self.y = pos
-        self.symbol = self.inp[self.y][self.x]
-
         self.step = step or 0
         self.path = path or [pos]
         self.actions = actions or []
         self.cost = cost
         self.wall_symbol = wall_symbol
+
+        self.symbol = self.inp[self.y][self.x]
 
     def __str__(self):
         return (
@@ -71,13 +71,13 @@ class OrthogonalPositionState(BaseState):
     def _copy_grid(self) -> list[list[str]]:
         return [lst.copy() for lst in self.inp]
 
-    def draw(self):
+    def draw(self, level=None):
         grid = self._copy_grid()
         for i, pos in enumerate(self.path[1:-1]):
             set_value_by_position(pos, str((i + 1) % 10), grid)
 
         set_value_by_position(self.path[-1], "x", grid)
-        draw_maze(grid)
+        draw_maze(grid, level=level)
 
     def get_successors(self) -> Generator[tuple[BaseState, OrthogonalDirectionEnum, int]]:
         prior_action = self.get_last_action()

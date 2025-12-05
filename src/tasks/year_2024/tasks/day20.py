@@ -13,7 +13,7 @@ from src.utils.maze import draw_maze, parse_maze
 from src.utils.pathfinding import PriorityQueue, astar, manhattan_heuristic
 from src.utils.position import Position2D, set_value_by_position
 from src.utils.position_search_problem import OrthogonalPositionState, PositionSearchProblem
-from src.utils.test_and_run import test
+from src.utils.test_and_run import run, test
 
 T = TypeVar("T")
 
@@ -105,10 +105,10 @@ class LimitedPositionSearchProblem(PositionSearchProblem):
     def get_successors(self, state: RaceConditionState) -> Generator[tuple[RaceConditionState, Any, Any]]:
         """Must return new state, last action and its cost"""
         res = []
-        for new_state, action, cost in state.get_successors():
+        for new_state, new_action, step_cost in state.get_successors():
             pos = new_state.pos
             _logger.debug(
-                f"Considering move from {state.pos} ({state._get(pos)}) {action} to {new_state.pos} ({new_state._get(pos)}). cheat_at={new_state.cheat_made_at}. actions={[str(a) for a in new_state.actions]}"
+                f"Considering move from {state.pos} ({state._get(pos)}) {new_action} to {new_state.pos} ({new_state._get(pos)}). cheat_at={new_state.cheat_made_at}. actions={[str(a) for a in new_state.actions]}"
             )
             # TODO idk what to choose. if I choose 1st - algo cant see jump to 11, 2 as cheat down since it already considered 11, 2 cheating right
             #  but if I do 2nd line, algo is super slow
@@ -138,6 +138,7 @@ class LimitedPositionSearchProblem(PositionSearchProblem):
                     new_state.symbol = self.initial_final_state.symbol
                     new_state.x = self.initial_final_state.x
                     new_state.y = self.initial_final_state.y
+                    step_cost += cached_cost
 
                     _logger.debug(
                         f"Cache hit at at {pos} ({new_state.cheat_made_at=}), add cost {cached_cost}, final cost {new_state.cost}"
@@ -145,9 +146,9 @@ class LimitedPositionSearchProblem(PositionSearchProblem):
                     if new_state.cost > self.cost_threshold:
                         continue
 
-                res.append((new_state, action, cost))
+                res.append((new_state, new_action, step_cost))
             elif new_state.cheat_made_at is None:
-                res.append((new_state, action, cost))
+                res.append((new_state, new_action, step_cost))
 
         # if not res:
         # _logger.debug(f"No succ at {state.pos} ({state.cheat_made_at=})")
@@ -159,11 +160,11 @@ class LimitedPositionSearchProblem(PositionSearchProblem):
 def limited_search(problem: LimitedPositionSearchProblem, fringe, add_to_fringe_fn) -> RaceConditionState | None:
     """generic search rework"""
     closed = set()
-    start = (problem.get_start_state(), 0, [])  # (state, cost, actions)
-    add_to_fringe_fn(fringe, start, 0)
+    start_state = problem.get_start_state()
+    add_to_fringe_fn(fringe, start_state)
 
     while not fringe.isEmpty():
-        (state, cost, actions) = fringe.pop()
+        state = fringe.pop()
 
         if problem.is_goal_state(state):
             return state
@@ -172,23 +173,17 @@ def limited_search(problem: LimitedPositionSearchProblem, fringe, add_to_fringe_
         if state not in closed:
             closed.add(state)
 
-            for child_node, child_action, child_cost in problem.get_successors(state):
-                new_cost = cost + child_cost
-                new_actions = actions + [child_action]
-                new_element = (child_node, new_cost, new_actions)
-                #
-                # if child_node.is_final:
-                #     # TODO not sure..
-                #     # and now update cache tp optimize?
-                #     # cheat_made_at = child_node.cheat_made_at
-                #     return child_node
+            for child_node, child_action, child_step_cost in problem.get_successors(state):
+                new_cost = state.cost + child_step_cost
 
-                add_to_fringe_fn(fringe, new_element, new_cost)
+                assert child_node.cost == new_cost
+
+                add_to_fringe_fn(fringe, child_node)
 
     return None
 
 
-def count_cheap_paths_with_astar(problem, heuristic):
+def count_cheap_paths_with_astar(problem: LimitedPositionSearchProblem, heuristic):
     """Like astar but
     1. does not add state to fringe if cost reaches threshold
     2. consider
@@ -196,19 +191,17 @@ def count_cheap_paths_with_astar(problem, heuristic):
     fringe = PriorityQueue()
     res = 0
 
-    def add_to_fringe_fn(fringe: PriorityQueue, element, cost):
-        (state, cost_, actions) = element
-        new_cost = cost + heuristic(state, problem)
-        assert cost_ == cost, f"{cost_=} != {cost=}"
-        if new_cost > problem.cost_threshold:
+    def add_to_fringe_fn(fringe: PriorityQueue, state: RaceConditionState):
+        estimated_cost = state.cost + heuristic(state, problem)
+        if estimated_cost > problem.cost_threshold:
             return None
-        fringe.push(element, new_cost)
+        fringe.push(state, estimated_cost)
 
     solutions = []
     while new_final_state := limited_search(problem, fringe, add_to_fringe_fn):
         res += 1
-        _logger.debug(
-            f"New solution #{res} found with cost={new_final_state.cost}, is_final={new_final_state.fast_forwarded_from}"
+        _logger.info(
+            f"New solution #{res} found with cost={new_final_state.cost}, fast_forwarded_from={new_final_state.fast_forwarded_from}"
         )
 
         if new_final_state.fast_forwarded_from:
@@ -217,22 +210,53 @@ def count_cheap_paths_with_astar(problem, heuristic):
         else:
             fast_forward_index = 0
             unique_path = new_final_state.path
-            # # fast_forward from problem.initial_final_state
-            # start_common_path_index = new_final_state.cost - len(new_final_state.path) + 1
-            # common_initial_path = problem.initial_final_state
-            # continue  # since we do not extend its real path - we cant rely on it
 
-        # TODO add all pos-->cost_to_goal after cheat to cache!
-        for steps_to_goal_left, pos in enumerate(reversed(unique_path)):
+        tail_cost = len(new_final_state.path[fast_forward_index:])
+
+        for steps_to_goal_left_, pos in enumerate(reversed(unique_path)):
             if pos == new_final_state.cheat_made_at:
                 break
 
+            steps_to_goal_left = steps_to_goal_left_ + tail_cost
             if pos in problem.path_costs_cache:
-                assert steps_to_goal_left == problem.path_costs_cache[pos]
+                assert steps_to_goal_left == problem.path_costs_cache[pos], (
+                    f"steps_to_goal_left != problem.path_costs_cache[pos]: "
+                    f"({steps_to_goal_left} != {problem.path_costs_cache[pos]}, {pos=})"
+                )
             else:
                 problem.path_costs_cache[pos] = steps_to_goal_left
 
         solutions.append(new_final_state)
+
+        # optimization:
+        # start new search from the last point of diverge from original path
+        step = 0
+        for step, pos in enumerate(new_final_state.path):
+            if pos != problem.initial_final_state.path[step]:
+                break
+        last_common_step = step - 1
+        if last_common_step < 0:
+            raise RuntimeError("broken search from the last point of diverge from original path")
+        start_pos = problem.initial_final_state.path[last_common_step]
+        start_actions = list(problem.initial_final_state.actions[:last_common_step])
+        start_path = list(problem.initial_final_state.path[:last_common_step])
+        assert new_final_state.cheat_made_at not in start_path, f"{new_final_state.cheat_made_at=} in {start_path=}!"
+        assert new_final_state.path[:last_common_step] == start_path
+        assert new_final_state.actions[:last_common_step] == start_actions
+
+        if start_pos != problem.startState.pos:
+            # now fast-forward our problem from start position to this point of diverge
+            # TODO further optimization includes iterative fast-forwarding start pos not from initial start but last fast-forward made
+            _logger.info(f"Fast forwarding starting position {last_common_step} steps from start pos to {start_pos}")
+            problem.startState = RaceConditionState(
+                problem.inp,
+                start_pos,
+                step=last_common_step,
+                path=start_path,
+                actions=start_actions,
+                cost=new_final_state.get_cost_of_actions(start_actions),
+                wall_symbol=new_final_state.wall_symbol,
+            )
 
     # TODO del
     edge_solutions = [s for s in solutions if s.cost == problem.cost_threshold]
@@ -276,7 +300,7 @@ class RaceCondition:
     def _show_grid(self, grid: list[list[str]] | None = None, level=logging.DEBUG) -> None:
         if grid is None:
             grid = self.maze
-        draw_maze(grid)
+        draw_maze(grid, level=level)
 
     def _get_problem[T](self, state_cls, problem_cls: type[T], grid, **kw) -> T:
         state = state_cls(grid, self.start, 0)
@@ -296,8 +320,8 @@ class RaceCondition:
         return _initial_final_state
 
     def solve(self) -> int | None:
-        _logger.debug("Initial grid:")
-        self._show_grid()
+        _logger.info("Initial grid:")
+        self._show_grid(level=logging.INFO)
 
         _initial_final_state = self._initial_run()
 
@@ -306,8 +330,8 @@ class RaceCondition:
         for pos in _initial_final_state.path[1:-1]:  # leave start and end as is
             set_value_by_position(pos, PATH_MEMBER, grid_copy)
 
-        _logger.debug(f"Best path for initial problem of cost {min_actions_with_no_cheat}:")
-        _initial_final_state.draw()
+        _logger.info(f"Best path for initial problem of cost {min_actions_with_no_cheat}:")
+        _initial_final_state.draw(level=logging.INFO)
 
         if self.task_num != 1:
             raise NotImplementedError(f"task_num = {self.task_num} is not implemented")
@@ -318,6 +342,8 @@ class RaceCondition:
         if min_actions_with_no_cheat <= target_savings:
             raise ValueError(f"{min_actions_with_no_cheat=} <= {target_savings=}!")
         cost_threshold = min_actions_with_no_cheat - target_savings
+        _logger.info(f"Counting paths with {cost_threshold=} (at maximum) following {target_savings=} (at minimum)")
+
         # 2. cache path length from every initial path to goal not to compute it again
         # we can then update this cache fot new points found AFTER the cheat
         path_costs_cache = {}
@@ -393,4 +419,4 @@ if __name__ == "__main__":
     test(task1, 16, target_savings=6)  # +2
     test(task1, 30, target_savings=4)  # +14
     test(task1, 44, target_savings=2)  # +14
-    # run(task1)
+    run(task1)

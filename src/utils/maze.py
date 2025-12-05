@@ -26,6 +26,7 @@ def parse_maze(
 
 
 def draw_maze(maze: list[list[str]], level: int = logging.DEBUG) -> None:
+    level = level or logging.DEBUG
     for i, line in enumerate(maze):
         line_str = "".join(line)
         _maze_logger.log(level, line_str)
