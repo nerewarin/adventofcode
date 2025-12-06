@@ -88,6 +88,6 @@ def run(fn, *args, **kwargs):
     data = _file_to_list(_get_resources_dir() / "run")
     _logger.info(f"Running {fn.__name__} in 'run' mode")
 
-    res = timeit_deco(fn(data, *args, **kwargs))
+    res = timeit_deco(fn)(data, *args, **kwargs)
     _logger.warning(f"'run' {fn.__name__} result: {res}")
     return res

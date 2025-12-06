@@ -366,11 +366,16 @@ class RaceCondition:
         res = 0
         min_cheat_len = 2
         max_cheat_len = 20
-        cheats = []
-        for step, cheat_start in tqdm(enumerate(initial_path), desc="considering cheats", total=len(initial_path)):
+        cheat_starts_to_consider = initial_path[:-target_savings]
+        for step, cheat_start in tqdm(
+            enumerate(cheat_starts_to_consider),
+            desc="considering cheats from every perspective position of original path",
+            total=len(cheat_starts_to_consider),
+        ):
             # try to reach some far points
             target_shift = min_cheat_len + step + target_savings
-            for i, cheat_end in enumerate(initial_path[target_shift:]):
+            cheat_ends_to_consider = initial_path[target_shift:]
+            for i, cheat_end in enumerate(cheat_ends_to_consider):
                 cheat = Cheat(cheat_start, cheat_end)
                 cheat_length = cheat.length
                 if cheat_length > max_cheat_len:
@@ -379,8 +384,7 @@ class RaceCondition:
                 initial_cost = target_shift + i
                 cost_with_cheat = step + cheat_length
                 savings = initial_cost - cost_with_cheat
-                if strict is False and savings >= target_savings or strict is True and savings == target_savings:
-                    cheats.append(cheat)
+                if savings == target_savings or strict is False and savings > target_savings:
                     res += 1
 
                     if _logger.level <= logging.DEBUG:
@@ -446,6 +450,7 @@ def task(inp: list[str], task_num: int | None = 1, target_savings: int | None = 
 
 
 def task1(inp, **kw):
+    # TODO rewrite using task2 approach
     return task(inp, **kw)
 
 
