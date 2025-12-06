@@ -49,7 +49,7 @@ def test(fn, expected, *args, test_part=None, **kwargs):
 
     fname = "tst"
     func_name = fn.__name__
-    _base_msg = "test {func_name}{extra}"
+    _base_msg = "{func_name}{extra} in 'test' mode"
     extra_params = []
     if test_part and test_part > 1:
         fname += str(test_part)
