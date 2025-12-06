@@ -4,8 +4,11 @@ https://adventofcode.com/2024/day/20
 """
 
 import logging
+import re
 from collections.abc import Generator
 from typing import Any, NamedTuple, TypeVar, cast
+
+from tqdm import tqdm
 
 from src.utils.directions import OrthogonalDirectionEnum, go, is_a_way_back, out_of_borders
 from src.utils.logger import get_logger, get_message_only_logger
@@ -13,7 +16,7 @@ from src.utils.maze import draw_maze, parse_maze
 from src.utils.pathfinding import PriorityQueue, astar, manhattan_heuristic
 from src.utils.position import Position2D, set_value_by_position
 from src.utils.position_search_problem import OrthogonalPositionState, PositionSearchProblem
-from src.utils.test_and_run import test
+from src.utils.test_and_run import run, test
 
 T = TypeVar("T")
 
@@ -326,19 +329,18 @@ class RaceCondition:
                 if pos not in path:
                     raise RuntimeError(f"pos {pos} not in optimal path of initial run!")
 
-    def _count_distinct_cheats(self, initial_final_state: RaceConditionState, cost_threshold: int) -> int:
+    def _count_distinct_cheats(self, initial_final_state: RaceConditionState, strict: bool | None = False) -> int:
         """
         This problem is harder, but now I know:
         1. All spaces in our input exist in initial path (check it with 1st line of implementation below)
         2. Cheat is defined with start and end - implementing Cheat class
+
+        strict mode:
+            count only cheats which save EXACT target_savings
         """
         self._check_every_cell_is_in_initial_path(initial_final_state)
 
         target_savings = self.target_savings
-
-        pos_to_step = {}
-        for i, pos in enumerate(initial_final_state.path):
-            pos_to_step[pos] = i
 
         # for every step of initial path, we can try every cheat up to 20 length.
         # we get to some point. this point is either wall or part of initial path.
@@ -354,7 +356,7 @@ class RaceCondition:
         # def check_cheat_end(cheat: Cheat) -> bool:
         #     return not initial_final_state.is_wall(cheat.end)
         #
-        # # 3. cheat makes saves needed
+        # # 3. cheat makes needed amount of savings
         # def is_valuable_cheat(cheat: Cheat) -> bool:
         #     return pos_to_step[cheat.start] + cheat.length <= pos_to_step[cheat.end] + target_savings
 
@@ -365,7 +367,7 @@ class RaceCondition:
         min_cheat_len = 2
         max_cheat_len = 20
         cheats = []
-        for step, cheat_start in enumerate(initial_path):
+        for step, cheat_start in tqdm(enumerate(initial_path), desc="considering cheats", total=len(initial_path)):
             # try to reach some far points
             target_shift = min_cheat_len + step + target_savings
             for i, cheat_end in enumerate(initial_path[target_shift:]):
@@ -377,23 +379,23 @@ class RaceCondition:
                 initial_cost = target_shift + i
                 cost_with_cheat = step + cheat_length
                 savings = initial_cost - cost_with_cheat
-                if savings >= target_savings:
+                if strict is False and savings >= target_savings or strict is True and savings == target_savings:
                     cheats.append(cheat)
-
-                    grid = self._copy_grid()
-                    set_value_by_position(cheat.start, "1", grid)
-                    set_value_by_position(cheat.end, "2", grid)
-
-                    _logger.debug(
-                        f"showing {cheat} of len {cheat.length} forking path at step {step} and saving {savings} steps (from {initial_cost} to {cost_with_cheat} to end point) meeting {target_savings=}"
-                    )
-                    draw_maze(grid)
-
                     res += 1
+
+                    if _logger.level <= logging.DEBUG:
+                        grid = self._copy_grid()
+                        set_value_by_position(cheat.start, "1", grid)
+                        set_value_by_position(cheat.end, "2", grid)
+
+                        _logger.debug(
+                            f"Found cheat #{res}: {cheat} of len {cheat.length} forking path at step {step} and saving {savings} steps (from {initial_cost} to {cost_with_cheat} to end point) meeting {target_savings=}"
+                        )
+                        draw_maze(grid)
 
         return res
 
-    def solve(self) -> int | None:
+    def solve(self, strict: bool | None = False) -> int | None:
         _logger.info("Initial grid:")
         self.draw_maze(level=logging.INFO)
 
@@ -413,7 +415,9 @@ class RaceCondition:
         if min_actions_with_no_cheat <= target_savings:
             raise ValueError(f"{min_actions_with_no_cheat=} <= {target_savings=}!")
         cost_threshold = min_actions_with_no_cheat - target_savings
-        _logger.info(f"Counting paths with {cost_threshold=} (at maximum) following {target_savings=} (at minimum)")
+        _logger.info(
+            f"Counting paths with unique cheats with {cost_threshold=} (at maximum) following {target_savings=} (at minimum)"
+        )
 
         # 2. cache path length from every initial path to goal not to compute it again
         # we can then update this cache fot new points found AFTER the cheat
@@ -422,7 +426,7 @@ class RaceCondition:
             path_costs_cache[pos] = min_actions_with_no_cheat - i
 
         if self.task_num == 2:
-            return self._count_distinct_cheats(_initial_final_state, cost_threshold)
+            return self._count_distinct_cheats(_initial_final_state, strict)
 
         assert self.task_num == 1
         problem = self._get_problem(
@@ -437,8 +441,8 @@ class RaceCondition:
         return res
 
 
-def task(inp: list[str], task_num: int | None = 1, target_savings: int | None = 100) -> int:
-    return RaceCondition.from_multiline_input(inp, task_num, target_savings).solve()
+def task(inp: list[str], task_num: int | None = 1, target_savings: int | None = 100, strict=False) -> int:
+    return RaceCondition.from_multiline_input(inp, task_num, target_savings).solve(strict)
 
 
 def task1(inp, **kw):
@@ -495,6 +499,28 @@ if __name__ == "__main__":
     # test(task1, 30, target_savings=4)  # +14
     # test(task1, 44, target_savings=2)  # +14
     # run(task1)  # 1490
-    #
-    test(task2, 3, target_savings=76)
-    # run(task2)
+
+    # test task2
+    _rexp = re.compile(r"(\d+).*?(\d+)")
+    for test_statement in """
+        There are 32 cheats that save 50 picoseconds.
+        There are 31 cheats that save 52 picoseconds.
+        There are 29 cheats that save 54 picoseconds.
+        There are 39 cheats that save 56 picoseconds.
+        There are 25 cheats that save 58 picoseconds.
+        There are 23 cheats that save 60 picoseconds.
+        There are 20 cheats that save 62 picoseconds.
+        There are 19 cheats that save 64 picoseconds.
+        There are 12 cheats that save 66 picoseconds.
+        There are 14 cheats that save 68 picoseconds.
+        There are 12 cheats that save 70 picoseconds.
+        There are 22 cheats that save 72 picoseconds.
+        """.split("\n"):
+        if not test_statement:
+            continue
+        _res = _rexp.search(test_statement)
+        if _res:
+            _expected_path_with_cheats, _savings = map(int, _res.groups())
+            test(task2, _expected_path_with_cheats, target_savings=_savings, strict=True)
+
+    run(task2)  # 1011325

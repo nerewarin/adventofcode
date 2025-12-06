@@ -3,6 +3,7 @@ import pathlib
 import re
 
 from src.utils.logger import get_logger
+from src.utils.profiler import timeit_deco
 
 _TASK_NUM_FROM_FILE_REGEXP = re.compile(r"(?:day)?(\d+)")
 
@@ -87,6 +88,6 @@ def run(fn, *args, **kwargs):
     data = _file_to_list(_get_resources_dir() / "run")
     _logger.info(f"Running {fn.__name__} in 'run' mode")
 
-    res = fn(data, *args, **kwargs)
+    res = timeit_deco(fn(data, *args, **kwargs))
     _logger.warning(f"'run' {fn.__name__} result: {res}")
     return res
