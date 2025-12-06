@@ -5,7 +5,7 @@ https://adventofcode.com/2024/day/20
 
 import logging
 from collections.abc import Generator
-from typing import Any, TypeVar, cast
+from typing import Any, NamedTuple, TypeVar, cast
 
 from src.utils.directions import OrthogonalDirectionEnum, go, is_a_way_back, out_of_borders
 from src.utils.logger import get_logger, get_message_only_logger
@@ -13,7 +13,7 @@ from src.utils.maze import draw_maze, parse_maze
 from src.utils.pathfinding import PriorityQueue, astar, manhattan_heuristic
 from src.utils.position import Position2D, set_value_by_position
 from src.utils.position_search_problem import OrthogonalPositionState, PositionSearchProblem
-from src.utils.test_and_run import run, test
+from src.utils.test_and_run import test
 
 T = TypeVar("T")
 
@@ -40,7 +40,7 @@ class RaceConditionState(OrthogonalPositionState):
         Extends base functionality allowing one cheat
         """
         prior_action = self.get_last_action()
-        for yx, direction in self._directions:
+        for yx, direction in self.directions:
             if prior_action is not None and is_a_way_back(direction, prior_action):
                 continue
 
@@ -50,7 +50,7 @@ class RaceConditionState(OrthogonalPositionState):
                 continue
 
             cheat_made_at = self.cheat_made_at
-            if self._is_wall(pos):
+            if self.is_wall(pos):
                 if cheat_made_at is None:
                     cheat_made_at = pos
                 else:
@@ -110,19 +110,12 @@ class LimitedPositionSearchProblem(PositionSearchProblem):
             _logger.debug(
                 f"Considering move from {state.pos} ({state._get(pos)}) {new_action} to {new_state.pos} ({new_state._get(pos)}). cheat_at={new_state.cheat_made_at}. actions={[str(a) for a in new_state.actions]}"
             )
-            # TODO idk what to choose. if I choose 1st - algo cant see jump to 11, 2 as cheat down since it already considered 11, 2 cheating right
-            #  but if I do 2nd line, algo is super slow
-            # if new_state.cheat_made_at and pos not in self.considered_successors_post_cheat:
-
-            # TODO !!!!!!!!!!!!!!!!!! FOR REAL WE NEED JUST TO TRACK CHEATS WE ALREADY MADE! JUST NOT TO REPEAT THEM!
             if new_state.cheat_made_at:
                 if new_state.cheat_made_at == pos:
-                    # but what if we considered this tile from another cheat?
                     if pos not in self.considered_cheats:
                         self.considered_cheats.add(pos)
                     else:
                         continue
-                        # todo = "do something not to duplicate search from this point again"
 
                 if pos in self.path_costs_cache:
                     new_state.fast_forwarded_from = new_state.cost
@@ -130,7 +123,6 @@ class LimitedPositionSearchProblem(PositionSearchProblem):
                     # TODO move to fast_forward method
                     cached_cost = self.path_costs_cache[pos]
                     new_state.cost += cached_cost
-                    # start_common_path_index = new_final_state.cost - len(new_final_state.path) + 1
                     common_initial_path = self.initial_final_state.path[-cached_cost:]
                     new_state.path += common_initial_path
                     new_state.actions += self.initial_final_state.actions[-cached_cost:]
@@ -150,11 +142,16 @@ class LimitedPositionSearchProblem(PositionSearchProblem):
             elif new_state.cheat_made_at is None:
                 res.append((new_state, new_action, step_cost))
 
-        # if not res:
-        # _logger.debug(f"No succ at {state.pos} ({state.cheat_made_at=})")
-        # state.draw()
-
         yield from res
+
+
+class Cheat(NamedTuple):
+    start: Position2D
+    end: Position2D
+
+    @property
+    def length(self) -> int:
+        return self.start.manhattan_to(self.end)
 
 
 def limited_search(problem: LimitedPositionSearchProblem, fringe, add_to_fringe_fn) -> RaceConditionState | None:
@@ -297,7 +294,7 @@ class RaceCondition:
         x, y = pos
         return grid[y][x]
 
-    def _show_grid(self, grid: list[list[str]] | None = None, level=logging.DEBUG) -> None:
+    def draw_maze(self, grid: list[list[str]] | None = None, level=logging.DEBUG) -> None:
         if grid is None:
             grid = self.maze
         draw_maze(grid, level=level)
@@ -319,9 +316,86 @@ class RaceCondition:
         _initial_final_state, *_ = initial_res
         return _initial_final_state
 
+    def _check_every_cell_is_in_initial_path(self, initial_final_state: RaceConditionState) -> None:
+        path = set(initial_final_state.path)
+        for row_ids, row in enumerate(self.maze):
+            for col_idx, value in enumerate(row):
+                pos = Position2D(col_idx, row_ids)
+                if initial_final_state.is_wall(pos):
+                    continue
+                if pos not in path:
+                    raise RuntimeError(f"pos {pos} not in optimal path of initial run!")
+
+    def _count_distinct_cheats(self, initial_final_state: RaceConditionState, cost_threshold: int) -> int:
+        """
+        This problem is harder, but now I know:
+        1. All spaces in our input exist in initial path (check it with 1st line of implementation below)
+        2. Cheat is defined with start and end - implementing Cheat class
+        """
+        self._check_every_cell_is_in_initial_path(initial_final_state)
+
+        target_savings = self.target_savings
+
+        pos_to_step = {}
+        for i, pos in enumerate(initial_final_state.path):
+            pos_to_step[pos] = i
+
+        # for every step of initial path, we can try every cheat up to 20 length.
+        # we get to some point. this point is either wall or part of initial path.
+        # we know that cost to reach this cell by initial path is just its index in this path, but still let's
+        # cache it for O(1) pick explicitly.
+        # so we found good cheat if:
+        # 1. this cheat is not covered yet
+        # cheated = set()
+        # def is_new_cheat(cheat: Cheat) -> bool:
+        #     return cheat not in cheated
+        #
+        # # 2. cheat end is a space
+        # def check_cheat_end(cheat: Cheat) -> bool:
+        #     return not initial_final_state.is_wall(cheat.end)
+        #
+        # # 3. cheat makes saves needed
+        # def is_valuable_cheat(cheat: Cheat) -> bool:
+        #     return pos_to_step[cheat.start] + cheat.length <= pos_to_step[cheat.end] + target_savings
+
+        # ...but well, since we know that "All spaces in our input exist in initial path" - we can just consider
+        # cheat from every path to some far point on the path
+        initial_path = initial_final_state.path
+        res = 0
+        min_cheat_len = 2
+        max_cheat_len = 20
+        cheats = []
+        for step, cheat_start in enumerate(initial_path):
+            # try to reach some far points
+            target_shift = min_cheat_len + step + target_savings
+            for i, cheat_end in enumerate(initial_path[target_shift:]):
+                cheat = Cheat(cheat_start, cheat_end)
+                cheat_length = cheat.length
+                if cheat_length > max_cheat_len:
+                    continue
+
+                initial_cost = target_shift + i
+                cost_with_cheat = step + cheat_length
+                savings = initial_cost - cost_with_cheat
+                if savings >= target_savings:
+                    cheats.append(cheat)
+
+                    grid = self._copy_grid()
+                    set_value_by_position(cheat.start, "1", grid)
+                    set_value_by_position(cheat.end, "2", grid)
+
+                    _logger.debug(
+                        f"showing {cheat} of len {cheat.length} forking path at step {step} and saving {savings} steps (from {initial_cost} to {cost_with_cheat} to end point) meeting {target_savings=}"
+                    )
+                    draw_maze(grid)
+
+                    res += 1
+
+        return res
+
     def solve(self) -> int | None:
         _logger.info("Initial grid:")
-        self._show_grid(level=logging.INFO)
+        self.draw_maze(level=logging.INFO)
 
         _initial_final_state = self._initial_run()
 
@@ -332,9 +406,6 @@ class RaceCondition:
 
         _logger.info(f"Best path for initial problem of cost {min_actions_with_no_cheat}:")
         _initial_final_state.draw(level=logging.INFO)
-
-        if self.task_num != 1:
-            raise NotImplementedError(f"task_num = {self.task_num} is not implemented")
 
         # from initial run:
         # 1. use length of the best path with no cheats to compute cost_threshold
@@ -350,6 +421,10 @@ class RaceCondition:
         for i, pos in enumerate(_initial_final_state.path):  # leave start and end as is
             path_costs_cache[pos] = min_actions_with_no_cheat - i
 
+        if self.task_num == 2:
+            return self._count_distinct_cheats(_initial_final_state, cost_threshold)
+
+        assert self.task_num == 1
         problem = self._get_problem(
             RaceConditionState,
             LimitedPositionSearchProblem,
@@ -370,8 +445,8 @@ def task1(inp, **kw):
     return task(inp, **kw)
 
 
-def task2(inp):
-    return task(inp, task_num=2)
+def task2(inp, **kw):
+    return task(inp, task_num=2, **kw)
 
 
 class Tests:
@@ -407,16 +482,19 @@ class Tests:
 
 
 if __name__ == "__main__":
-    Tests.test1()
-    test(task1, 1, target_savings=64)
-    test(task1, 2, target_savings=40)  # +1
-    test(task1, 3, target_savings=38)  # +1
-    test(task1, 4, target_savings=36)  # +1
-    test(task1, 5, target_savings=20)  # +1
-    test(task1, 8, target_savings=12)  # +3
-    test(task1, 10, target_savings=10)  # +2
-    test(task1, 14, target_savings=8)  # +4
-    test(task1, 16, target_savings=6)  # +2
-    test(task1, 30, target_savings=4)  # +14
-    test(task1, 44, target_savings=2)  # +14
-    run(task1)  # 1490
+    # Tests.test1()
+    # test(task1, 1, target_savings=64)
+    # test(task1, 2, target_savings=40)  # +1
+    # test(task1, 3, target_savings=38)  # +1
+    # test(task1, 4, target_savings=36)  # +1
+    # test(task1, 5, target_savings=20)  # +1
+    # test(task1, 8, target_savings=12)  # +3
+    # test(task1, 10, target_savings=10)  # +2
+    # test(task1, 14, target_savings=8)  # +4
+    # test(task1, 16, target_savings=6)  # +2
+    # test(task1, 30, target_savings=4)  # +14
+    # test(task1, 44, target_savings=2)  # +14
+    # run(task1)  # 1490
+    #
+    test(task2, 3, target_savings=76)
+    # run(task2)

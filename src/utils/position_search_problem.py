@@ -36,6 +36,8 @@ class BaseState(ABC):
 
 
 class OrthogonalPositionState(BaseState):
+    directions = ORTHOGONAL_DIRECTIONS.items()
+
     def __init__(self, inp: list[list[str]], pos, step=None, path=None, actions=None, cost=0, wall_symbol="#"):
         self.inp = inp
         self.x, self.y = pos
@@ -61,12 +63,8 @@ class OrthogonalPositionState(BaseState):
     def _get(self, pos: Position2D) -> str:
         return get_value_by_position(pos, self.inp)
 
-    def _is_wall(self, yx: Position2D) -> bool:
-        return self._get(yx) == self.wall_symbol
-
-    @property
-    def _directions(self) -> Generator[OrthogonalDirectionEnum]:
-        yield from ORTHOGONAL_DIRECTIONS.items()
+    def is_wall(self, pos: Position2D) -> bool:
+        return self._get(pos) == self.wall_symbol
 
     def _copy_grid(self) -> list[list[str]]:
         return [lst.copy() for lst in self.inp]
@@ -81,7 +79,7 @@ class OrthogonalPositionState(BaseState):
 
     def get_successors(self) -> Generator[tuple[BaseState, OrthogonalDirectionEnum, int]]:
         prior_action = self.get_last_action()
-        for yx, direction in self._directions:
+        for yx, direction in self.directions:
             if prior_action is not None and is_a_way_back(direction, prior_action):
                 continue
 
@@ -89,7 +87,7 @@ class OrthogonalPositionState(BaseState):
 
             if out_of_borders(*pos, self.inp, is_reversed=False):
                 continue
-            if self._is_wall(pos):
+            if self.is_wall(pos):
                 continue
 
             new_path = self.path + [pos]
