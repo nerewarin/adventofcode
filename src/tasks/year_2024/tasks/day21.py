@@ -310,4 +310,6 @@ if __name__ == "__main__":
 
         test(task1, expected_res_, test_data=[door_code_])
 
+    test(task1, 126384)
+
     # run(task1) # 157554 is too high!
