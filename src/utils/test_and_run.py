@@ -43,17 +43,11 @@ def _file_to_list(fname):
     return lst
 
 
-def test(fn, expected, *args, test_part=None, **kwargs):
+def test(fn, expected, *args, test_part=None, test_data=None, **kwargs):
     """Checks the output of applying function to test data matches expected result"""
-    root = _get_resources_dir()
-
-    fname = "tst"
     func_name = fn.__name__
     _base_msg = "{func_name}{extra} in 'test' mode"
     extra_params = []
-    if test_part and test_part > 1:
-        fname += str(test_part)
-        extra_params.append(f"{test_part=}")
 
     if args:
         extra_params.append(f"{args=}")
@@ -67,7 +61,13 @@ def test(fn, expected, *args, test_part=None, **kwargs):
         extra = ""
     base_msg = _base_msg.format(func_name=func_name, extra=extra)
 
-    test_data = _file_to_list(root / fname)
+    if test_data is None:
+        root = _get_resources_dir()
+        fname = "tst"
+        if test_part and test_part > 1:
+            fname += str(test_part)
+            extra_params.append(f"{test_part=}")
+        test_data = _file_to_list(root / fname)
 
     _logger.info(f"Running {base_msg}")
     res = fn(test_data, *args, **kwargs)

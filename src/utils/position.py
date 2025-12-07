@@ -1,6 +1,12 @@
 import math
+import typing
 from collections.abc import Sequence
 from typing import NamedTuple, TypeVar
+
+from src.utils.numbers import get_sign
+
+if typing.TYPE_CHECKING:
+    from src.utils.directions import AbstractDirectionEnum
 
 T = TypeVar("T")
 
@@ -56,6 +62,17 @@ class Position2D(NamedTuple):
 
     def reversed(self) -> "Position2D":
         return Position2D(self.y, self.x)
+
+    def get_actions_to(self, other: "Position2D", allowed_direction="orthogonal") -> list["AbstractDirectionEnum"]:
+        if allowed_direction == "orthogonal":
+            from src.utils.directions import ORTHOGONAL_DIRECTIONS
+
+            x, y = other - self
+            horizontal = [ORTHOGONAL_DIRECTIONS[(0, (get_sign(x)))]] * abs(x)
+            vertical = [ORTHOGONAL_DIRECTIONS[(get_sign(y), 0)]] * abs(y)
+            return horizontal + vertical
+        else:
+            raise NotImplementedError(f"{allowed_direction=} is not implemented.")
 
 
 def get_value_by_position[T](

@@ -53,6 +53,7 @@ ORTHOGONAL_DIRECTION_SYMBOLS = {
     SYMBOL_RIGHT: OrthogonalDirectionEnum.right,
     SYMBOL_LEFT: OrthogonalDirectionEnum.left,
 }
+ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM = {v: k for k, v in ORTHOGONAL_DIRECTION_SYMBOLS.items()}
 
 
 class DiagonalDirectionEnum(AbstractDirectionEnum, StrEnum):
@@ -73,6 +74,8 @@ DIAGONAL_DIRECTION_SYMBOLS = {
     SYMBOL_DOWN_LEFT: DiagonalDirectionEnum.down_left,
     SYMBOL_DOWN_RIGHT: DiagonalDirectionEnum.down_right,
 }
+DIAGONAL_DIRECTION_SYMBOLS_BY_ENUM = {v: k for k, v in DIAGONAL_DIRECTION_SYMBOLS.items()}
+
 ADJACENT_DIRECTION_SYMBOLS = {
     **ORTHOGONAL_DIRECTION_SYMBOLS,
     **DIAGONAL_DIRECTION_SYMBOLS,
