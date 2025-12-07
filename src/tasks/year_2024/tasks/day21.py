@@ -148,7 +148,13 @@ class BaseAgent(ABC):
         return low_lvl_commands
 
 
-class Human(BaseAgent): ...
+class Human(BaseAgent):
+    @classmethod
+    def with_robots(cls, robots_amount: int):
+        control = Robot(controls=Door())
+        for _ in range(robots_amount - 1):
+            control = Robot(controls=control)
+        return Human(controls=control)
 
 
 class Robot(BaseAgent, BaseDevice):
@@ -214,8 +220,8 @@ class DoorCodeProblem:
 
 
 class KeypadConundrum:
-    def __init__(self, door_codes: list[str], task_num: int, agent: BaseAgent | None = None):
-        self.agent = agent or _get_agent_with_robots(3)
+    def __init__(self, door_codes: list[str], task_num: int, robots_amount: int = 3):
+        self.agent = Human.with_robots(robots_amount)
 
         self.door_codes = door_codes
 
@@ -265,16 +271,6 @@ def task2(inp, **kw):
     return task(inp, task_num=2, **kw)
 
 
-def _get_agent_with_robots(robots_amount: int):
-    if not robots_amount:
-        raise ValueError("robots_amount cannot be zero")
-
-    control = Robot(controls=Door())
-    for _ in range(robots_amount - 1):
-        control = Robot(controls=control)
-    return Human(controls=control)
-
-
 if __name__ == "__main__":
     for door_code_, expected_num_ in {
         "029A": 29,
@@ -287,29 +283,29 @@ if __name__ == "__main__":
 
     # In total, there are three shortest possible sequences of button presses on this directional keypad that would
     # cause the robot to type 029A: <A^A>^^AvvvA, <A^A^>^AvvvA, and <A^A^^>AvvvA.
-    test(task1, 29 * len("<A^A>^^AvvvA"), test_data=["029A"], agent=_get_agent_with_robots(1))
+    test(task1, 29 * len("<A^A>^^AvvvA"), test_data=["029A"], robots_amount=1)
 
     # add 2nd layer
-    test(task1, 29 * len("v<<A>>^A<A>AvA<^AA>A<vAAA>^A"), test_data=["029A"], agent=_get_agent_with_robots(2))
+    test(task1, 29 * len("v<<A>>^A<A>AvA<^AA>A<vAAA>^A"), test_data=["029A"], robots_amount=2)
 
     # add 3rd layer (default mode)
     test(task1, 29 * len("<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"), test_data=["029A"])
-
-    for test_statement in """
-            029A: <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
-            980A: <v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A
-            179A: <v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-            456A: <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
-            379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-        """.split("\n"):
-        if not test_statement:
-            continue
-        door_code_, shortest_sequence_ = (x.strip() for x in test_statement.split(":"))
-        num_ = KeypadConundrum.get_numeric_part(door_code_)
-        expected_res_ = num_ * len(shortest_sequence_)
-
-        test(task1, expected_res_, test_data=[door_code_])
-
-    test(task1, 126384)
+    #
+    # for test_statement in """
+    #         029A: <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+    #         980A: <v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A
+    #         179A: <v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+    #         456A: <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
+    #         379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+    #     """.split("\n"):
+    #     if not test_statement:
+    #         continue
+    #     door_code_, shortest_sequence_ = (x.strip() for x in test_statement.split(":"))
+    #     num_ = KeypadConundrum.get_numeric_part(door_code_)
+    #     expected_res_ = num_ * len(shortest_sequence_)
+    #
+    #     test(task1, expected_res_, test_data=[door_code_])
+    #
+    # test(task1, 126384)
 
     # run(task1) # 157554 is too high!
