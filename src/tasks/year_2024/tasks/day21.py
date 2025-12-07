@@ -46,9 +46,13 @@ class Button(StrEnum):
 
 class BaseKeypad(ABC):
     layout: ClassVar[tuple[tuple[Button]]]
+    initial_position: ClassVar[Position2D]
+
+    def __init__(self):
+        self.cursor = self.initial_position
 
     def __repr__(self):
-        return f"{self.__class__.__qualname__}"
+        return f"{self.__class__.__qualname__}(cursor={self.cursor})"
 
     # should it be classmethod or store current state there inside?
     def get_button_by_position(self, position: Position2D) -> Button:
@@ -77,6 +81,7 @@ class NumericKeypad(BaseKeypad):
         +---+---+
     """
 
+    initial_position = Position2D(2, 3)
     layout = tuple(
         tuple(Button(ch) if ch.strip() else Button.gap for ch in row)
         for row in (
@@ -97,8 +102,7 @@ class DirectionalKeypad(BaseKeypad):
     +---+---+---+
     """
 
-    initial_position: Position2D = Position2D(2, 0)
-    # path: list[OrthogonalPositionState] = dataclasses.field(default_factory=list)
+    initial_position = Position2D(2, 0)
     layout = (
         (Button.gap, Button.up, Button.activate),
         (Button.left, Button.down, Button.right),
@@ -117,15 +121,15 @@ class BaseDevice(ABC):
 
 
 class BaseAgent(ABC):
-    _start_arm_position: ClassVar[Position2D]
+    # _start_arm_position: ClassVar[Position2D]
 
     def __init__(self, controls: BaseDevice, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.control = controls
-        self.arm_position = self._start_arm_position
+        # self.arm_position = self._start_arm_position
 
     def __repr__(self):
-        return f"{self.__class__.__qualname__}(controls={self.control}, arm_position={self.arm_position})"
+        return f"{self.__class__.__qualname__}(controls={self.control})"
 
     def execute_command(self, cmd) -> list[Button]:
         """
@@ -144,22 +148,46 @@ class BaseAgent(ABC):
         return low_lvl_commands
 
 
-class Human(BaseAgent):
-    _start_arm_position = Position2D(2, 0)  # TODO ??
+class Human(BaseAgent): ...
 
 
 class Robot(BaseAgent, BaseDevice):
+    # robotic arm can be controlled remotely via a directional keypad
     _keypad_cls = DirectionalKeypad
-    _start_arm_position = Position2D(2, 3)
+
+    def _drive_control(self, child_actions_made: list[Button]) -> list[Button]:
+        my_commands = []
+        control_keypad = self.control.keypad
+        for target_button in child_actions_made:
+            target_button_pos = control_keypad.get_button_position(target_button)
+            actions = control_keypad.cursor.get_actions_to(target_button_pos)
+            buttons = [Button(ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM[action]) for action in actions]
+            control_keypad.cursor = target_button_pos
+            buttons.append(Button.activate)
+            my_commands.extend(buttons)
+        return my_commands
 
     def execute_command(self, cmd) -> list[Button]:
+        """executes high-level command e.g. "press 0" """
         target_button = Button(cmd)
-        target_button_pos = self.control.keypad.get_button_position(target_button)
-        actions = self.arm_position.get_actions_to(target_button_pos)
-        buttons = [Button(ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM[action]) for action in actions]
-        self.arm_position = target_button_pos
-        buttons.append(Button.activate)
-        return buttons
+        if isinstance(self.control, Door):
+            # direct mode - robot simulates arm movements and activate button press
+            control_keypad = self.control.keypad
+            target_button_pos = control_keypad.get_button_position(target_button)
+
+            actions = control_keypad.cursor.get_actions_to(target_button_pos)
+            actions_made = [Button(ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM[action]) for action in actions]
+            control_keypad.cursor = target_button_pos
+            actions_made.append(Button.activate)
+            return actions_made
+        elif isinstance(self.control, Robot):
+            # commands that control executed in advance
+            child_actions_made = self.control.execute_command(cmd)
+            # we need to move our hand and execute needed commands to execute commands above by control
+            actions_made = self._drive_control(child_actions_made)
+            return actions_made
+        else:
+            raise NotImplementedError(f"Unknown control {self.control}")
 
 
 class Door(BaseDevice):
@@ -233,8 +261,17 @@ def task2(inp, **kw):
     return task(inp, task_num=2, **kw)
 
 
+def _bot_level_agent() -> Robot:
+    return Robot(controls=Door())
+
+
 def _get_one_layer_agent() -> Human:
-    agent = Human(controls=Robot(controls=Door()))
+    agent = Human(controls=_bot_level_agent())
+    return agent
+
+
+def _get_two_layer_agent() -> Human:
+    agent = Human(controls=Robot(controls=_bot_level_agent()))
     return agent
 
 
@@ -242,6 +279,8 @@ if __name__ == "__main__":
     # In total, there are three shortest possible sequences of button presses on this directional keypad that would
     # cause the robot to type 029A: <A^A>^^AvvvA, <A^A^>^AvvvA, and <A^A^^>AvvvA.
     test(task1, 29 * len("<A^A>^^AvvvA"), test_data=["029A"], agent=_get_one_layer_agent())
+    # add 2nd layer
+    test(task1, 29 * len("v<<A>>^A<A>AvA<^AA>A<vAAA>^A"), test_data=["029A"], agent=_get_two_layer_agent())
 
     # test(task1, 126384)
 
