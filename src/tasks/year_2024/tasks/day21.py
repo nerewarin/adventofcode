@@ -215,7 +215,7 @@ class DoorCodeProblem:
 
 class KeypadConundrum:
     def __init__(self, door_codes: list[str], task_num: int, agent: BaseAgent | None = None):
-        self.agent = agent or Human(controls=Robot(controls=Robot(controls=Door())))
+        self.agent = agent or _get_agent_with_robots(3)
 
         self.door_codes = door_codes
 
@@ -226,14 +226,18 @@ class KeypadConundrum:
     def __repr__(self):
         return f"{self.__class__.__qualname__}(door_codes={self.door_codes}. task_num={self.task_num})"
 
-    def _get_complexity(self, door_code: str, shortest_sequence: list[str]) -> int:
+    @staticmethod
+    def get_numeric_part(door_code: str) -> int:
         assert door_code[-1] == "A"
         numeric_part = door_code[:-1]
         assert len(numeric_part) == 3
         number = int(numeric_part)
+        return number
 
+    @classmethod
+    def _get_complexity(cls, door_code: str, shortest_sequence: list[str]) -> int:
+        number = cls.get_numeric_part(door_code)
         shortest_sequence_len = len(shortest_sequence)
-
         res = shortest_sequence_len * number
         return res
 
@@ -261,57 +265,49 @@ def task2(inp, **kw):
     return task(inp, task_num=2, **kw)
 
 
-def _bot_level_agent() -> Robot:
-    return Robot(controls=Door())
+def _get_agent_with_robots(robots_amount: int):
+    if not robots_amount:
+        raise ValueError("robots_amount cannot be zero")
 
-
-def _get_one_layer_agent() -> Human:
-    agent = Human(controls=_bot_level_agent())
-    return agent
-
-
-def _get_two_layer_agent() -> Human:
-    agent = Human(controls=Robot(controls=_bot_level_agent()))
-    return agent
+    control = Robot(controls=Door())
+    for _ in range(robots_amount - 1):
+        control = Robot(controls=control)
+    return Human(controls=control)
 
 
 if __name__ == "__main__":
+    for door_code_, expected_num_ in {
+        "029A": 29,
+        "980A": 980,
+        "179A": 179,
+        "456A": 456,
+        "379A": 379,
+    }.items():
+        assert KeypadConundrum.get_numeric_part(door_code_) == expected_num_
+
     # In total, there are three shortest possible sequences of button presses on this directional keypad that would
     # cause the robot to type 029A: <A^A>^^AvvvA, <A^A^>^AvvvA, and <A^A^^>AvvvA.
-    test(task1, 29 * len("<A^A>^^AvvvA"), test_data=["029A"], agent=_get_one_layer_agent())
+    test(task1, 29 * len("<A^A>^^AvvvA"), test_data=["029A"], agent=_get_agent_with_robots(1))
+
     # add 2nd layer
-    test(task1, 29 * len("v<<A>>^A<A>AvA<^AA>A<vAAA>^A"), test_data=["029A"], agent=_get_two_layer_agent())
+    test(task1, 29 * len("v<<A>>^A<A>AvA<^AA>A<vAAA>^A"), test_data=["029A"], agent=_get_agent_with_robots(2))
 
-    # test(task1, 126384)
+    # add 3rd layer (default mode)
+    test(task1, 29 * len("<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"), test_data=["029A"])
 
-    # Tests.test1()
-    # test(task1, 1, target_savings=64)
-    # test(task1, 2, target_savings=40)  # +1
-    # test(task1, 3, target_savings=38)  # +1
-    # test(task1, 4, target_savings=36)  # +1
-    # test(task1, 5, target_savings=20)  # +1
-    # test(task1, 8, target_savings=12)  # +3
-    # test(task1, 10, target_savings=10)  # +2
-    # test(task1, 14, target_savings=8)  # +4
-    # test(task1, 16, target_savings=6)  # +2
-    # test(task1, 30, target_savings=4)  # +14
-    # test(task1, 44, target_savings=2)  # +14
-    # run(task1)  # 1490
-    #
-    # # test task2
-    # _rexp = re.compile(r"(\d+).*?(\d+)")
-    # for test_statement in """
-    #         029A: <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
-    #         980A: <v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A
-    #         179A: <v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-    #         456A: <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
-    #         379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-    #     """.split("\n"):
-    #     if not test_statement:
-    #         continue
-    #     _res = _rexp.search(test_statement)
-    #     if _res:
-    #         _expected_path_with_cheats, _savings = map(int, _res.groups())
-    #         test(task2, _expected_path_with_cheats, target_savings=_savings, strict=True)
-    #
-    # run(task2)  # 1011325
+    for test_statement in """
+            029A: <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+            980A: <v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A
+            179A: <v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+            456A: <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
+            379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+        """.split("\n"):
+        if not test_statement:
+            continue
+        door_code_, shortest_sequence_ = (x.strip() for x in test_statement.split(":"))
+        num_ = KeypadConundrum.get_numeric_part(door_code_)
+        expected_res_ = num_ * len(shortest_sequence_)
+
+        test(task1, expected_res_, test_data=[door_code_])
+
+    # run(task1) # 157554 is too high!

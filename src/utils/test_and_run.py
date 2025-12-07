@@ -61,7 +61,8 @@ def test(fn, expected, *args, test_part=None, test_data=None, **kwargs):
         extra = ""
     base_msg = _base_msg.format(func_name=func_name, extra=extra)
 
-    if test_data is None:
+    is_user_test_data_passed = test_data is not None
+    if not is_user_test_data_passed:
         root = _get_resources_dir()
         fname = "tst"
         if test_part and test_part > 1:
@@ -75,6 +76,8 @@ def test(fn, expected, *args, test_part=None, test_data=None, **kwargs):
     result_msg = base_msg + " {result}"
     if res != expected:
         result = f"returned wrong result: {res=} != {expected=}!"
+        if is_user_test_data_passed:
+            result += f" {test_data=}"
         msg = result_msg.format(result=result)
         raise ValueError(msg)
     else:
