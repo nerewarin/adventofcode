@@ -6,7 +6,8 @@ https://adventofcode.com/2024/day/21
 from __future__ import annotations
 
 import dataclasses
-from abc import ABC
+from abc import ABC, abstractmethod
+from collections import defaultdict
 from enum import StrEnum
 from functools import lru_cache
 from typing import ClassVar
@@ -20,7 +21,7 @@ from src.utils.directions import (
 )
 from src.utils.logger import get_logger
 from src.utils.position import Position2D, get_value_by_position
-from src.utils.test_and_run import test
+from src.utils.test_and_run import run, test
 
 _logger = get_logger()
 
@@ -42,6 +43,14 @@ class Button(StrEnum):
     seven = "7"
     eight = "8"
     nine = "9"
+
+    def __str__(self):
+        return self.value
+
+
+UnsortedButtons = dict[Button, int]
+PossibleButtonsSequence = list[UnsortedButtons]
+PropagationResult = tuple[list[Button], PossibleButtonsSequence]
 
 
 class BaseKeypad(ABC):
@@ -109,7 +118,32 @@ class DirectionalKeypad(BaseKeypad):
     )
 
 
-class BaseDevice(ABC):
+def define_buttons_order(button_to_amount: UnsortedButtons, keypad: BaseKeypad) -> list[Button]:
+    # sort by distance to arm to choose best buttons order from possible options
+    ordered_target_buttons = []
+
+    # compute steps from arm to every button
+    target_buttons_by_price = defaultdict(list)
+    for target_button in button_to_amount:
+        target_button_pos = keypad.get_button_position(target_button)
+        price = keypad.cursor.manhattan_to(target_button_pos)
+
+        target_buttons_by_price[price].append(target_button)
+
+    # resolve buttons in the closest order
+    for price in sorted(target_buttons_by_price):
+        target_buttons = target_buttons_by_price[price]
+        for target_button in target_buttons:
+            amount = button_to_amount[target_button]
+
+            button_presses = [target_button] * amount
+
+            ordered_target_buttons.extend(button_presses)
+
+    return ordered_target_buttons
+
+
+class BaseSlave(ABC):
     _keypad_cls: type[BaseKeypad]
 
     def __init__(self, *args, **kwargs):
@@ -119,85 +153,196 @@ class BaseDevice(ABC):
     def __repr__(self):
         return f"{self.__class__.__qualname__}(keypad={self.keypad})"
 
+    @abstractmethod
+    def _transfer_to_self_commands(
+        self, possible_buttons_sequence: PossibleButtonsSequence
+    ) -> PossibleButtonsSequence: ...
+
+    def execute_command(self, cmd) -> PossibleButtonsSequence:
+        child_possible_buttons_sequence = self._propagate(cmd)
+        possible_buttons_sequence = self._transfer_to_self_commands(child_possible_buttons_sequence)
+        return possible_buttons_sequence
+
+    @abstractmethod
+    def _propagate(self, cmd: str) -> PossibleButtonsSequence:
+        """Propagates high-level cmd to control"""
+        ...
+
+    # high-level
+    def design_command(self, cmd: str) -> PossibleButtonsSequence:
+        # transform to low-level
+        raise ValueError
+
+        possible_buttons_sequence = self.execute_command(cmd)
+
+        res = []
+        for button_to_amount in possible_buttons_sequence:
+            ordered = define_buttons_order(button_to_amount, self.keypad)
+            res += ordered
+
+        return res
+
+    # low-level options
+    def perform_actions_to_press_button(self, target_button: Button) -> PossibleButtonsSequence:
+        res = []
+        keypad = self.control.keypad
+
+        # collect move buttons to dict for further execution by master in order they prefers
+        target_button_pos = keypad.get_button_position(target_button)
+        actions_group = keypad.cursor.get_actions_to_another_as_dict(target_button_pos)
+        if actions_group:
+            # move_buttons_group
+            res.append(
+                {
+                    Button(ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM[action]): count
+                    for action, count in keypad.cursor.get_actions_to_another_as_dict(target_button_pos).items()
+                }
+            )
+            # shift cursor
+            keypad.cursor = target_button_pos
+
+        # press activation
+        # activate_buttons_group
+        res.append({Button.activate: 1})
+
+        return res
+
 
 class BaseAgent(ABC):
-    # _start_arm_position: ClassVar[Position2D]
-
-    def __init__(self, controls: BaseDevice, *args, **kwargs):
+    def __init__(self, controls: BaseSlave, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.control = controls
-        # self.arm_position = self._start_arm_position
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}(controls={self.control})"
 
-    def execute_command(self, cmd) -> list[Button]:
-        """
-        Gets high-level command.
-        If it controls another object:
-            1. propagate command to it
-            2. get back low-level commands needed to pass to it to execute your high-level command
-            3. transform their low-level commands into commands on your kbd
-            4. return back commands passed to your kbd
-        if not:
-            1. transform commands into commands on your kbd
-            2. return back commands passed to your kbd
+    def _propagate(self, cmd: str) -> PossibleButtonsSequence:
+        """Propagates high-level cmd to control
+
+        push original cmd inside, e.g. 1
+
+        From
+            [{'<': 2, '^': 1},
+            {'A': 1}]
+
+        taken on 0 level, returns
+
+        ^<<A
+
+        [
+            {<: 1},
+            {A: 1},
+            {<: 1, v: 1},
+            {A: 1},
+            {A: 1},
+            {>: 2, ^: 1},
+            {A: 1}
+        ]
+        to use for human or for further robot
 
         """
-        low_lvl_commands = self.control.execute_command(cmd)
-        return low_lvl_commands
+        possible_buttons_sequence = self.control.execute_command(cmd)
+
+        return possible_buttons_sequence
 
 
 class Human(BaseAgent):
     @classmethod
     def with_robots(cls, robots_amount: int):
-        control = Robot(controls=Door())
-        for _ in range(robots_amount - 1):
-            control = Robot(controls=control)
+        control = Robot(0, controls=Door())
+        for i in range(robots_amount - 1):
+            control = Robot(i + 1, controls=control)
+
         return Human(controls=control)
 
+    def _get_ordered(self, possible_buttons_sequence: PossibleButtonsSequence) -> list[Button]:
+        # orders commands in best order and returns action needed on self keypad to execute propagated commands
+        my_ordered_buttons_for_child: list[Button] = []
+        for target_button_group in possible_buttons_sequence:
+            ordered_target_buttons = define_buttons_order(target_button_group, self.control.keypad)
+            my_ordered_buttons_for_child.extend(ordered_target_buttons)
 
-class Robot(BaseAgent, BaseDevice):
+        return my_ordered_buttons_for_child
+
+    def compute_shortest_buttons_list(self, cmd: str) -> list[Button]:
+        possible_buttons_sequence = self._propagate(cmd)
+
+        my_ordered_buttons_for_child = self._get_ordered(possible_buttons_sequence)
+
+        return my_ordered_buttons_for_child
+
+
+class Robot(BaseAgent, BaseSlave):
     # robotic arm can be controlled remotely via a directional keypad
     _keypad_cls = DirectionalKeypad
 
-    def _drive_control(self, child_actions_made: list[Button]) -> list[Button]:
-        my_commands = []
-        control_keypad = self.control.keypad
-        for target_button in child_actions_made:
-            target_button_pos = control_keypad.get_button_position(target_button)
-            actions = control_keypad.cursor.get_actions_to(target_button_pos)
-            buttons = [Button(ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM[action]) for action in actions]
-            control_keypad.cursor = target_button_pos
-            buttons.append(Button.activate)
-            my_commands.extend(buttons)
-        return my_commands
+    def __init__(self, level, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.level = level
 
-    def execute_command(self, cmd) -> list[Button]:
-        """executes high-level command e.g. "press 0" """
-        target_button = Button(cmd)
-        if isinstance(self.control, Door):
-            # direct mode - robot simulates arm movements and activate button press
-            control_keypad = self.control.keypad
-            target_button_pos = control_keypad.get_button_position(target_button)
+    def __repr__(self):
+        return f"{self.__class__.__qualname__}(level={self.level}, keypad={self.keypad}, controls={self.control})"
 
-            actions = control_keypad.cursor.get_actions_to(target_button_pos)
-            actions_made = [Button(ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM[action]) for action in actions]
-            control_keypad.cursor = target_button_pos
-            actions_made.append(Button.activate)
-            return actions_made
-        elif isinstance(self.control, Robot):
-            # commands that control executed in advance
-            child_actions_made = self.control.execute_command(cmd)
-            # we need to move our hand and execute needed commands to execute commands above by control
-            actions_made = self._drive_control(child_actions_made)
-            return actions_made
-        else:
-            raise NotImplementedError(f"Unknown control {self.control}")
+    # def execute_command(self, cmd: str) -> PossibleButtonsSequence:
+    #     """executes high-level command e.g. "press 0"
+    #
+    #     Gets high-level command.
+    #     If it controls another object:
+    #         1. propagate command to it
+    #         2. get back low-level commands needed to pass to it to execute your high-level command
+    #         3. transform their low-level commands into commands on your kbd
+    #         4. return back commands passed to your kbd
+    #     if not:
+    #         1. transform commands into commands on your kbd
+    #         2. return back commands passed to your kbd
+    #
+    #     """
+
+    def _transfer_to_self_commands(self, possible_buttons_sequence: PossibleButtonsSequence) -> PossibleButtonsSequence:
+        # orders commands in best order and returns action needed on self keypad to execute propagated commands
+        my_ordered_buttons: list[Button] = []
+        for target_button_group in possible_buttons_sequence:
+            ordered_target_buttons = define_buttons_order(target_button_group, self.control.keypad)
+            my_ordered_buttons.extend(ordered_target_buttons)
+
+        buttons_sequence_for_parent = []
+        for button in my_ordered_buttons:
+            actions = self.perform_actions_to_press_button(button)
+            buttons_sequence_for_parent.extend(actions)
+
+        return buttons_sequence_for_parent
 
 
-class Door(BaseDevice):
+class Door(BaseSlave):
     _keypad_cls = NumericKeypad
+
+    def execute_command(self, cmd: str) -> PossibleButtonsSequence:
+        return [{Button(cmd): 1}]
+
+    def _propagate(self, cmd: str) -> PossibleButtonsSequence:
+        """Propagates high-level cmd to control"""
+        pass
+
+    def _transfer_to_self_commands(self, possible_buttons_sequence: PossibleButtonsSequence) -> PossibleButtonsSequence:
+        return possible_buttons_sequence
+
+    #    # high-level
+    def design_command(self, cmd: str) -> PropagationResult:
+        assert len(cmd) == 1
+        button = Button(cmd)
+
+        # transform to low-level
+        possible_buttons_sequence = self.perform_actions_to_press_button(button)
+        #
+        # res = []
+        # for button_to_amount in possible_buttons_sequence:
+        #     assert len(button_to_amount) == 1
+        #
+        #     for button, amount in button_to_amount.items():
+        #         res.append(button)
+        buttons_list = [button]
+
+        return buttons_list, possible_buttons_sequence
 
 
 @dataclasses.dataclass
@@ -208,20 +353,42 @@ class DoorCodeProblem:
     """
 
     door_code: str
-    agent: BaseAgent
+    human: Human
 
     def get_shortest_sequence(self) -> list[str]:
         cmds = []
+        strgins = []
         for code in self.door_code:
-            new_cmds = self.agent.execute_command(code)
+            new_cmds = self.human.compute_shortest_buttons_list(code)
+            strgins.append("".join([cmd for cmd in new_cmds]))
             cmds.extend(new_cmds)
+
+        # 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+        #    3: <<vA>>^AvA^A<<vA>^^A<A>A
+        # res = [
+        #     # expected
+        #     "<v<A>>^AvA^A"
+        #     "<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"
+        #     "v<<A>>^AvA^A"
+        #     "v<<A>>^AAv<A"
+        #     ""
+        #     "<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A"
+        # ]
+        # # string
+        # [
+        #     "v<<A>>^AvA^A",
+        #     # expected
+        #     "<v<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>A",
+        #     "v<A>^AA<A>A",
+        #     "v<A<A>>^AAAvA^<A>A",
+        # ]
 
         return cmds
 
 
 class KeypadConundrum:
     def __init__(self, door_codes: list[str], task_num: int, robots_amount: int = 3):
-        self.agent = Human.with_robots(robots_amount)
+        self.human = Human.with_robots(robots_amount)
 
         self.door_codes = door_codes
 
@@ -250,7 +417,7 @@ class KeypadConundrum:
     def solve(self) -> int | None:
         res = []
         for door_code in self.door_codes:
-            problem = DoorCodeProblem(door_code, self.agent)
+            problem = DoorCodeProblem(door_code, self.human)
 
             shortest_sequence = problem.get_shortest_sequence()
 
@@ -291,21 +458,27 @@ if __name__ == "__main__":
     # add 3rd layer (default mode)
     test(task1, 29 * len("<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"), test_data=["029A"])
     #
-    # for test_statement in """
-    #         029A: <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
-    #         980A: <v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A
-    #         179A: <v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-    #         456A: <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
-    #         379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-    #     """.split("\n"):
-    #     if not test_statement:
-    #         continue
-    #     door_code_, shortest_sequence_ = (x.strip() for x in test_statement.split(":"))
-    #     num_ = KeypadConundrum.get_numeric_part(door_code_)
-    #     expected_res_ = num_ * len(shortest_sequence_)
-    #
-    #     test(task1, expected_res_, test_data=[door_code_])
-    #
+    for test_statement in """
+            029A: <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+            980A: <v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A
+            179A: <v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+            456A: <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
+            # 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+        """.split("\n"):
+        test_statement = test_statement.strip()
+        if not test_statement:
+            continue
+        door_code_, shortest_sequence_ = (x.strip() for x in test_statement.split(":"))
+        if door_code_.startswith("#"):
+            continue
+        num_ = KeypadConundrum.get_numeric_part(door_code_)
+        expected_res_ = num_ * len(shortest_sequence_)
+
+        test(task1, expected_res_, test_data=[door_code_])
+
     # test(task1, 126384)
 
-    # run(task1) # 157554 is too high!
+    run(task1)
+    # from earliest to latest probes:
+    # 157554 is too high!
+    # 165062
