@@ -154,7 +154,7 @@ def define_buttons_order(button_to_amount: UnsortedButtons, keypad: BaseKeypad, 
         price = keypad.cursor.manhattan_to(target_button_pos)
         target_buttons_by_price[price].append(target_button)
     if button_to_amount == {"<": 2, "^": 2}:
-        _logger.debug(f"chosen ordering for {button_to_amount} problem: {target_buttons_by_price}")
+        _logger.info(f"chosen ordering for {button_to_amount} ({cmd}) problem: {target_buttons_by_price}")
         if cmd in "7":
             # target_buttons_by_price = {2: [Button.up], 0: [Button.left]}
             pass
