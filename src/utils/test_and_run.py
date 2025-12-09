@@ -54,15 +54,10 @@ def test(fn, expected, *args, test_part=None, test_data=None, **kwargs):
     if kwargs:
         for k, v in kwargs.items():
             extra_params.append(f"{k}={v}")
-
-    if extra_params:
-        extra = " (" + ", ".join(extra_params) + ")"
-    else:
-        extra = ""
-    base_msg = _base_msg.format(func_name=func_name, extra=extra)
-
     is_user_test_data_passed = test_data is not None
-    if not is_user_test_data_passed:
+    if is_user_test_data_passed:
+        extra_params.append(f"{test_data=}")
+    else:
         root = _get_resources_dir()
         fname = "tst"
         if test_part and test_part > 1:
@@ -70,14 +65,19 @@ def test(fn, expected, *args, test_part=None, test_data=None, **kwargs):
             extra_params.append(f"{test_part=}")
         test_data = _file_to_list(root / fname)
 
+    if extra_params:
+        extra = " (" + ", ".join(extra_params) + ")"
+    else:
+        extra = ""
+    base_msg = _base_msg.format(func_name=func_name, extra=extra)
+
     _logger.info(f"Running {base_msg}")
     res = fn(test_data, *args, **kwargs)
 
     result_msg = base_msg + " {result}"
     if res != expected:
         result = f"returned wrong result: {res=} != {expected=}!"
-        if is_user_test_data_passed:
-            result += f" {test_data=}"
+
         msg = result_msg.format(result=result)
         raise ValueError(msg)
     else:

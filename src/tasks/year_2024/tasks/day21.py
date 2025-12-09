@@ -48,9 +48,29 @@ class Button(StrEnum):
         return self.value
 
 
-UnsortedButtons = dict[Button, int]
-PossibleButtonsSequence = list[UnsortedButtons]
-PropagationResult = tuple[list[Button], PossibleButtonsSequence]
+class UnsortedButtons(dict[Button, int]):
+    def __str__(self):
+        data = {button.value: value for button, value in self.items()}
+        return str(data)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class PossibleButtonsSequence(list[UnsortedButtons]):
+    def __str__(self):
+        return f"{[{button.value: value for button, value in b2v.items()} for b2v in self]}"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class BottonList(list[Button]):
+    def __str__(self):
+        return f"{[button.value for button in self]}"
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class BaseKeypad(ABC):
@@ -118,17 +138,26 @@ class DirectionalKeypad(BaseKeypad):
     )
 
 
-def define_buttons_order(button_to_amount: UnsortedButtons, keypad: BaseKeypad) -> list[Button]:
+# def define_sequnece(possible_buttons_sequence: PossibleButtonsSequence, keypad: BaseKeypad)
+#     possible_buttons_sequence
+
+
+def define_buttons_order(button_to_amount: UnsortedButtons, keypad: BaseKeypad, cmd: str) -> list[Button]:
     # sort by distance to arm to choose best buttons order from possible options
     ordered_target_buttons = []
 
     # compute steps from arm to every button
     target_buttons_by_price = defaultdict(list)
+
     for target_button in button_to_amount:
         target_button_pos = keypad.get_button_position(target_button)
         price = keypad.cursor.manhattan_to(target_button_pos)
-
         target_buttons_by_price[price].append(target_button)
+    if button_to_amount == {"<": 2, "^": 2}:
+        _logger.debug(f"chosen ordering for {button_to_amount} problem: {target_buttons_by_price}")
+        if cmd in "7":
+            # target_buttons_by_price = {2: [Button.up], 0: [Button.left]}
+            pass
 
     # resolve buttons in the closest order
     for price in sorted(target_buttons_by_price):
@@ -155,32 +184,33 @@ class BaseSlave(ABC):
 
     @abstractmethod
     def _transfer_to_self_commands(
-        self, possible_buttons_sequence: PossibleButtonsSequence
+        self, possible_buttons_sequence: PossibleButtonsSequence, cmd: str
     ) -> PossibleButtonsSequence: ...
 
     def execute_command(self, cmd) -> PossibleButtonsSequence:
+        """executes high-level command e.g. "press 0"
+
+        (old approach) # TODO actualize
+        Gets high-level command.
+        If it controls another object:
+            1. propagate command to it
+            2. get back low-level commands needed to pass to it to execute your high-level command
+            3. transform their low-level commands into commands on your kbd
+            4. return back commands passed to your kbd
+        if not:
+            1. transform commands into commands on your kbd
+            2. return back commands passed to your kbd
+
+        """
+
         child_possible_buttons_sequence = self._propagate(cmd)
-        possible_buttons_sequence = self._transfer_to_self_commands(child_possible_buttons_sequence)
+        possible_buttons_sequence = self._transfer_to_self_commands(child_possible_buttons_sequence, cmd)
         return possible_buttons_sequence
 
     @abstractmethod
     def _propagate(self, cmd: str) -> PossibleButtonsSequence:
         """Propagates high-level cmd to control"""
         ...
-
-    # high-level
-    def design_command(self, cmd: str) -> PossibleButtonsSequence:
-        # transform to low-level
-        raise ValueError
-
-        possible_buttons_sequence = self.execute_command(cmd)
-
-        res = []
-        for button_to_amount in possible_buttons_sequence:
-            ordered = define_buttons_order(button_to_amount, self.keypad)
-            res += ordered
-
-        return res
 
     # low-level options
     def perform_actions_to_press_button(self, target_button: Button) -> PossibleButtonsSequence:
@@ -193,10 +223,12 @@ class BaseSlave(ABC):
         if actions_group:
             # move_buttons_group
             res.append(
-                {
-                    Button(ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM[action]): count
-                    for action, count in keypad.cursor.get_actions_to_another_as_dict(target_button_pos).items()
-                }
+                UnsortedButtons(
+                    **{
+                        Button(ORTHOGONAL_DIRECTION_SYMBOLS_BY_ENUM[action]): count
+                        for action, count in keypad.cursor.get_actions_to_another_as_dict(target_button_pos).items()
+                    }
+                )
             )
             # shift cursor
             keypad.cursor = target_button_pos
@@ -255,11 +287,13 @@ class Human(BaseAgent):
 
         return Human(controls=control)
 
-    def _get_ordered(self, possible_buttons_sequence: PossibleButtonsSequence) -> list[Button]:
+    def _get_ordered(self, possible_buttons_sequence: PossibleButtonsSequence, cmd) -> list[Button]:
         # orders commands in best order and returns action needed on self keypad to execute propagated commands
         my_ordered_buttons_for_child: list[Button] = []
         for target_button_group in possible_buttons_sequence:
-            ordered_target_buttons = define_buttons_order(target_button_group, self.control.keypad)
+            ordered_target_buttons = define_buttons_order(
+                target_button_group, self.control.keypad, cmd
+            )  # no sence whats order here
             my_ordered_buttons_for_child.extend(ordered_target_buttons)
 
         return my_ordered_buttons_for_child
@@ -267,7 +301,7 @@ class Human(BaseAgent):
     def compute_shortest_buttons_list(self, cmd: str) -> list[Button]:
         possible_buttons_sequence = self._propagate(cmd)
 
-        my_ordered_buttons_for_child = self._get_ordered(possible_buttons_sequence)
+        my_ordered_buttons_for_child = self._get_ordered(possible_buttons_sequence, cmd)
 
         return my_ordered_buttons_for_child
 
@@ -283,32 +317,30 @@ class Robot(BaseAgent, BaseSlave):
     def __repr__(self):
         return f"{self.__class__.__qualname__}(level={self.level}, keypad={self.keypad}, controls={self.control})"
 
-    # def execute_command(self, cmd: str) -> PossibleButtonsSequence:
-    #     """executes high-level command e.g. "press 0"
-    #
-    #     Gets high-level command.
-    #     If it controls another object:
-    #         1. propagate command to it
-    #         2. get back low-level commands needed to pass to it to execute your high-level command
-    #         3. transform their low-level commands into commands on your kbd
-    #         4. return back commands passed to your kbd
-    #     if not:
-    #         1. transform commands into commands on your kbd
-    #         2. return back commands passed to your kbd
-    #
-    #     """
-
-    def _transfer_to_self_commands(self, possible_buttons_sequence: PossibleButtonsSequence) -> PossibleButtonsSequence:
+    def _transfer_to_self_commands(
+        self, possible_buttons_sequence: PossibleButtonsSequence, cmd: str
+    ) -> PossibleButtonsSequence:
         # orders commands in best order and returns action needed on self keypad to execute propagated commands
         my_ordered_buttons: list[Button] = []
         for target_button_group in possible_buttons_sequence:
-            ordered_target_buttons = define_buttons_order(target_button_group, self.control.keypad)
+            ordered_target_buttons = define_buttons_order(target_button_group, self.control.keypad, cmd)
+            _logger.debug(
+                f"Robot{self.level}: sorting {UnsortedButtons(target_button_group)} into {BottonList(ordered_target_buttons)}"
+            )
             my_ordered_buttons.extend(ordered_target_buttons)
+
+        new_string = "".join([cmd.value for cmd in my_ordered_buttons])
+
+        _logger.debug(
+            f"Robot{self.level}: thnking on task {new_string} of len {len(new_string)} to execute on {self.control.keypad}"
+        )
 
         buttons_sequence_for_parent = []
         for button in my_ordered_buttons:
             actions = self.perform_actions_to_press_button(button)
             buttons_sequence_for_parent.extend(actions)
+
+        _logger.debug(f"Robot{self.level} outputs {PossibleButtonsSequence(buttons_sequence_for_parent)}")
 
         return buttons_sequence_for_parent
 
@@ -323,26 +355,10 @@ class Door(BaseSlave):
         """Propagates high-level cmd to control"""
         pass
 
-    def _transfer_to_self_commands(self, possible_buttons_sequence: PossibleButtonsSequence) -> PossibleButtonsSequence:
+    def _transfer_to_self_commands(
+        self, possible_buttons_sequence: PossibleButtonsSequence, cmd: str
+    ) -> PossibleButtonsSequence:
         return possible_buttons_sequence
-
-    #    # high-level
-    def design_command(self, cmd: str) -> PropagationResult:
-        assert len(cmd) == 1
-        button = Button(cmd)
-
-        # transform to low-level
-        possible_buttons_sequence = self.perform_actions_to_press_button(button)
-        #
-        # res = []
-        # for button_to_amount in possible_buttons_sequence:
-        #     assert len(button_to_amount) == 1
-        #
-        #     for button, amount in button_to_amount.items():
-        #         res.append(button)
-        buttons_list = [button]
-
-        return buttons_list, possible_buttons_sequence
 
 
 @dataclasses.dataclass
@@ -360,11 +376,20 @@ class DoorCodeProblem:
         strgins = []
         for code in self.door_code:
             new_cmds = self.human.compute_shortest_buttons_list(code)
-            strgins.append("".join([cmd for cmd in new_cmds]))
+            new_string = "".join([cmd for cmd in new_cmds])
+            strgins.append(new_string)
             cmds.extend(new_cmds)
+            _logger.debug(
+                f"get_shortest_sequence {code} -> {new_string} len of +{len(new_cmds)} ({len(cmds)} in total)"
+            )
 
         # 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-        #    3: <<vA>>^AvA^A<<vA>^^A<A>A
+        #    3: <v<A>>^AvA^A # manual ordering from oroginal
+        #    3: v<<A>>^AvA^A # original
+
+        # tail <vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+        # 7:
+
         # res = [
         #     # expected
         #     "<v<A>>^AvA^A"
@@ -448,8 +473,8 @@ if __name__ == "__main__":
     }.items():
         assert KeypadConundrum.get_numeric_part(door_code_) == expected_num_
 
-    # In total, there are three shortest possible sequences of button presses on this directional keypad that would
-    # cause the robot to type 029A: <A^A>^^AvvvA, <A^A^>^AvvvA, and <A^A^^>AvvvA.
+    # # In total, there are three shortest possible sequences of button presses on this directional keypad that would
+    # # cause the robot to type 029A: <A^A>^^AvvvA, <A^A^>^AvvvA, and <A^A^^>AvvvA.
     test(task1, 29 * len("<A^A>^^AvvvA"), test_data=["029A"], robots_amount=1)
 
     # add 2nd layer
@@ -457,13 +482,13 @@ if __name__ == "__main__":
 
     # add 3rd layer (default mode)
     test(task1, 29 * len("<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"), test_data=["029A"])
-    #
+
     for test_statement in """
             029A: <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
             980A: <v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A
             179A: <v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
             456A: <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
-            # 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+            379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
         """.split("\n"):
         test_statement = test_statement.strip()
         if not test_statement:
@@ -481,4 +506,4 @@ if __name__ == "__main__":
     run(task1)
     # from earliest to latest probes:
     # 157554 is too high!
-    # 165062
+    # 165062 is too high!
