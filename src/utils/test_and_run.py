@@ -66,7 +66,13 @@ def test(fn, expected, *args, test_part=None, test_data=None, **kwargs):
         test_data = _file_to_list(root / fname)
 
     if extra_params:
-        extra = " (" + ", ".join(extra_params) + ")"
+        extra = (
+            " ("
+            + ", ".join(str(extra_param).replace("{", "{{").replace("}", "}}") for extra_param in extra_params)
+            + ")"
+        )
+        if len(extra) > 80:
+            extra = extra[:67] + "...)"
     else:
         extra = ""
     base_msg = _base_msg.format(func_name=func_name, extra=extra)
