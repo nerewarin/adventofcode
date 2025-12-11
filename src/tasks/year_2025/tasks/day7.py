@@ -6,27 +6,11 @@ https://adventofcode.com/2025/day/7
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
-from math import prod
-from typing import Literal
 
 from src.utils.logger import get_logger
 from src.utils.test_and_run import run, test
 
 _logger = get_logger()
-
-
-@dataclass
-class Operation:
-    symbol: Literal["+", "*"]
-
-    def apply(self, operands: Iterable[int]) -> int:
-        if self.symbol == "+":
-            operation = sum
-        elif self.symbol == "*":
-            operation = prod
-        else:
-            raise NotImplementedError(f"Unknown operation {self.symbol!r}")
-        return operation(operands)
 
 
 @dataclass
