@@ -4,7 +4,6 @@ https://adventofcode.com/2025/day/7
 """
 
 import logging
-import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 from math import prod
@@ -14,7 +13,6 @@ from src.utils.logger import get_logger
 from src.utils.test_and_run import run, test
 
 _logger = get_logger()
-_rexp = re.compile(r"\s+")
 
 
 @dataclass
@@ -34,20 +32,22 @@ class Operation:
 @dataclass
 class Problem:
     manifold: list[list[int]]
+    task_num: int
 
     def solve(self) -> int:
-        beams = []
-        res = 0
+        beams, timelines = [], []
+        res1 = 0  # splits
         for i, line in enumerate(self.manifold):
             if not beams:
                 beams = line
                 _logger.info(f"initial: {beams}")
+                timelines = list(beams)
                 continue
 
             for j, value in enumerate(line):
                 if value:
                     if beams[j]:
-                        res += 1
+                        res1 += 1
 
                         width = len(beams)
 
@@ -56,11 +56,18 @@ class Problem:
                                 continue
 
                             beams[step] = 1
+                            timelines[step] += timelines[j]
+
                         beams[j] = 0
+                        timelines[j] = 0
 
-            _logger.info(f"step {i}/{len(self.manifold)}: {line=}, {beams=}")
+            if self.task_num == 2:
+                _logger.info(f"step {i}/{len(self.manifold)}: {timelines=}")
+            else:
+                _logger.debug(f"step {i}/{len(self.manifold)}: {line=}, {beams=}")
 
-        return res
+        res2 = sum(timelines)
+        return [res1, res2][self.task_num - 1]
 
 
 class TrashCompactor:
@@ -85,7 +92,7 @@ class TrashCompactor:
 
     @staticmethod
     def _parse_input(inp: list[str], task_num: int) -> Iterable[Problem]:
-        yield Problem(manifold=[[(symbol in ("S", "^")) * 1 for symbol in line] for line in inp])
+        yield Problem(manifold=[[(symbol in ("S", "^")) * 1 for symbol in line] for line in inp], task_num=task_num)
 
     def solve(self) -> int:
         return sum(problem.solve() for problem in self.problems)
@@ -106,3 +113,6 @@ def task2(inp):
 if __name__ == "__main__":
     test(task1, 21)
     run(task1)
+
+    test(task2, 40)
+    run(task2)
