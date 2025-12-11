@@ -8,6 +8,7 @@ import logging
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
+from functools import lru_cache
 
 from tqdm import tqdm
 
@@ -30,7 +31,6 @@ class Indicator(StrEnum):
 class Device:
     name: str
     connections: list["Device"] = field(default_factory=list)
-    path: list[str] = field(default_factory=list)
 
     def __str__(self):
         return self.name
@@ -55,6 +55,9 @@ class Problem:
         else:
             return self._solve_part2()
 
+    def __hash__(self):
+        return hash(str(self.device_by_name))
+
     def _solve_part1(self):
         fringe = collections.deque()
 
@@ -74,6 +77,32 @@ class Problem:
                 fringe.append(connected)
 
         return paths
+
+    @lru_cache
+    def _find_paths_bfs(self, start: str, end: str) -> int:
+        if start == end:
+            return 1
+
+        res = 0
+        for connected in self.device_by_name.get(start, Device("")).connections:
+            new_res = self._find_paths_bfs(connected.name, end)
+            if new_res:
+                res += new_res
+        return res
+
+    def _solve_part2(self):
+        start = "svr"
+        checkpoints = ("fft", "dac", "out")
+        end = "fft"
+        res = 1
+        for end in tqdm(checkpoints, desc=f"{start} -> {end}", total=len(checkpoints)):
+            # TODO add stops: do not search deeper than...
+            res_ = self._find_paths_bfs(start, end=end)
+            _logger.info("%s paths found", res_)
+            res *= res_
+            start = end
+
+        return res
 
 
 class Factory:
@@ -136,7 +165,7 @@ class Factory:
         for src, targets in graph.items():
             for dst in targets:
                 _logger.debug("%s -> %s", src, dst)
-        _logger.debug("%s", cls.to_dot(graph))
+        _logger.info("%s", cls.to_dot(graph))
 
         yield Problem(devices, task_num)
 
@@ -162,3 +191,6 @@ def task2(inp):
 if __name__ == "__main__":
     test(task1, 5)
     run(task1)
+
+    test(task2, 2, test_part=2)
+    run(task2)
