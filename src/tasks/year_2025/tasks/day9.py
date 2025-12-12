@@ -3,10 +3,10 @@
 https://adventofcode.com/2025/day/*
 """
 
+import itertools
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
-from itertools import product
 
 from src.utils.logger import get_logger
 from src.utils.position import Position2D
@@ -21,40 +21,11 @@ class Problem:
     task_num: int
 
     def solve(self) -> int:
-        corners = [[] for _ in range(4)]
-
-        corners_ = [float("-inf"), float("-inf"), float("-inf"), float("-inf")]
-
-        min_values = [min(point[axis] for point in self.points) for axis in range(2)]
-        max_values = [max(point[axis] for point in self.points) for axis in range(2)]
-        middles = [(max_values[i] - min_values[i] / 2) for i in range(2)]
-
-        for point in self.points:
-            corner_idx = 0
-            for axis in range(2):
-                if middles[axis] > point[axis]:
-                    corner_idx += 1 * axis
-
-            square = 1
-            for axis in range(2):
-                square *= abs(point[axis] - middles[axis])
-
-            if square >= corners_[corner_idx]:
-                if square > corners_[corner_idx]:
-                    corners[corner_idx] = [point]
-                else:
-                    corners[corner_idx].append(point)
-                corners_[corner_idx] = square
-
-        # all_combinations = list(itertools.product(*corners))
-        # i < j ensures each basket pair used once (no (j,i) duplicates)
         max_square = 0
-        for i in range(4):
-            for j in range(i + 1, 4):
-                for a, b in product(corners[i], corners[j]):
-                    w, h = a - b
-                    square = (abs(w) + 1) * (abs(h) + 1)
-                    max_square = max(max_square, square)
+        for a, b in itertools.combinations(self.points, 2):
+            w, h = a - b
+            square = (abs(w) + 1) * (abs(h) + 1)
+            max_square = max(max_square, square)
 
         return max_square
 
@@ -104,4 +75,4 @@ def task2(inp, **kw):
 
 if __name__ == "__main__":
     test(task1, 50)
-    assert run(task1) > 3005828594  # 2700162690 and 3005828594: too low
+    assert run(task1) > 4679487087  # 2700162690, 3005828594 and 4679487087: too low
