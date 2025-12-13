@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+from tqdm import tqdm
 
 from src.utils.logger import get_logger
 from src.utils.position import Position2D
@@ -44,6 +45,8 @@ class Problem:
         # add rectangle
 
         colors = "red", "green"
+        if self.task_num == 2:
+            colors = colors[::-1]
         for i, rectangle_corners in enumerate(rectangles):
             fig, ax = plt.subplots(figsize=(8, 8))
             ax.fill(
@@ -79,7 +82,7 @@ class Problem:
             ax.invert_yaxis()
             ax.grid(True)
 
-        out = f"day9_points_plot_{len(self.points)}_points.png"
+        out = f"day9_points_plot_{len(self.points)}_points_part{self.task_num}.png"
         plt.tight_layout()
         plt.savefig(out, dpi=200)
         plt.show()
@@ -90,34 +93,109 @@ class Problem:
 
         min_values = [min(point[axis] for point in self.points) for axis in range(2)]
         max_values = [max(point[axis] for point in self.points) for axis in range(2)]
-        # middles = [(max_values[i] - min_values[i] / 2) + min_values[i] for i in range(2)]
 
         if self.task_num == 1:
-            points = self.points
+            for a, b in itertools.combinations(self.points, 2):
+                w, h = a - b
+                square = (abs(w) + 1) * (abs(h) + 1)
+                if square > max_square:
+                    max_square = square
+                    rectangle_corners = (a, b)
         else:
-            points = set()
-            wight_and_height_halves = [(max_values[i] - min_values[i]) / 2 for i in range(2)]
-            for i, point in enumerate(self.points):
-                next_point = self.points[(i + 1) % len(self.points)]
-                diff = next_point - point
+            reference_points_data = self._get_reference_points(max_values, min_values)
+            for ref_point, axis, _ in reference_points_data:
+                if axis != 0:
+                    raise NotImplementedError("vertical reference_points_lines")
 
-                for axis in range(2):
-                    if abs(diff[axis]) > wight_and_height_halves[axis]:
-                        points.add(point)
-                        points.add(next_point)
-                        break
+            ref_points_amount = len(reference_points_data)
+            for i, (ref_point, ref_axis, limits) in enumerate(reference_points_data):
+                if ref_axis != 0:
+                    raise NotImplementedError("reference_points considered ")
 
-        for a, b in itertools.combinations(points, 2):
-            w, h = a - b
+                for point in tqdm(
+                    self.points,
+                    total=len(self.points),
+                    desc=f"ref_point {i}/{ref_points_amount}: considering {len(self.points)} pairs",
+                ):
+                    # if other_axis_value_above_avg:
+                    #     raise NotImplementedError(f"{other_axis_value_above_avg=}")
+                    for axis in range(2):
+                        # look for other side
+                        limits_for_axis = limits[axis]
+                        callable_, value = limits_for_axis
+                        if not callable_(point[axis], value):
+                            break
+                        # if ref_points_amount == 1:
+                        #     ...
+                        # elif ref_points_amount == 2:
+                        #     if axis == another_axis:
+                        #         # look to the end of your side instead
+                        #         limits_for_axis *= -1
+                        # else:
+                        #     raise NotImplementedError(f"not considered {ref_points_amount=} case")
+                        # if limits_for_axis < 0:
+                        #     if point[axis] >= ref_point[axis]:
+                        #         break
+                        # else:
+                        #     if point[axis] < ref_point[axis]:
+                        #         break
+                    else:
+                        w, h = ref_point - point
+                        square = (abs(w) + 1) * (abs(h) + 1)
+                        if square > max_square:
+                            max_square = square
+                            rectangle_corners = (ref_point, point)
 
-            square = (abs(w) + 1) * (abs(h) + 1)
-            if square > max_square:
-                max_square = square
-                rectangle_corners = (a, b)
+            # for pair in tqdm(product(reference_points_data, self.points), total=len(self.points) * len(reference_points_data)):
+            #     (reference_point, axis, size_by_axis), point = pair
+            #     if reference_point == point:
+            #         continue
 
         assert rectangle_corners is not None
         self._show_plot([rectangle_corners])
         return max_square
+
+    def _get_reference_points(
+        self, max_values: list[int], min_values: list[int]
+    ) -> list[tuple[Position2D, int, tuple]]:
+        lines = []
+        wight_and_height = [(max_values[i] - min_values[i]) for i in range(2)]
+        middles = [(max_values[i] - min_values[i]) / 2 + min_values[i] for i in range(2)]
+        for i, point in enumerate(self.points):
+            next_point = self.points[(i + 1) % len(self.points)]
+            diff = next_point - point
+
+            for axis in range(2):
+                size_by_axis = abs(diff[axis])
+                limit = wight_and_height[axis]
+                if limit > size_by_axis > 3 / 4 * limit:
+                    offsets_from_center = (
+                        abs(point[axis] - middles[axis]),
+                        abs(next_point[axis] - middles[axis]),
+                    )
+                    max_offset_idx = offsets_from_center.index(min(offsets_from_center))
+                    ref_point = [point, next_point][max_offset_idx]
+
+                    axis_value = ref_point[axis]
+                    if axis_value > middles[axis]:
+                        axis_limit = (lambda a, b: a < b), ref_point[axis]
+                    else:
+                        axis_limit = (lambda a, b: a > b), ref_point[axis]
+
+                    another_axis = (axis + 1) % 2
+                    another_axis_value = ref_point[another_axis]
+                    if another_axis_value > middles[another_axis]:
+                        other_axis_limit = (lambda a, b: a < b), ref_point[another_axis]
+                    else:
+                        other_axis_limit = (lambda a, b: a > b), ref_point[another_axis]
+
+                    limits = axis_limit, other_axis_limit  # e.g. (-1, -1) left top
+
+                    lines.append((ref_point, axis, limits))
+                    break
+
+                # TODO find another axis limit
+        return lines
 
 
 class MovieTheater:
@@ -164,8 +242,9 @@ def task2(inp, **kw):
 
 
 if __name__ == "__main__":
-    test(task1, 50)
-    assert run(task1) == 4737096935  # 2700162690, 3005828594 and 4679487087: too low
+    # test(task1, 50)
+    # assert run(task1) == 4737096935  # 2700162690, 3005828594 and 4679487087: too low
 
     test(task2, 24)
     run(task2)
+#
