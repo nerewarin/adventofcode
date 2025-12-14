@@ -16,6 +16,12 @@ from src.utils.logger import get_logger
 from src.utils.position import Position2D
 from src.utils.test_and_run import run, test
 
+LESSER_OR_BIGGER = [
+    # handle + 1 if needed?
+    (lambda _a, _b: _a < _b),
+    (lambda _a, _b: _a > _b),
+]
+
 _logger = get_logger()
 
 
@@ -87,6 +93,78 @@ class Problem:
         plt.savefig(out, dpi=200)
         plt.show()
 
+    def _get_reference_points(
+        self, max_values: list[int], min_values: list[int]
+    ) -> list[tuple[Position2D, int, tuple]]:
+        lines = []
+        wight_and_height = [(max_values[i] - min_values[i]) for i in range(2)]
+        middles = [(max_values[i] - min_values[i]) / 2 + min_values[i] for i in range(2)]
+        for i, point in enumerate(self.points):
+            next_point = self.points[(i + 1) % len(self.points)]
+            diff = next_point - point
+
+            for axis in range(2):
+                size_by_axis = abs(diff[axis])
+                limit = wight_and_height[axis]
+                if limit > size_by_axis > 3 / 4 * limit:
+                    offsets_from_center = (
+                        abs(point[axis] - middles[axis]),
+                        abs(next_point[axis] - middles[axis]),
+                    )
+                    max_offset_idx = offsets_from_center.index(min(offsets_from_center))
+                    ref_point = [point, next_point][max_offset_idx]
+
+                    axis_value = ref_point[axis]
+                    if axis_value > middles[axis]:
+                        axis_limit = axis, 0, ref_point[axis]
+                    else:
+                        axis_limit = axis, 1, ref_point[axis]
+
+                    def find_intersection(ref_point_, another_axis_limit_):
+                        closer_left, closer_right = None, None
+                        for i_, point_ in enumerate(self.points):
+                            if point_ == ref_point_:
+                                continue
+                            # y filter
+                            axis_, idx_, val_ = another_axis_limit_
+                            callable_ = list(reversed(LESSER_OR_BIGGER))[idx_]
+                            res = callable_(point_[axis_], val_)
+                            if not res:  # TODO solve this shit
+                                continue
+
+                            # x filter
+                            _is_to_the_left = ref_point_[axis] >= point_[axis]
+                            if _is_to_the_left:
+                                if closer_left is None:
+                                    closer_left = point_
+                                elif 0 <= (ref_point_[axis] - point_[axis]) < (ref_point_[axis] - closer_left[axis]):
+                                    closer_left = point_
+
+                            _is_to_the_right = ref_point_[axis] <= point_[axis]
+                            if _is_to_the_right:
+                                if closer_right is None:
+                                    closer_right = point_
+                                elif 0 <= (point_[axis] - ref_point_[axis]) < (closer_right[axis] - ref_point_[axis]):
+                                    closer_right = point_
+
+                        return closer_right[another_axis]
+
+                    another_axis = (axis + 1) % 2
+                    another_axis_value = ref_point[another_axis]
+                    if another_axis_value > middles[another_axis]:
+                        another_axis_limit = another_axis, 0, another_axis_value
+                        additional_limit = another_axis, 1, find_intersection(ref_point, another_axis_limit)
+                    else:
+                        another_axis_limit = another_axis, 1, another_axis_value
+                        additional_limit = another_axis, 0, find_intersection(ref_point, another_axis_limit)
+
+                    limits = axis_limit, another_axis_limit, additional_limit  # e.g. (-1, -1) left top
+
+                    lines.append((ref_point, axis, limits))
+                    break
+
+        return lines
+
     def solve(self) -> int:
         max_square = 0
         rectangle_corners = None
@@ -119,33 +197,40 @@ class Problem:
                 ):
                     # if other_axis_value_above_avg:
                     #     raise NotImplementedError(f"{other_axis_value_above_avg=}")
-                    for axis in range(2):
+                    for limit in limits:
+                        limit_axis, callable_index, value = limit
                         # look for other side
-                        limits_for_axis = limits[axis]
-                        callable_, value = limits_for_axis
-                        if not callable_(point[axis], value):
-                            break
-                        # if ref_points_amount == 1:
-                        #     ...
-                        # elif ref_points_amount == 2:
-                        #     if axis == another_axis:
-                        #         # look to the end of your side instead
-                        #         limits_for_axis *= -1
-                        # else:
-                        #     raise NotImplementedError(f"not considered {ref_points_amount=} case")
+                        # limits_for_axis = limits[axis]
+                        # callable_index, value = limits_for_axis
+
+                        # another_axis = (axis + 1) % 2
+                        if ref_points_amount == 1:
+                            ...
+                        elif ref_points_amount == 2:
+                            if limit_axis != ref_axis:
+                                # look to the end of your side instead
+                                callable_index = (callable_index + 1) % 2
+                        else:
+                            raise NotImplementedError(f"not considered {ref_points_amount=} case")
                         # if limits_for_axis < 0:
                         #     if point[axis] >= ref_point[axis]:
                         #         break
                         # else:
                         #     if point[axis] < ref_point[axis]:
                         #         break
+
+                        callable_ = LESSER_OR_BIGGER[callable_index]
+                        res = callable_(point[axis], value)
+                        if not res:
+                            break
+
                     else:
                         w, h = ref_point - point
                         square = (abs(w) + 1) * (abs(h) + 1)
                         if square > max_square:
                             max_square = square
                             rectangle_corners = (ref_point, point)
-
+            # 94532
             # for pair in tqdm(product(reference_points_data, self.points), total=len(self.points) * len(reference_points_data)):
             #     (reference_point, axis, size_by_axis), point = pair
             #     if reference_point == point:
@@ -154,48 +239,6 @@ class Problem:
         assert rectangle_corners is not None
         self._show_plot([rectangle_corners])
         return max_square
-
-    def _get_reference_points(
-        self, max_values: list[int], min_values: list[int]
-    ) -> list[tuple[Position2D, int, tuple]]:
-        lines = []
-        wight_and_height = [(max_values[i] - min_values[i]) for i in range(2)]
-        middles = [(max_values[i] - min_values[i]) / 2 + min_values[i] for i in range(2)]
-        for i, point in enumerate(self.points):
-            next_point = self.points[(i + 1) % len(self.points)]
-            diff = next_point - point
-
-            for axis in range(2):
-                size_by_axis = abs(diff[axis])
-                limit = wight_and_height[axis]
-                if limit > size_by_axis > 3 / 4 * limit:
-                    offsets_from_center = (
-                        abs(point[axis] - middles[axis]),
-                        abs(next_point[axis] - middles[axis]),
-                    )
-                    max_offset_idx = offsets_from_center.index(min(offsets_from_center))
-                    ref_point = [point, next_point][max_offset_idx]
-
-                    axis_value = ref_point[axis]
-                    if axis_value > middles[axis]:
-                        axis_limit = (lambda a, b: a < b), ref_point[axis]
-                    else:
-                        axis_limit = (lambda a, b: a > b), ref_point[axis]
-
-                    another_axis = (axis + 1) % 2
-                    another_axis_value = ref_point[another_axis]
-                    if another_axis_value > middles[another_axis]:
-                        other_axis_limit = (lambda a, b: a < b), ref_point[another_axis]
-                    else:
-                        other_axis_limit = (lambda a, b: a > b), ref_point[another_axis]
-
-                    limits = axis_limit, other_axis_limit  # e.g. (-1, -1) left top
-
-                    lines.append((ref_point, axis, limits))
-                    break
-
-                # TODO find another axis limit
-        return lines
 
 
 class MovieTheater:
@@ -243,8 +286,9 @@ def task2(inp, **kw):
 
 if __name__ == "__main__":
     # test(task1, 50)
-    # assert run(task1) == 4737096935  # 2700162690, 3005828594 and 4679487087: too low
+    assert run(task1) == 4737096935  # 2700162690, 3005828594 and 4679487087: too low
 
     test(task2, 24)
-    run(task2)
+    # assert run(task2) == 1644094530
+    # found them manually
 #
